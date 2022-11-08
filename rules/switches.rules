@@ -495,29 +495,24 @@ when
 then
 	var Number EatingSceneBuffer = Light_EatingScenes.state
 
-	sendCommand(Light_EatingOutSwitch, ON)
-	sendCommand(Light_EatingInSwitch, ON)
+    SetEatingLightsOnOff.apply(ON)
 
 	SetEatingLights.apply(0, 100, 100)
 
 	createTimer(now.plusSeconds(2)) [|
-		sendCommand(Light_EatingOutSwitch, OFF)
-		sendCommand(Light_EatingInSwitch, OFF)
+        SetEatingLightsOnOff.apply(OFF)
 
 		createTimer(now.plusSeconds(2)) [|
-			sendCommand(Light_EatingOutSwitch, ON)
-			sendCommand(Light_EatingInSwitch, ON)
+            SetEatingLightsOnOff.apply(ON)
 
 			createTimer(now.plusSeconds(2)) [|
-				sendCommand(Light_EatingOutSwitch, OFF)
-				sendCommand(Light_EatingInSwitch, OFF)
+                SetEatingLightsOnOff.apply(OFF)
 
 				createTimer(now.plusSeconds(2)) [|
-					sendCommand(Light_EatingOutSwitch, ON)
-					sendCommand(Light_EatingInSwitch, ON)
+        		    SetEatingLightsOnOff.apply(ON)
 
 					createTimer(now.plusSeconds(2)) [|
-						if (Light_EatingScenes.state > 0) {
+						if (EatingSceneBuffer > 0) {
 							postUpdate(Light_EatingScenes, EatingSceneBuffer)
 						} else {
 							postUpdate(Light_EatingScenes, 0)
