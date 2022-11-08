@@ -1,0 +1,271 @@
+var Timer TimerDisableButton = null
+var Timer TimerBuzzUntilOpen = null
+var Timer TimerBuzzerDownJustOn = null
+var Timer TimerBuzzerUpJustOn = null
+var Timer TimerStairwayLight = null
+
+var Timer TimerAppDoorOpen = null
+
+var boolean appartmentDoorOpened = false
+
+
+rule "Apartment door switch as impulse"
+when
+	Item DoorBuzzer_Up changed to ON
+then
+	TimerBuzzerUpJustOn = createTimer(now.plusSeconds(3)) [|
+		sendCommand(DoorBuzzer_Up, OFF)
+	]
+end
+
+
+rule "Front door switch as impulse"
+when
+	Item DoorBuzzer_Down changed to ON
+then
+	TimerBuzzerDownJustOn = createTimer(now.plusSeconds(2)) [|
+		sendCommand(DoorBuzzer_Down, OFF)
+	]
+end
+
+
+rule "switch off door buzzers"
+when
+	Time cron "/10 * * * * ?"		// every 10 sec
+then
+	if (DoorBuzzer_Up.state == ON && (TimerBuzzerUpJustOn === null || TimerBuzzerUpJustOn.hasTerminated())) {
+		sendCommand(DoorBuzzer_Up, OFF)
+	}
+	if (DoorBuzzer_Down.state == ON && (TimerBuzzerDownJustOn === null || TimerBuzzerDownJustOn.hasTerminated())) {
+		sendCommand(DoorBuzzer_Down, OFF)
+	}
+end
+
+
+rule "Apartment door opened"
+when
+	Item Window_AppDoor changed to OPEN
+then
+	logInfo("Buzzer", "Appartment door opened")
+
+	appartmentDoorOpened = true
+
+	if (DoorBuzzer_Up.state == ON) {
+		sendCommand(DoorBuzzer_Up, OFF)
+	}
+end
+
+
+rule "buzzer downstairs and upstairs"
+when
+	Item DoorBuzzer_Both changed to ON
+then
+	createTimer(now.plusSeconds(1)) [|
+		postUpdate(DoorBuzzer_Both, OFF)
+	]
+	sendCommand(DoorBuzzer_Down, ON)
+
+	createTimer(now.plusSeconds(10)) [|
+    	postUpdate(BuzzerButton, 1.0)
+	]
+end
+
+
+rule "Apartment buzzer button terrace trace"
+when
+	Item BuzzerButton changed
+then
+	logInfo("Buzzer", "Button fired " + BuzzerButton.state)
+end
+
+rule "Apartment buzzer button terrace"
+when
+	Item BuzzerButton changed
+then
+	logInfo("Buzzer", "Button " + BuzzerButton.state)
+	if (BuzzerButton.state > 0) {
+
+		if (TimerDisableButton === null || TimerDisableButton.hasTerminated()) {
+			if (Window_AppDoor.state == CLOSED) {
+				appartmentDoorOpened = false
+
+				logInfo("Buzzer", "doorBuzzer on")
+				sendCommand(DoorBuzzer_Up, ON)
+
+				var secsToWait = 0
+				while (StairwayMotion.state == OFF && secsToWait < 60) {
+					Thread::sleep(1000)
+					secsToWait = secsToWait + 1
+				}
+
+				if (StairwayMotion.state == ON) {
+					TimerBuzzUntilOpen = createTimer(now.plusSeconds(6)) [|
+						if (appartmentDoorOpened == false) {
+							logInfo("Buzzer", "doorBuzzer on")
+							sendCommand(DoorBuzzer_Up, ON)
+
+							TimerBuzzUntilOpen = createTimer(now.plusSeconds(6)) [|
+								if (appartmentDoorOpened == false) {
+									logInfo("Buzzer", "doorBuzzer on")
+									sendCommand(DoorBuzzer_Up, ON)
+
+									TimerBuzzUntilOpen = createTimer(now.plusSeconds(6)) [|
+										if (appartmentDoorOpened == false) {
+											logInfo("Buzzer", "doorBuzzer on")
+											sendCommand(DoorBuzzer_Up, ON)
+
+											TimerBuzzUntilOpen = createTimer(now.plusSeconds(6)) [|
+												if (appartmentDoorOpened == false) {
+													logInfo("Buzzer", "doorBuzzer on")
+													sendCommand(DoorBuzzer_Up, ON)
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				} else {
+					logInfo("Buzzer", "no one there")
+				}
+
+				TimerDisableButton = createTimer(now.plusSeconds(30)) [|
+					postUpdate(BuzzerButton, 0)
+				]
+			} else {
+				logInfo("Buzzer", "Appartment door already open")
+				postUpdate(BuzzerButton, 0)
+			}
+		}
+	}
+end
+
+
+
+rule "Stairway light on"
+when
+	Item StairwayMotion changed to ON
+then
+	if (Daylight.state == ON) {
+		sendCommand(Light_StairsTemp, 5)
+        Thread::sleep(10)
+		sendCommand(Light_StairsBright, 100)
+	} else if (now.getHour() < 6 || now.getHour() >= 23 ) {
+		sendCommand(Light_StairsTemp, 90)
+        Thread::sleep(10)
+		sendCommand(Light_StairsBright, 70)
+	} else {
+		sendCommand(Light_StairsTemp, 60)
+        Thread::sleep(10)
+		sendCommand(Light_StairsBright, 90)
+	}
+    Thread::sleep(10)
+	sendCommand(Light_StairsSwitch, ON)
+
+	if (TimerStairwayLight !== null && !TimerStairwayLight.hasTerminated()) {
+		TimerStairwayLight.reschedule(now.plusMinutes(5))
+	} else {
+		TimerStairwayLight = createTimer(now.plusMinutes(5)) [|
+			if(Light_StairsSwitch.state == ON) {
+				sendCommand(Light_StairsSwitch, OFF)
+			}
+		]
+	}
+end
+
+rule "Stairway light off"
+when
+	Item StairwayMotion changed to OFF
+then
+	sendCommand(Light_StairsSwitch, OFF)
+end
+
+rule "Stairway light really off"
+when
+	Time cron "0 0/5 * * * ?"		// every 5 mins
+then
+	if(TimerStairwayLight === null || TimerStairwayLight.hasTerminated()) {
+		if(Light_StairsSwitch.state == ON) {
+			sendCommand(Light_StairsSwitch, OFF)
+		}
+	}
+end
+
+rule "Stairway light down on"
+when
+	Item StairwayMotion changed to ON
+then
+	Thread.sleep(1000)
+	if (Daylight.state == OFF &&
+		Window_AppDoor.state == OPEN)
+    {
+		sendCommand(Light_StairwaysDown, ON)
+	}
+end
+
+rule "Front door buzzer switches on stairway light down"
+when
+	Item DoorBuzzer_Down changed to ON
+then
+	if (Daylight.state == OFF) {
+		sendCommand(Light_StairwaysDown, ON)
+	}
+end
+
+rule "Stairway light down item as impulse (z-wave switch is impulse)"
+when
+	Item Light_StairwaysDown changed to ON
+then
+	Thread.sleep(200)
+	sendCommand(Light_StairwaysDown, OFF)
+end
+
+rule "warn when appartment door open too long"
+when
+	Item Window_AppDoor changed to OPEN
+then
+	if (TimerAppDoorOpen === null) {
+		TimerAppDoorOpen = createTimer(now.plusMinutes(30)) [|
+			sendNotification("dirk.trescher@web.de", "Die Wohnungstür ist schon 30 Min. offen!")
+			TimerAppDoorOpen = null
+		]
+	}
+    else {
+        TimerAppDoorOpen.reschedule(now.plusMinutes(30))
+    }
+end
+
+rule "cancel appartment door open timer"
+when
+	Item Window_AppDoor changed to CLOSED
+then
+	if (TimerAppDoorOpen !== null) {
+		TimerAppDoorOpen.cancel()
+		TimerAppDoorOpen = null
+	}
+end
+
+rule "activate iPhone for Beacon"
+when
+    Item iPhoneDirk changed to OFF or
+    Item FritzBoxMacOnlineDirk changed to OFF
+then
+    if (iPhoneDirk.state == OFF && FritzBoxMacOnlineDirk.state == OFF) {
+        postUpdate(BeaconIPhoneDirkActive, ON)
+    }
+end
+
+rule "switch on buzzer of appartment door due to iBeacon"
+when
+    Item AppartmentDoorBeacon changed to ON
+then
+    if (BeaconIPhoneDirkActive.state == ON &&
+        Window_AppDoor.state == CLOSED) {
+        logInfo("Buzzer", "Wohnungstür-Öffner Beacon")
+
+        postUpdate(BeaconIPhoneDirkActive, OFF)
+        sendCommand(DoorBuzzer_Up, ON)
+    }
+    postUpdate(AppartmentDoorBeacon, OFF)
+end

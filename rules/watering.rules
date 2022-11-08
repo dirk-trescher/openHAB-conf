@@ -1,0 +1,1127 @@
+import org.eclipse.smarthome.core.library.types.DecimalType
+import org.eclipse.smarthome.model.script.actions.Timer
+import org.eclipse.xtext.xbase.lib.Functions
+
+var Timer timer1on = null
+var Timer timer2on = null
+var Timer timer3on = null
+var Timer timer4on = null
+var Timer timer5on = null
+var Timer timerWinSills_on = null
+var Timer timerValveOn1 = null
+var Timer timerValveOn2 = null
+var Timer timerValveOn3 = null
+var Timer timerValveOn4 = null
+var Timer timerValveOn5 = null
+var Timer timerValveOn6 = null
+var boolean notifyOn = true
+
+var Number waterAtBeginning1 = 0
+var Number waterAtBeginning2 = 0
+var Number waterAtBeginning3 = 0
+var Number waterAtBeginning4 = 0
+var Number waterAtBeginning5 = 0
+var Number waterAtBeginning6 = 0
+var Number timeAtBeginning1 = 0
+var Number timeAtBeginning2 = 0
+var Number timeAtBeginning3 = 0
+var Number timeAtBeginning4 = 0
+var Number timeAtBeginning5 = 0
+var Number timeAtBeginning6 = 0
+var boolean initialValveOn1 = false
+var boolean initialValveOn2 = false
+var boolean initialValveOn3 = false
+var boolean initialValveOn4 = false
+var boolean initialValveOn5 = false
+var boolean initialValveOn6 = false
+var Number lastWater1 = 0
+var Number lastWater2 = 0
+var Number lastWater3 = 0
+var Number lastWater4 = 0
+var Number lastWater5 = 0
+var Number lastWater6 = 0
+var long lastTime1 = 0
+var long lastTime2 = 0
+var long lastTime3 = 0
+var long lastTime4 = 0
+var long lastTime5 = 0
+var long lastTime6 = 0
+var Number waterAtMidnight1 = 0
+var Number waterAtMidnight2 = 0
+var Number waterAtMidnight3 = 0
+var Number waterAtMidnight4 = 0
+var Number waterAtMidnight5 = 0
+var Number waterAtMidnight6 = 0
+
+var Number sentTodayWaterUsage = 0.0
+
+val	Functions.Function2<NumberItem, Integer, Void> WateringCountdownLogic = [
+    NumberItem locCurrWaterTime,
+    Integer number |
+
+	if (locCurrWaterTime.state >= 10 &&
+		(WateringStatus.state == 1 || WateringStatus.state == 2) &&
+		IrrigationLane.state == number) {
+        var int timerSecs = 10 + (locCurrWaterTime.state as DecimalType).intValue % 10
+		createTimer(now.plusSeconds(timerSecs)) [|
+			var Number currTime = locCurrWaterTime.state as DecimalType
+			postUpdate(locCurrWaterTime, currTime - timerSecs)
+		]
+	}
+	return null
+]
+
+val	Functions.Function1<NumberItem, Void> WateringCountdownLogicWinSills = [
+    NumberItem locCurrWaterTime |
+
+	if (locCurrWaterTime.state >= 10 &&
+        (WateringStatusWinSills.state == 1 || WateringStatusWinSills.state == 2)) {
+        var int timerSecs = 10 + (locCurrWaterTime.state as DecimalType).intValue % 10
+		createTimer(now.plusSeconds(timerSecs)) [|
+			var Number currTime = locCurrWaterTime.state as DecimalType
+			postUpdate(locCurrWaterTime, currTime - timerSecs)
+		]
+	}
+	return null
+]
+
+val Functions.Function3<NumberItem, NumberItem, Integer, Integer> ComputeWateringTime = [
+	NumberItem locAutoWaterTime,
+	NumberItem locCurrWaterTime,
+	Integer number |
+
+    postUpdate(IrrigationLane, number)
+    var int maxWateringTime = (AutoMaxWateringTime.state as DecimalType).intValue
+    if (WateringStatus.state == 2) {
+        maxWateringTime = (ManMaxWateringTime.state as DecimalType).intValue * 60
+    }
+    var int wateringTimeSecs = (locAutoWaterTime.state as DecimalType).intValue * maxWateringTime / 100
+    postUpdate(locCurrWaterTime, wateringTimeSecs)
+
+    logInfo( "watering", "lane " + number + ": watering time " + wateringTimeSecs + " sec." )
+    return wateringTimeSecs
+]
+
+
+val	Functions.Function0<Void> WateringStartAutomaticLogic = [ |
+
+	if (WateringPeriod.state == ON) {
+		if (WateringStatus.state == 0) {
+			if (AutoMaxWateringTime.state <= 60) {
+				logInfo( "watering", "no automatic watering (irrigation time <= 1 min.)" )
+			} else if ( Soil1_corr.state > (TargetSoilHumidity.state as Number) + 20 ) {
+				logInfo( "watering", "no automatic watering (soil humid enough)" )
+			} else if (Rainsensor.state == ON) {
+				logInfo( "watering", "no automatic watering (currently raining)" )
+			} else {
+				logInfo( "watering", "start automatic watering" )
+				postUpdate(WateringStatus, 1)
+			}
+		}
+	}
+	return null
+]
+
+
+val	Functions.Function0<Void> WateringStartAutomaticLogicWinSills = [ |
+
+	if (WateringPeriod.state == ON) {
+		if (WateringStatusWinSills.state == 0) {
+            logInfo( "watering", "start automatic watering window sills" )
+            postUpdate(WateringStatusWinSills, 1)
+        }
+	}
+	return null
+]
+
+
+rule "Init"
+when
+	System started
+then
+	if (ManMaxWateringTime.state == NULL) {
+		postUpdate(HeatFactor, 50)
+		postUpdate(ManMaxWateringTime, 10)
+		postUpdate(AutoMaxWateringTime, 20)
+		postUpdate(TargetSoilHumidity, 50)
+		postUpdate(IrrigationLane, 0)
+	}
+    if (AutoWateringTimeWinSills.state == NULL) {
+		postUpdate(MonthFactor, 100)
+		postUpdate(HeatFactorWinSills, 50)
+        postUpdate(AutoWateringTimeWinSills, 5)
+    }
+    if (WaterFlowRoofPerH1.state == NULL) {
+        postUpdate(WaterFlowRoofPerH1, 0)
+        postUpdate(WaterFlowRoofPerH2, 0)
+        postUpdate(WaterFlowRoofPerH3, 0)
+        postUpdate(WaterFlowRoofPerH4, 0)
+        postUpdate(WaterFlowRoofPerH5, 0)
+        postUpdate(WaterFlowRoofPerH6, 0)
+    }
+
+	postUpdate(WateringStatus, 0)
+	postUpdate(WateringStatusWinSills, 0)
+    postUpdate(WateringStatusDisplay, 0)
+	postUpdate(StartWatering, OFF)
+    postUpdate(StartWateringWinSills, OFF)
+
+    postUpdate(WaterFlowRoofTransformed1, 0)
+    postUpdate(WaterFlowRoofTransformed2, 0)
+    postUpdate(WaterFlowRoofTransformed3, 0)
+    postUpdate(WaterFlowRoofTransformed4, 0)
+    postUpdate(WaterFlowRoofTransformed5, 0)
+    postUpdate(WaterFlowRoofTransformed6, 0)
+
+	sendCommand(WateringPlug, ON)
+end
+
+rule "correct Soil Humidity"
+when
+	Item Soil1 changed
+then
+	var correctedSoilHumidity = Soil1.state as Number
+	correctedSoilHumidity = correctedSoilHumidity - (Temp_Outside.state as Number) / 20.0
+	postUpdate(Soil1_corr, correctedSoilHumidity)
+end
+
+rule "Heat Factor / Maximum Irrigation Time for Roof"
+when
+	Item TargetSoilHumidity changed or
+	Time cron "0 59 * * * ?"		// 59th min each hour
+then
+	if (WateringStatus.state == 0) {
+
+		var Number maxTemp = 20
+		if (TempDay.state != NULL && TempDay.state != UNDEF) {
+			maxTemp = (TempDay.state as QuantityType<Number>).doubleValue
+			maxTemp = maxTemp + 2.0     			// auf Dachterrasse 2 Grad wärmer
+		} else if (Temp_Outside.state != NULL) {
+			maxTemp = (Temp_Outside.state as Number).doubleValue
+		}
+
+		logInfo( "watering", "Calculate Heat Factor: max. Temp. today: " + maxTemp + "°C, Rain today: " + Rain.state + ", soil: " + Soil1_corr.state )
+
+		var Number rainToday = 0
+		if (Rain.state != NULL) {
+			rainToday = (Rain.state as QuantityType<Number>).doubleValue
+		} else if (Rainsensor.state == ON) {				// Fallback, if weather data not available
+			rainToday = 8
+		}
+
+		var Number soilHumidity = TargetSoilHumidity.state as Number
+		if (Soil1_corr.state != NULL) {
+			soilHumidity = Soil1_corr.state as Number
+		}
+
+		var Number irrigationFactor = 0
+		if (maxTemp > 0 && maxTemp <= 20) {
+			irrigationFactor = maxTemp * 1.0
+		} else if (maxTemp > 20) {
+			irrigationFactor = (maxTemp - 10) * 2.5 - 5
+		}
+
+		if (rainToday > 3) {
+			irrigationFactor = irrigationFactor / (rainToday / 3)
+		}
+
+		if (soilHumidity > TargetSoilHumidity.state as Number) {
+			irrigationFactor = irrigationFactor / (1.0 + (soilHumidity - (TargetSoilHumidity.state as Number)) / 15)
+		} else {
+			irrigationFactor = irrigationFactor * (1.0 + ((TargetSoilHumidity.state as Number) - soilHumidity) / 15)
+		}
+
+		irrigationFactor = Math::max(0, Math::min(100, (irrigationFactor).intValue))
+
+		val MAX_MAXIRRTIME = 20 * 60
+		var Number maxIrrTime = irrigationFactor * MAX_MAXIRRTIME / 100
+
+		maxIrrTime = Math::round(maxIrrTime.floatValue)
+
+		logInfo( "watering", "  irrigation Factor: " + irrigationFactor + ", max. irrigation time: " + maxIrrTime + " sec." )
+
+		postUpdate(HeatFactor, irrigationFactor)
+		postUpdate(AutoMaxWateringTime, maxIrrTime)
+	}
+end
+
+
+rule "Heat Factor / Maximum Irrigation Time for Window Sills"
+when
+    Item AutoModifyWinSills changed or
+	Time cron "30 59 * * * ?"		// 59th min 30th sec each hour
+then
+    var Number maxTemp = 20
+    if (TempDay.state != NULL && TempDay.state != UNDEF) {
+        maxTemp = (TempDay.state as QuantityType<Number>).doubleValue
+        maxTemp = maxTemp + 2.0     			// auf Dachterrasse 2 Grad wärmer
+    } else if (Temp_Outside.state != NULL) {
+        maxTemp = (Temp_Outside.state as Number).doubleValue
+    }
+    var Number tempFactor = maxTemp * 3.5
+    tempFactor = Math::max(0, Math::min(100, tempFactor.intValue))
+
+    var currentMonth = now.getMonth.getValue
+    var monthFactor = 0
+    if (currentMonth > 7) {
+        monthFactor = 100 - (currentMonth - 8) * 10
+    } else {
+        monthFactor = 100 - (7 - currentMonth) * 10
+    }
+    postUpdate(MonthFactor, monthFactor)
+
+    logInfo( "watering", "Calculate Window Sills Heat Factor: max. Temp. today: " + maxTemp + ", tempFactor: " + tempFactor + ", monthFactor: " + monthFactor )
+
+    var irrigationFactor = monthFactor * tempFactor / 100
+
+    val MAX_MAXIRRTIME = 10 * 60
+    var Number maxIrrTime = irrigationFactor * MAX_MAXIRRTIME / 100
+
+    maxIrrTime = Math::round(maxIrrTime.floatValue)
+
+    logInfo( "watering", "  irrigation Factor: " + irrigationFactor + ", irrigation time: " + maxIrrTime + " sec." )
+
+    postUpdate(HeatFactorWinSills, irrigationFactor)
+
+    var int wateringTimeSecs = (AutoModifyWinSills.state as DecimalType).intValue * maxIrrTime / 100
+    postUpdate(AutoWateringTimeWinSills, wateringTimeSecs)
+end
+
+
+rule "Automatic Watering Morning"
+when
+	Time cron "0 0 7 * * ?"		// 7:00 each day
+then
+	WateringStartAutomaticLogic.apply()
+    postUpdate(NextIrrigationTime, "11:00 Uhr")
+end
+
+rule "Automatic Watering Morning Window Sills"
+when
+	Time cron "0 0 9 * * ?"		// 9:00 each day
+then
+	WateringStartAutomaticLogicWinSills.apply()
+	postUpdate(NextIrrigationTimeWinSills, "17:00 Uhr")
+end
+
+rule "Automatic Watering before Noon"
+when
+	Time cron "0 0 11 * * ?"		// 11:00 each day
+then
+	WateringStartAutomaticLogic.apply()
+	postUpdate(NextIrrigationTime, "15:00 Uhr")
+end
+
+rule "Automatic Watering Mid-Day"
+when
+	Time cron "0 0 15 * * ?"		// 15:00 each day
+then
+	WateringStartAutomaticLogic.apply()
+	postUpdate(NextIrrigationTime, "19:00 Uhr")
+end
+
+rule "Automatic Watering Evening Window Sills"
+when
+	Time cron "0 0 17 * * ?"		// 17:00 each day
+then
+	WateringStartAutomaticLogicWinSills.apply()
+	postUpdate(NextIrrigationTimeWinSills, "9:00 Uhr")
+end
+
+rule "Automatic Watering Evening"
+when
+	Time cron "0 0 19 * * ?"		// 19:00 each day
+then
+	WateringStartAutomaticLogic.apply()
+	postUpdate(NextIrrigationTime, "7:00 Uhr")
+end
+
+
+rule "Watering Program Roof"
+when
+	Item StartWatering received command ON
+then
+	if(WateringStatus.state == 0) {
+		postUpdate(WateringStatus, 2)
+		logInfo( "watering", "start program watering roof" )
+	}
+end
+
+rule "Watering Program Window Sills"
+when
+	Item StartWateringWinSills received command ON
+then
+	if(WateringStatusWinSills.state == 0) {
+		postUpdate(WateringStatusWinSills, 2)
+		logInfo( "watering", "start program watering window sills" )
+	}
+end
+
+
+rule "Watering count-down 1"
+when Item CurrWaterTime_1 changed or
+     Item WateringStatus changed to 1 or
+     Item WateringStatus changed to 2
+then
+	WateringCountdownLogic.apply(CurrWaterTime_1, 1)
+end
+rule "Watering count-down 2"
+when Item CurrWaterTime_2 changed or
+     Item WateringStatus changed to 1 or
+     Item WateringStatus changed to 2
+then
+	WateringCountdownLogic.apply(CurrWaterTime_2, 2)
+end
+rule "Watering count-down 3"
+when Item CurrWaterTime_3 changed or
+     Item WateringStatus changed to 1 or
+     Item WateringStatus changed to 2
+then
+	WateringCountdownLogic.apply(CurrWaterTime_3, 3)
+end
+rule "Watering count-down 4"
+when Item CurrWaterTime_4 changed or
+     Item WateringStatus changed to 1 or
+     Item WateringStatus changed to 2
+then
+	WateringCountdownLogic.apply(CurrWaterTime_4, 4)
+end
+rule "Watering count-down 5"
+when Item CurrWaterTime_5 changed or
+     Item WateringStatus changed to 1 or
+     Item WateringStatus changed to 2
+then
+	WateringCountdownLogic.apply(CurrWaterTime_5, 5)
+end
+rule "Watering count-down Window Sills"
+when Item CurrWaterTimeWinSills changed or
+     Item WateringStatusWinSills changed to 1 or
+     Item WateringStatusWinSills changed to 2
+then
+	WateringCountdownLogicWinSills.apply(CurrWaterTimeWinSills)
+end
+
+
+rule "Watering start roof"
+when
+	Item WateringStatus changed to 1 or
+    Item WateringStatus changed to 2
+then
+	if (WateringPeriod.state == ON) {
+        postUpdate(StartWatering, ON)
+
+        val currentWaterUsage = DailyWaterUsage.state as Number
+        createTimer(now.plusMinutes(10)) [|
+            if ((DailyWaterUsage.state as Number) < currentWaterUsage + 2) {
+                sendNotification("dirk.trescher@web.de", "Die Bewässerung läuft nicht!")
+            }
+        ]
+
+		var int wateringTime_1 = (ComputeWateringTime.apply(AutoWaterTime_1, CurrWaterTime_1, 1)).intValue
+        if (wateringTime_1 > 0) {
+            sendCommand(WaterValveRoof2, ON)
+        }
+
+        var int wateringTime_2 = (ComputeWateringTime.apply(AutoWaterTime_2, CurrWaterTime_2, 2)).intValue
+        if (wateringTime_2 > 0) {
+            sendCommand(WaterValveRoof3, ON)
+        }
+
+        var int wateringTime_1_2 = Math::max(wateringTime_1, wateringTime_2)
+        timer2on = createTimer(now.plusSeconds(wateringTime_1_2 + 2)) [|
+            timer2on = null
+
+            var int wateringTime_3 = (ComputeWateringTime.apply(AutoWaterTime_3, CurrWaterTime_3, 3)).intValue
+            if (wateringTime_3 > 0) {
+                sendCommand(WaterValveRoof4, ON)
+            }
+
+            timer3on = createTimer(now.plusSeconds(wateringTime_3 + 2)) [|
+                timer3on = null
+
+                var int wateringTime_4 = (ComputeWateringTime.apply(AutoWaterTime_4, CurrWaterTime_4, 4)).intValue
+                if (wateringTime_4 > 0) {
+                    sendCommand(WaterValveRoof5, ON)
+                }
+
+                timer4on = createTimer(now.plusSeconds(wateringTime_4 + 2)) [|
+                    timer4on = null
+
+                    var int wateringTime_5 = (ComputeWateringTime.apply(AutoWaterTime_5, CurrWaterTime_5, 5)).intValue
+                    if (wateringTime_5 > 0) {
+                        sendCommand(WaterValveRoof6, ON)
+                    }
+
+                    timer5on = createTimer(now.plusSeconds(wateringTime_5 + 2)) [|
+                        timer5on = null
+                        postUpdate(StartWatering, OFF)
+                        postUpdate(WateringStatus, 0)
+                		postUpdate(IrrigationLane, 0)
+                        logInfo( "watering", "watering finished" )
+                    ]
+                ]
+            ]
+		]
+	}
+end
+
+rule "Watering start window sills"
+when
+	Item WateringStatusWinSills changed to 1 or
+	Item WateringStatusWinSills changed to 2
+then
+	if (WateringPeriod.state == ON) {
+        var int wateringTimeSecs = (ManWateringTimeWinSills.state as DecimalType).intValue * 60
+        if (WateringStatusWinSills.state == 1) {
+            wateringTimeSecs = (AutoWateringTimeWinSills.state as DecimalType).intValue
+        }
+		logInfo( "watering", "Window sills watering time: " + wateringTimeSecs + " sec." )
+
+        if (wateringTimeSecs > 0) {
+            postUpdate(StartWateringWinSills, ON)
+            postUpdate(IrrigationLane, 6)
+
+            postUpdate(CurrWaterTimeWinSills, wateringTimeSecs)
+            sendCommand(WaterValveRoof1, ON)
+
+            timerWinSills_on = createTimer(now.plusSeconds(wateringTimeSecs + 2)) [|
+                timerWinSills_on = null
+                postUpdate(StartWateringWinSills, OFF)
+                postUpdate(WateringStatusWinSills, 0)
+                postUpdate(IrrigationLane, 0)
+                logInfo( "watering", "Watering window sills finished." )
+            ]
+
+            val Number currentWaterUsageWinSills = WaterFlowRoofTransformed1.state as Number
+            createTimer(now.plusMinutes(3)) [|
+                if ((WaterFlowRoofTransformed1.state as Number) < currentWaterUsageWinSills + 0.02) {
+                    sendNotification("dirk.trescher@web.de", "Die Bewässerung der Fensterbänke läuft nicht!")
+                }
+            ]
+        }
+    }
+end
+
+rule "Watering display"
+when
+	Item WateringStatus changed or
+	Item WateringStatusWinSills changed or
+    Item WaterValveRoof1 received command or
+    Item WaterValveRoof2 received command or
+    Item WaterValveRoof3 received command or
+    Item WaterValveRoof4 received command or
+    Item WaterValveRoof5 received command or
+    Item WaterValveRoof6 received command
+then
+    if (WateringStatus.state > 0) {
+        postUpdate(WateringStatusDisplay, 1)
+    } else if (WateringStatusWinSills.state > 0) {
+        postUpdate(WateringStatusDisplay, 2)
+    } else if (WaterValveRoof1.state == ON ||
+               WaterValveRoof2.state == ON ||
+               WaterValveRoof3.state == ON ||
+               WaterValveRoof4.state == ON ||
+               WaterValveRoof5.state == ON ||
+               WaterValveRoof6.state == ON) {
+        postUpdate(WateringStatusDisplay, 3)
+    } else {
+        postUpdate(WateringStatusDisplay, 0)
+    }
+end
+
+rule "Watering interrupt"
+when
+	Item StartWatering received command OFF
+then
+	if (WateringStatus.state > 0) {
+		logInfo( "watering", "interrupt watering" )
+
+        timer1on?.cancel()
+        timer1on = null
+		timer2on?.cancel()
+		timer2on = null
+		timer3on?.cancel()
+		timer3on = null
+		timer4on?.cancel()
+		timer4on = null
+		timer5on?.cancel()
+		timer5on = null
+
+    	postUpdate(WateringStatus, 0)
+
+        sendCommand(WaterValveRoof2, OFF)
+        sendCommand(WaterValveRoof3, OFF)
+        sendCommand(WaterValveRoof4, OFF)
+        sendCommand(WaterValveRoof5, OFF)
+        sendCommand(WaterValveRoof6, OFF)
+	}
+end
+
+rule "Watering interrupt Window Sills"
+when
+	Item StartWateringWinSills received command OFF
+then
+	if (WateringStatusWinSills.state > 0) {
+        logInfo( "watering", "Interrupt watering window sills." )
+
+        timerWinSills_on?.cancel()
+        timerWinSills_on = null
+
+        postUpdate(WateringStatusWinSills, 0)
+        sendCommand(WaterValveRoof1, OFF)
+    }
+end
+
+
+rule "switch water valves 1 for Roof with esp32"
+when
+	Item WaterValveRoof1 received command ON
+then
+    var Number setTime = (ManWateringTimeWinSills.state as Number) * 60
+
+    if (CurrWaterTimeWinSills.state > 0) {
+        setTime = CurrWaterTimeWinSills.state as Number
+    }
+
+	val mqttActions = getActions("mqtt","mqtt:broker:1fd8bb3ef8")
+    mqttActions.publishMQTT("irrigation/actor1", setTime.toString())
+
+    initialValveOn1 = true
+    createTimer(now.plusSeconds(12)) [|
+        waterAtBeginning1 = WaterFlowRoofTransformed1.state as Number
+        timeAtBeginning1 = now.toInstant.toEpochMilli
+        initialValveOn1 = false
+    ]
+
+    timerValveOn1 = createTimer(now.plusSeconds(setTime.intValue)) [|
+    	postUpdate(WaterValveRoof1, OFF)
+        postUpdate(CurrWaterTimeWinSills, 0)
+
+        var Number deltaWater = (WaterFlowRoofTransformed1.state as Number) - waterAtBeginning1
+        var Number deltaTime = (now.toInstant.toEpochMilli) - timeAtBeginning1
+        postUpdate(WaterFlowRoofPerH1, deltaWater * 1000 * 60 * 60 / deltaTime)
+    ]
+end
+
+rule "switch water valve 2 for Roof with esp32"
+when
+	Item WaterValveRoof2 received command ON
+then
+    var Number setTime = (ManWateringTime.state as Number) * 60
+    if (CurrWaterTime_1.state > 0) {
+        setTime = CurrWaterTime_1.state as Number
+    }
+
+	val mqttActions = getActions("mqtt","mqtt:broker:1fd8bb3ef8")
+    mqttActions.publishMQTT("irrigation/actor2", setTime.toString())
+
+    initialValveOn2 = true
+    createTimer(now.plusSeconds(12)) [|
+        waterAtBeginning2 = WaterFlowRoofTransformed2.state as Number
+        timeAtBeginning2 = now.toInstant.toEpochMilli
+        initialValveOn2 = false
+    ]
+
+    timerValveOn2 = createTimer(now.plusSeconds(setTime.intValue)) [|
+    	postUpdate(WaterValveRoof2, OFF)
+        postUpdate(CurrWaterTime_1, 0)
+
+        var Number deltaWater = (WaterFlowRoofTransformed2.state as Number) - waterAtBeginning2
+        var Number deltaTime = (now.toInstant.toEpochMilli) - timeAtBeginning2
+        postUpdate(WaterFlowRoofPerH2, deltaWater * 1000 * 60 * 60 / deltaTime)
+    ]
+end
+
+rule "switch water valve 3 for Roof with esp32"
+when
+	Item WaterValveRoof3 received command ON
+then
+    var Number setTime = (ManWateringTime.state as Number) * 60
+    if (CurrWaterTime_2.state > 0) {
+        setTime = CurrWaterTime_2.state as Number
+    }
+
+	val mqttActions = getActions("mqtt","mqtt:broker:1fd8bb3ef8")
+    mqttActions.publishMQTT("irrigation/actor3", setTime.toString())
+
+    initialValveOn3 = true
+    createTimer(now.plusSeconds(12)) [|
+        waterAtBeginning3 = WaterFlowRoofTransformed3.state as Number
+        timeAtBeginning3 = now.toInstant.toEpochMilli
+        initialValveOn3 = false
+    ]
+
+    timerValveOn3 = createTimer(now.plusSeconds(setTime.intValue)) [|
+    	postUpdate(WaterValveRoof3, OFF)
+        postUpdate(CurrWaterTime_2, 0)
+
+        var Number deltaWater = (WaterFlowRoofTransformed3.state as Number) - waterAtBeginning3
+        var Number deltaTime = (now.toInstant.toEpochMilli) - timeAtBeginning3
+        postUpdate(WaterFlowRoofPerH3, deltaWater * 1000 * 60 * 60 / deltaTime)
+    ]
+end
+
+rule "switch water valve 4 for Roof with esp32"
+when
+	Item WaterValveRoof4 received command ON
+then
+    var Number setTime = (ManWateringTime.state as Number) * 60
+    if (CurrWaterTime_3.state > 0) {
+        setTime = CurrWaterTime_3.state as Number
+    }
+
+	val mqttActions = getActions("mqtt","mqtt:broker:1fd8bb3ef8")
+    mqttActions.publishMQTT("irrigation/actor4", setTime.toString())
+
+    initialValveOn4 = true
+    createTimer(now.plusSeconds(12)) [|
+        waterAtBeginning4 = WaterFlowRoofTransformed4.state as Number
+        timeAtBeginning4 = now.toInstant.toEpochMilli
+        initialValveOn4 = false
+    ]
+
+    timerValveOn4 = createTimer(now.plusSeconds(setTime.intValue)) [|
+    	postUpdate(WaterValveRoof4, OFF)
+        postUpdate(CurrWaterTime_3, 0)
+
+        var Number deltaWater = (WaterFlowRoofTransformed4.state as Number) - waterAtBeginning4
+        var Number deltaTime = (now.toInstant.toEpochMilli) - timeAtBeginning4
+        postUpdate(WaterFlowRoofPerH4, deltaWater * 1000 * 60 * 60 / deltaTime)
+    ]
+end
+
+rule "switch water valve 5 for Roof with esp32"
+when
+	Item WaterValveRoof5 received command ON
+then
+    var Number setTime = (ManWateringTime.state as Number) * 60
+    if (CurrWaterTime_4.state > 0) {
+        setTime = CurrWaterTime_4.state as Number
+    }
+
+	val mqttActions = getActions("mqtt","mqtt:broker:1fd8bb3ef8")
+    mqttActions.publishMQTT("irrigation/actor5", setTime.toString())
+
+    initialValveOn5 = true
+    createTimer(now.plusSeconds(12)) [|
+        waterAtBeginning5 = WaterFlowRoofTransformed5.state as Number
+        timeAtBeginning5 = now.toInstant.toEpochMilli
+        initialValveOn5 = false
+    ]
+
+    timerValveOn5 = createTimer(now.plusSeconds(setTime.intValue)) [|
+    	postUpdate(WaterValveRoof5, OFF)
+        postUpdate(CurrWaterTime_4, 0)
+
+        var Number deltaWater = (WaterFlowRoofTransformed5.state as Number) - waterAtBeginning5
+        var Number deltaTime = (now.toInstant.toEpochMilli) - timeAtBeginning5
+        postUpdate(WaterFlowRoofPerH5, deltaWater * 1000 * 60 * 60 / deltaTime)
+    ]
+end
+
+rule "switch water valve 6 for Roof with esp32"
+when
+	Item WaterValveRoof6 received command ON
+then
+    var Number setTime = (ManWateringTime.state as Number) * 60
+    if (CurrWaterTime_5.state > 0) {
+        setTime = CurrWaterTime_5.state as Number
+    }
+
+	val mqttActions = getActions("mqtt","mqtt:broker:1fd8bb3ef8")
+    mqttActions.publishMQTT("irrigation/actor6", setTime.toString())
+
+    initialValveOn6 = true
+    createTimer(now.plusSeconds(12)) [|
+        waterAtBeginning6 = WaterFlowRoofTransformed6.state as Number
+        timeAtBeginning6 = now.toInstant.toEpochMilli
+        initialValveOn6 = false
+    ]
+
+    timerValveOn6 = createTimer(now.plusSeconds(setTime.intValue)) [|
+    	postUpdate(WaterValveRoof6, OFF)
+        postUpdate(CurrWaterTime_5, 0)
+
+        var Number deltaWater = (WaterFlowRoofTransformed6.state as Number) - waterAtBeginning6
+        var Number deltaTime = (now.toInstant.toEpochMilli) - timeAtBeginning6
+        postUpdate(WaterFlowRoofPerH6, deltaWater * 1000 * 60 * 60 / deltaTime)
+    ]
+end
+
+rule "switch off water valves 1 for Roof with esp32"
+when
+	Item WaterValveRoof1 received command OFF
+then
+	val mqttActions = getActions("mqtt","mqtt:broker:1fd8bb3ef8")
+    mqttActions.publishMQTT("irrigation/actor1", "0")
+
+    var Number deltaWater = (WaterFlowRoofTransformed1.state as Number) - waterAtBeginning1
+    var Number deltaTime = (now.toInstant.toEpochMilli) - timeAtBeginning1
+    postUpdate(WaterFlowRoofPerH1, deltaWater * 1000 * 60 * 60 / deltaTime)
+
+    timerValveOn1?.cancel()
+    timerValveOn1 = null
+
+    postUpdate(CurrWaterTimeWinSills, 0)
+
+    timerWinSills_on?.reschedule(now.plusSeconds(1))
+end
+
+rule "switch off water valves 2 for Roof with esp32"
+when
+	Item WaterValveRoof2 received command OFF
+then
+	val mqttActions = getActions("mqtt","mqtt:broker:1fd8bb3ef8")
+    mqttActions.publishMQTT("irrigation/actor2", "0")
+
+    var Number deltaWater = (WaterFlowRoofTransformed2.state as Number) - waterAtBeginning2
+    var Number deltaTime = (now.toInstant.toEpochMilli) - timeAtBeginning2
+    postUpdate(WaterFlowRoofPerH2, deltaWater * 1000 * 60 * 60 / deltaTime)
+
+    timerValveOn2?.cancel()
+    timerValveOn2 = null
+
+    postUpdate(CurrWaterTime_1, 0)
+
+    if (WaterValveRoof3.state == OFF) {     // only when other lawn off
+        timer2on?.reschedule(now.plusSeconds(1))
+    }
+end
+
+rule "switch off water valves 3 for Roof with esp32"
+when
+	Item WaterValveRoof3 received command OFF
+then
+	val mqttActions = getActions("mqtt","mqtt:broker:1fd8bb3ef8")
+    mqttActions.publishMQTT("irrigation/actor3", "0")
+
+    var Number deltaWater = (WaterFlowRoofTransformed3.state as Number) - waterAtBeginning3
+    var Number deltaTime = (now.toInstant.toEpochMilli) - timeAtBeginning3
+    postUpdate(WaterFlowRoofPerH3, deltaWater * 1000 * 60 * 60 / deltaTime)
+
+    timerValveOn3?.cancel()
+    timerValveOn3 = null
+
+    postUpdate(CurrWaterTime_2, 0)
+
+    if (WaterValveRoof2.state == OFF) {     // only when other lawn off
+        timer2on?.reschedule(now.plusSeconds(1))
+    }
+end
+
+rule "switch off water valves 4 for Roof with esp32"
+when
+	Item WaterValveRoof4 received command OFF
+then
+	val mqttActions = getActions("mqtt","mqtt:broker:1fd8bb3ef8")
+    mqttActions.publishMQTT("irrigation/actor4", "0")
+
+    var Number deltaWater = (WaterFlowRoofTransformed4.state as Number) - waterAtBeginning4
+    var Number deltaTime = (now.toInstant.toEpochMilli) - timeAtBeginning4
+    postUpdate(WaterFlowRoofPerH4, deltaWater * 1000 * 60 * 60 / deltaTime)
+
+    timerValveOn4?.cancel()
+    timerValveOn4 = null
+
+    postUpdate(CurrWaterTime_3, 0)
+
+    timer3on?.reschedule(now.plusSeconds(1))
+end
+
+rule "switch off water valves 5 for Roof with esp32"
+when
+	Item WaterValveRoof5 received command OFF
+then
+	val mqttActions = getActions("mqtt","mqtt:broker:1fd8bb3ef8")
+    mqttActions.publishMQTT("irrigation/actor5", "0")
+
+    var Number deltaWater = (WaterFlowRoofTransformed5.state as Number) - waterAtBeginning5
+    var Number deltaTime = (now.toInstant.toEpochMilli) - timeAtBeginning5
+    postUpdate(WaterFlowRoofPerH5, deltaWater * 1000 * 60 * 60 / deltaTime)
+
+    timerValveOn5?.cancel()
+    timerValveOn5 = null
+
+    postUpdate(CurrWaterTime_4, 0)
+
+    timer4on?.reschedule(now.plusSeconds(1))
+end
+
+rule "switch off water valves 6 for Roof with esp32"
+when
+	Item WaterValveRoof6 received command OFF
+then
+	val mqttActions = getActions("mqtt","mqtt:broker:1fd8bb3ef8")
+    mqttActions.publishMQTT("irrigation/actor6", "0")
+
+    var Number deltaWater = (WaterFlowRoofTransformed6.state as Number) - waterAtBeginning6
+    var Number deltaTime = (now.toInstant.toEpochMilli) - timeAtBeginning6
+    postUpdate(WaterFlowRoofPerH6, deltaWater * 1000 * 60 * 60 / deltaTime)
+
+    timerValveOn6?.cancel()
+    timerValveOn6 = null
+
+    postUpdate(CurrWaterTime_5, 0)
+
+    timer5on?.reschedule(now.plusSeconds(1))
+end
+
+rule "water usage per day"
+when
+	Item WaterFlowRoofTransformed1 changed or
+	Item WaterFlowRoofTransformed2 changed or
+	Item WaterFlowRoofTransformed3 changed or
+	Item WaterFlowRoofTransformed4 changed or
+	Item WaterFlowRoofTransformed5 changed or
+	Item WaterFlowRoofTransformed6 changed
+then
+	var Number dailyWaterUsage = (WaterFlowRoofTransformed1.state as Number)
+                               + (WaterFlowRoofTransformed2.state as Number)
+                               + (WaterFlowRoofTransformed3.state as Number)
+                               + (WaterFlowRoofTransformed4.state as Number)
+                               + (WaterFlowRoofTransformed5.state as Number)
+                               + (WaterFlowRoofTransformed6.state as Number)
+	postUpdate(DailyWaterUsage, dailyWaterUsage)
+
+	if (dailyWaterUsage > 300 && notifyOn) {
+		if (dailyWaterUsage > sentTodayWaterUsage + 50) {
+			sentTodayWaterUsage = dailyWaterUsage
+			sendNotification("dirk.trescher@web.de", "Der tägliche Wasserverbrauch für die Bewässerung ist " + dailyWaterUsage + " l!")
+		}
+        notifyOn = false
+        createTimer(now.plusMinutes(10)) [|
+            notifyOn = true
+        ]
+	}
+end
+
+rule "transform water usage 1"
+when
+    Item WaterFlowRoof1 changed
+then
+    if (waterAtMidnight1 > WaterFlowRoof1.state) {
+        waterAtMidnight1 = WaterFlowRoof1.state as Number
+    }
+    var Number waterFlowToday = (WaterFlowRoof1.state as Number) - waterAtMidnight1
+    waterFlowToday = waterFlowToday * 450.0 / 160.0
+    postUpdate(WaterFlowRoofTransformed1, waterFlowToday)
+
+    if (lastWater1 > 0 && !initialValveOn1) {
+        var Number flowPerHAkt = ((WaterFlowRoof1.state as Number)  - lastWater1) * 1000 * 60 * 60
+                                 / (now.toInstant.toEpochMilli - lastTime1)
+        flowPerHAkt = flowPerHAkt * 450.0 / 160.0
+        postUpdate(WaterFlowRoofPerHAkt1, flowPerHAkt)
+    }
+    lastWater1 = WaterFlowRoof1.state as Number
+    lastTime1 = now.toInstant.toEpochMilli
+end
+
+rule "transform water usage 2"
+when
+    Item WaterFlowRoof2 changed
+then
+    if (waterAtMidnight2 > WaterFlowRoof2.state) {
+        waterAtMidnight2 = WaterFlowRoof2.state as Number
+    }
+    var Number waterFlowToday = (WaterFlowRoof2.state as Number) - waterAtMidnight2
+    waterFlowToday = waterFlowToday * 450.0 / 160.0
+    postUpdate(WaterFlowRoofTransformed2, waterFlowToday)
+
+    if (lastWater2 > 0 && !initialValveOn2) {
+        var Number flowPerHAkt = ((WaterFlowRoof2.state as Number)  - lastWater2) * 1000 * 60 * 60
+                                 / (now.toInstant.toEpochMilli - lastTime2)
+        flowPerHAkt = flowPerHAkt * 450.0 / 160.0
+        postUpdate(WaterFlowRoofPerHAkt2, flowPerHAkt)
+    }
+    lastWater2 = WaterFlowRoof2.state as Number
+    lastTime2 = now.toInstant.toEpochMilli
+end
+
+rule "transform water usage 3"
+when
+    Item WaterFlowRoof3 changed
+then
+    if (waterAtMidnight3 > WaterFlowRoof3.state) {
+        waterAtMidnight3 = WaterFlowRoof3.state as Number
+    }
+    var Number waterFlowToday = (WaterFlowRoof3.state as Number) - waterAtMidnight3
+    waterFlowToday = waterFlowToday * 450.0 / 160.0
+    postUpdate(WaterFlowRoofTransformed3, waterFlowToday)
+
+    if (lastWater3 > 0 && !initialValveOn3) {
+        var Number flowPerHAkt = ((WaterFlowRoof3.state as Number)  - lastWater3) * 1000 * 60 * 60
+                                 / (now.toInstant.toEpochMilli - lastTime3)
+        flowPerHAkt = flowPerHAkt * 450.0 / 160.0
+        postUpdate(WaterFlowRoofPerHAkt3, flowPerHAkt)
+    }
+    lastWater3 = WaterFlowRoof3.state as Number
+    lastTime3 = now.toInstant.toEpochMilli
+end
+
+rule "transform water usage 4"
+when
+    Item WaterFlowRoof4 changed
+then
+    if (waterAtMidnight4 > WaterFlowRoof4.state) {
+        waterAtMidnight4 = WaterFlowRoof4.state as Number
+    }
+    var Number waterFlowToday = (WaterFlowRoof4.state as Number) - waterAtMidnight4
+    waterFlowToday = waterFlowToday * 450.0 / 160.0
+    postUpdate(WaterFlowRoofTransformed4, waterFlowToday)
+
+    if (lastWater4 > 0 && !initialValveOn4) {
+        var Number flowPerHAkt = ((WaterFlowRoof4.state as Number)  - lastWater4) * 1000 * 60 * 60
+                                 / (now.toInstant.toEpochMilli - lastTime4)
+        flowPerHAkt = flowPerHAkt * 450.0 / 160.0
+        postUpdate(WaterFlowRoofPerHAkt4, flowPerHAkt)
+    }
+    lastWater4 = WaterFlowRoof4.state as Number
+    lastTime4 = now.toInstant.toEpochMilli
+end
+
+rule "transform water usage 5"
+when
+    Item WaterFlowRoof5 changed
+then
+    if (waterAtMidnight5 > WaterFlowRoof5.state) {
+        waterAtMidnight5 = WaterFlowRoof5.state as Number
+    }
+    var Number waterFlowToday = (WaterFlowRoof5.state as Number) - waterAtMidnight5
+    waterFlowToday = waterFlowToday * 450.0 / 160.0
+    postUpdate(WaterFlowRoofTransformed5, waterFlowToday)
+
+    if (lastWater5 > 0 && !initialValveOn5) {
+        var Number flowPerHAkt = ((WaterFlowRoof5.state as Number)  - lastWater5) * 1000 * 60 * 60
+                                 / (now.toInstant.toEpochMilli - lastTime5)
+        flowPerHAkt = flowPerHAkt * 450.0 / 160.0
+        postUpdate(WaterFlowRoofPerHAkt5, flowPerHAkt)
+    }
+    lastWater5 = WaterFlowRoof5.state as Number
+    lastTime5 = now.toInstant.toEpochMilli
+end
+
+rule "transform water usage 6"
+when
+    Item WaterFlowRoof6 changed
+then
+    if (waterAtMidnight6 > WaterFlowRoof6.state) {
+        waterAtMidnight6 = WaterFlowRoof6.state as Number
+    }
+    var Number waterFlowToday = (WaterFlowRoof6.state as Number) - waterAtMidnight6
+    waterFlowToday = waterFlowToday * 450.0 / 160.0
+    postUpdate(WaterFlowRoofTransformed6, waterFlowToday)
+
+    if (lastWater6 > 0 && !initialValveOn6) {
+        var Number flowPerHAkt = ((WaterFlowRoof6.state as Number)  - lastWater6) * 1000 * 60 * 60
+                                 / (now.toInstant.toEpochMilli - lastTime6)
+        flowPerHAkt = flowPerHAkt * 450.0 / 160.0
+        postUpdate(WaterFlowRoofPerHAkt6, flowPerHAkt)
+    }
+    lastWater6 = WaterFlowRoof6.state as Number
+    lastTime6 = now.toInstant.toEpochMilli
+end
+
+rule "react on excessive waterflow 1"
+when
+    Item WaterFlowRoofPerHAkt1 changed
+then
+    if (WaterFlowRoofPerHAkt1.state > 300) {
+        sendNotification("dirk.trescher@web.de", "Wasser-Leck!!! Wasserdurchfluss für Fensterbänke zu hoch: " + WaterFlowRoofPerHAkt1.state + " l/h statt "
+                                                 + WaterFlowRoofPerH1.state + " l/h")
+        sendCommand(WaterValveRoof1, OFF)
+    }
+end
+
+rule "react on excessive waterflow 2"
+when
+    Item WaterFlowRoofPerHAkt2 changed
+then
+    if (WaterFlowRoofPerHAkt2.state > 300) {
+        sendNotification("dirk.trescher@web.de", "Wasser-Leck!!! Wasserdurchfluss für Wiese Süd zu hoch: " + WaterFlowRoofPerHAkt2.state + " l/h statt "
+                                                 + WaterFlowRoofPerH2.state + " l/h")
+        sendCommand(WaterValveRoof2, OFF)
+    }
+end
+
+rule "react on excessive waterflow 3"
+when
+    Item WaterFlowRoofPerHAkt3 changed
+then
+    if (WaterFlowRoofPerHAkt3.state > 300) {
+        sendNotification("dirk.trescher@web.de", "Wasser-Leck!!! Wasserdurchfluss für Wiese Nord zu hoch: " + WaterFlowRoofPerHAkt3.state + " l/h statt "
+                                                 + WaterFlowRoofPerH3.state + " l/h")
+        sendCommand(WaterValveRoof3, OFF)
+    }
+end
+
+rule "react on excessive waterflow 4"
+when
+    Item WaterFlowRoofPerHAkt4 changed
+then
+    if (WaterFlowRoofPerHAkt4.state > 600) {
+        sendNotification("dirk.trescher@web.de", "Wasser-Leck!!! Wasserdurchfluss für Tröge zu hoch: " + WaterFlowRoofPerHAkt4.state + " l/h statt "
+                                                 + WaterFlowRoofPerH4.state + " l/h")
+        sendCommand(WaterValveRoof4, OFF)
+    }
+end
+
+rule "react on excessive waterflow 5"
+when
+    Item WaterFlowRoofPerHAkt5 changed
+then
+    if (WaterFlowRoofPerHAkt5.state > 300) {
+        sendNotification("dirk.trescher@web.de", "Wasser-Leck!!! Wasserdurchfluss für Erdbeeren zu hoch: " + WaterFlowRoofPerHAkt5.state + " l/h statt "
+                                                 + WaterFlowRoofPerH5.state + " l/h")
+        sendCommand(WaterValveRoof5, OFF)
+    }
+end
+
+rule "react on excessive waterflow 6"
+when
+    Item WaterFlowRoofPerHAkt6 changed
+then
+    if (WaterFlowRoofPerHAkt6.state > 300) {
+        sendNotification("dirk.trescher@web.de", "Wasser-Leck!!! Wasserdurchfluss für Obstbäume zu hoch: " + WaterFlowRoofPerHAkt6.state + " l/h statt "
+                                                 + WaterFlowRoofPerH6.state + " l/h")
+        sendCommand(WaterValveRoof6, OFF)
+    }
+end
+
+rule "reset sentToday state for water usage notification"
+when
+	Time cron "0 1 0 * * ?"		// 00:01 each day
+then
+	sentTodayWaterUsage = 0.0
+    postUpdate(WaterFlowRoofTransformed1, 0)
+    postUpdate(WaterFlowRoofTransformed2, 0)
+    postUpdate(WaterFlowRoofTransformed3, 0)
+    postUpdate(WaterFlowRoofTransformed4, 0)
+    postUpdate(WaterFlowRoofTransformed5, 0)
+    postUpdate(WaterFlowRoofTransformed6, 0)
+    waterAtMidnight1 = WaterFlowRoof1.state
+    waterAtMidnight2 = WaterFlowRoof2.state
+    waterAtMidnight3 = WaterFlowRoof3.state
+    waterAtMidnight4 = WaterFlowRoof4.state
+    waterAtMidnight5 = WaterFlowRoof5.state
+    waterAtMidnight6 = WaterFlowRoof6.state
+end
+
+rule "water usage status"
+when
+	Item IrrigationLane changed
+then
+	if (WateringStatus.state > 0 ||
+        WateringStatusWinSills.state > 0) {
+		var Number waterStatus = ((IrrigationLane.state as DecimalType).doubleValue) * 20
+		postUpdate(WaterStatus, waterStatus)
+	} else {
+		postUpdate(WaterStatus, 0)
+	}
+end
+
+rule "update Heartbeat Date"
+when
+    Item WaterRoofHeartbeat changed
+then
+    postUpdate(WaterRoofHeartbeatDate, now.toLocalDateTime().toString())
+end

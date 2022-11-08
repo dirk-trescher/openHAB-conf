@@ -1,0 +1,1656 @@
+var boolean bathWindowOpen = false
+var double heatingTargetBeforeWindowOpen
+
+var Timer valveEnforceTimer_Living = null
+var Timer valveEnforceTimer_Kitchen = null
+var Timer valveEnforceTimer_Bath = null
+var Timer valveEnforceTimer_Sleep = null
+var Timer valveEnforceTimer_Emilie = null
+var Timer valveEnforceTimer_Niklas = null
+var Timer valveEnforceTimer_Office = null
+var Timer valveEnforceTimer_Hobby = null
+var Timer valveEnforceTimer_KidsBath = null
+
+var HashMap<String, Integer> PresentTemp = newHashMap(
+    "Living"            -> 20,
+    "Kitchen"           -> 20,
+    "Bath"              -> 21,
+    "Niklas"            -> 20,
+    "Emilie"            -> 20,
+    "Hobby"             -> 18,
+    "KidsBath"          -> 18,
+    "KidsBathGuests"    -> 20,
+    "Office"            -> 18,
+    "OfficeGuests"      -> 20
+) as HashMap
+
+/* ---------------------------------- */
+
+val	Functions.Function1<String, Void> logAndWriteReason = [
+    String reason |
+
+	logInfo("heating", reason)
+	postUpdate(DecisionReasons, now.getHour() + "h" + now.getMinute() + ": " + reason)
+	return null
+]
+
+val Functions.Function0<Void> saveModusState = [
+	postUpdate(HeatingValve_ModusStore_Kitchen, HeatingValve_Modus_Kitchen.state)
+	postUpdate(HeatingModusStore_Living, HeatingModus_Living.state)
+	postUpdate(HeatingModusStore_Bath, HeatingModus_Bath.state)
+	postUpdate(HeatingModusStore_Sleep, HeatingModus_Sleep.state)
+	postUpdate(HeatingModusStore_Emilie, HeatingModus_Emilie.state)
+	postUpdate(HeatingModusStore_Niklas, HeatingModus_Niklas.state)
+	postUpdate(HeatingModusStore_Office, HeatingModus_Office.state)
+	postUpdate(HeatingModusStore_Hobby, HeatingModus_Hobby.state)
+	postUpdate(HeatingModusStore_KidsBath, HeatingModus_KidsBath.state)
+	return null
+]
+
+val Functions.Function0<Void> restoreModusState = [
+	if (HeatingModusStore_Living.state == 0) {
+		sendCommand(HeatingModus_Auto_Living, ON)
+	} else {
+		sendCommand(HeatingModus_Manu_Living, 17.0)
+	}
+	if (HeatingValve_ModusStore_Kitchen.state == 0) {
+		sendCommand(HeatingValve_Auto_Kitchen, ON)
+	} else {
+		sendCommand(HeatingValve_Manu_Kitchen, 17.0)
+	}
+	if (HeatingModusStore_Bath.state == 0) {
+		sendCommand(HeatingModus_Auto_Bath, ON)
+	} else {
+		sendCommand(HeatingModus_Manu_Bath, 18.0)
+	}
+	if (HeatingModusStore_Sleep.state == 0) {
+		sendCommand(HeatingModus_Auto_Sleep, ON)
+	} else {
+		sendCommand(HeatingModus_Manu_Sleep, 16.0)
+	}
+	if (HeatingModusStore_Emilie.state == 0) {
+		sendCommand(HeatingModus_Auto_Emilie, ON)
+	} else {
+		sendCommand(HeatingModus_Manu_Emilie, 17.0)
+	}
+	if (HeatingModusStore_Niklas.state == 0) {
+		sendCommand(HeatingModus_Auto_Niklas, ON)
+	} else {
+		sendCommand(HeatingModus_Manu_Niklas, 17.0)
+	}
+	if (HeatingModusStore_Office.state == 0) {
+		sendCommand(HeatingModus_Auto_Office, ON)
+	} else {
+		sendCommand(HeatingModus_Manu_Office, 17.0)
+	}
+	if (HeatingModusStore_Hobby.state == 0) {
+		sendCommand(HeatingModus_Auto_Hobby, ON)
+	} else {
+		sendCommand(HeatingModus_Manu_Hobby, 17.0)
+	}
+	if (HeatingModusStore_KidsBath.state == 0) {
+		sendCommand(HeatingModus_Auto_KidsBath, ON)
+	} else {
+		sendCommand(HeatingModus_Manu_KidsBath, 17.0)
+	}
+	return null
+]
+
+val Functions.Function0<Void> saveTemp = [
+	postUpdate(HeatingValve_TargetStore_Kitchen, HeatingValve_Target_Kitchen.state)
+	postUpdate(HeatingTargetStore_Living, HeatingTarget_Living.state)
+	postUpdate(HeatingTargetStore_Bath, HeatingTarget_Bath.state)
+	postUpdate(HeatingTargetStore_Sleep, HeatingTarget_Sleep.state)
+	postUpdate(HeatingTargetStore_Emilie, HeatingTarget_Emilie.state)
+	postUpdate(HeatingTargetStore_Niklas, HeatingTarget_Niklas.state)
+	postUpdate(HeatingTargetStore_Office, HeatingTarget_Office.state)
+	postUpdate(HeatingTargetStore_Hobby, HeatingTarget_Hobby.state)
+	postUpdate(HeatingTargetStore_KidsBath, HeatingTarget_KidsBath.state)
+	return null
+]
+
+val Functions.Function0<Void> restoreTemp = [
+	sendCommand(HeatingValve_Target_Kitchen, (HeatingValve_TargetStore_Kitchen.state).toString())
+	sendCommand(HeatingTarget_Living,   (HeatingTargetStore_Living.state).toString())
+	sendCommand(HeatingTarget_Bath,     (HeatingTargetStore_Bath.state).toString())
+	sendCommand(HeatingTarget_Sleep,    (HeatingTargetStore_Sleep.state).toString())
+	sendCommand(HeatingTarget_Emilie,   (HeatingTargetStore_Emilie.state).toString())
+	sendCommand(HeatingTarget_Niklas,   (HeatingTargetStore_Niklas.state).toString())
+	sendCommand(HeatingTarget_Office,   (HeatingTargetStore_Office.state).toString())
+	sendCommand(HeatingTarget_Hobby,    (HeatingTargetStore_Hobby.state).toString())
+	sendCommand(HeatingTarget_KidsBath, (HeatingTargetStore_KidsBath.state).toString())
+	return null
+]
+
+
+val	Functions.Function6<NumberItem, StringItem, SwitchItem, NumberItem, NumberItem, SwitchItem, Void> writeHeatingModusLogic = [
+    NumberItem HeatingModus,
+    StringItem HeatingModus_Control,
+    SwitchItem HeatingModus_Auto,
+    NumberItem HeatingTarget,
+    NumberItem HeatingModus_Manu,
+    SwitchItem HeatingModus_Boost |
+
+	if(HeatingModus.state == 0) {				// Auto
+		if(HeatingModus_Control.state != "AUTO-MODE") {
+			sendCommand(HeatingModus_Auto, ON)
+		}
+	} else if(HeatingModus.state == 1) {		// Manu
+		if(HeatingModus_Control.state != "MANU-MODE") {
+			var Number targetTempManu = (HeatingTarget.state as DecimalType)
+			sendCommand(HeatingModus_Manu, targetTempManu)
+		}
+	} else if(HeatingModus.state == 2) {		// Boost
+		if(HeatingModus_Control.state != "BOOST-MODE") {
+			sendCommand(HeatingModus_Boost, ON)
+		}
+	}
+	return null
+]
+
+val	Functions.Function2<NumberItem, StringItem, Void> readHeatingModusLogic = [
+    NumberItem HeatingModus,
+    StringItem HeatingModus_Control |
+
+	if(HeatingModus_Control.state == "AUTO-MODE") {
+		if(HeatingModus.state != 0) {
+			postUpdate(HeatingModus, 0)
+		}
+	} else if(HeatingModus_Control.state == "MANU-MODE") {
+		if(HeatingModus.state != 1) {
+			postUpdate(HeatingModus, 1)
+		}
+	} else if(HeatingModus_Control.state == "BOOST-MODE") {
+		if(HeatingModus.state != 2) {
+			postUpdate(HeatingModus, 2)
+		}
+	} else if(HeatingModus_Control.state == "PARTY-MODE") {
+		if(HeatingModus.state != 3) {
+			postUpdate(HeatingModus, 3)
+		}
+	}
+	return null
+]
+
+val	Functions.Function6<NumberItem, NumberItem, SwitchItem, NumberItem, SwitchItem, Integer, Void> writeHeatingDayNightLogic = [
+    NumberItem HeatingModus_DayNight,
+    NumberItem HeatingTarget,
+    SwitchItem HeatingModus_Comfort,
+    NumberItem HeatingTarget_AllModi,
+    SwitchItem HeatingModus_Lowering,
+    Integer DayTemp |
+
+	if (HeatingModus_DayNight.state == 0) {
+//		if (HeatingTarget.state != DayTemp) {
+//			sendCommand(HeatingModus_Comfort, ON)
+//		}
+		if (HeatingTarget_AllModi.state != DayTemp) {
+			sendCommand(HeatingTarget_AllModi, DayTemp)
+		}
+	} else if (HeatingModus_DayNight.state == 1) {
+//		if (HeatingTarget.state != 17) {
+//			sendCommand(HeatingModus_Lowering, ON)
+//		}
+		if (HeatingTarget_AllModi.state != 17) {
+			sendCommand(HeatingTarget_AllModi, 17)
+		}
+	} else if (HeatingModus_DayNight.state == 2) {
+//		if (HeatingTarget.state != 12) {
+//			sendCommand(HeatingTarget, 12)
+//		}
+		if (HeatingTarget_AllModi.state != 12) {
+			sendCommand(HeatingTarget_AllModi, 12)
+		}
+	}
+	return null
+]
+
+val	Functions.Function3<NumberItem, NumberItem, Integer, Void> readHeatingDayNightLogic = [
+    NumberItem HeatingModus_DayNight,
+    NumberItem HeatingTarget,
+    Integer DayTemp |
+
+	if(HeatingTarget.state == DayTemp) {
+		if(HeatingModus_DayNight.state != 0) {
+			postUpdate(HeatingModus_DayNight, 0)
+		}
+	} else if(HeatingTarget.state == 17) {
+		if(HeatingModus_DayNight.state != 1) {
+			postUpdate(HeatingModus_DayNight, 1)
+		}
+	} else if(HeatingTarget.state == 12) {
+		if(HeatingModus_DayNight.state != 2) {
+			postUpdate(HeatingModus_DayNight, 2)
+		}
+	} else {
+		if(HeatingModus_DayNight.state != 3) {
+			postUpdate(HeatingModus_DayNight, 3)
+		}
+	}
+	return null
+]
+
+val	Functions.Function2<NumberItem, NumberItem, Void> writeHeatingTemperatureLogic = [
+    NumberItem HeatingTarget,
+    NumberItem HeatingTarget_AllModi |
+
+	var Number targetTemp = (HeatingTarget_AllModi.state as DecimalType)
+	if (HeatingTarget.state != targetTemp) {
+		sendCommand(HeatingTarget, targetTemp)
+	}
+	return null
+]
+
+val	Functions.Function2<NumberItem, NumberItem, Void> readHeatingTemperatureLogic = [
+    NumberItem HeatingTarget,
+    NumberItem HeatingTarget_AllModi |
+
+	var Number targetTemp = (HeatingTarget.state as DecimalType)
+	if(HeatingTarget_AllModi.state != targetTemp) {
+		postUpdate(HeatingTarget_AllModi, targetTemp)
+	}
+	return null
+]
+/* ---------------------------------- */
+
+rule "Heating Period on"
+when
+	Item HeatingPeriod received command ON
+then
+	logAndWriteReason.apply( "enter heating period" )
+
+	restoreModusState.apply()
+end
+
+
+rule "Heating Period off"
+when
+	Item HeatingPeriod received command OFF
+then
+	logAndWriteReason.apply( "exit heating period" )
+
+	saveModusState.apply()
+
+	sendCommand(HeatingValve_Manu_Kitchen, 4.5)
+	sendCommand(HeatingModus_Manu_Living, 4.5)
+	sendCommand(HeatingModus_Manu_Bath, 4.5)
+	sendCommand(HeatingModus_Manu_Sleep, 4.5)
+	sendCommand(HeatingModus_Manu_Emilie, 4.5)
+	sendCommand(HeatingModus_Manu_Niklas, 4.5)
+	sendCommand(HeatingModus_Manu_Office, 4.5)
+	sendCommand(HeatingModus_Manu_Hobby, 4.5)
+	sendCommand(HeatingModus_Manu_KidsBath, 4.5)
+end
+
+/* ---------------------------------- */
+
+rule "Modus for Living Room writing"
+when
+	Item HeatingModus_Living changed
+then
+	writeHeatingModusLogic.apply(HeatingModus_Living, HeatingModus_Control_Living, HeatingModus_Auto_Living, HeatingTarget_Living, HeatingModus_Manu_Living, HeatingModus_Boost_Living)
+	writeHeatingModusLogic.apply(HeatingModus_Living, HeatingValve_Modus_Control_Living, HeatingValve_Auto_Living, HeatingValve_Target_Living, HeatingValve_Manu_Living, HeatingValve_Boost_Living)
+end
+
+rule "Modus for Living Room reading"
+when
+	Item HeatingModus_Control_Living changed
+then
+	readHeatingModusLogic.apply(HeatingModus_Living, HeatingModus_Control_Living)
+end
+
+rule "Switch Day Night Living Room writing"
+when
+	Item HeatingModus_DayNight_Living changed
+then
+	writeHeatingDayNightLogic.apply(HeatingModus_DayNight_Living, HeatingTarget_Living, HeatingModus_Comfort_Living, HeatingTarget_AllModi_Living, HeatingModus_Lowering_Living, 21)
+	writeHeatingDayNightLogic.apply(HeatingModus_DayNight_Living, HeatingValve_Target_Living, HeatingValve_Comfort_Living, HeatingValve_Target_AllModi_Living, HeatingValve_Lowering_Living, 21)
+end
+
+rule "Switch Day Night Living Room reading"
+when
+	Item HeatingTarget_Living changed
+then
+	readHeatingDayNightLogic.apply(HeatingModus_DayNight_Living, HeatingTarget_Living, 21)
+end
+
+rule "Target Temperature Living Room writing"
+when
+	Item HeatingTarget_AllModi_Living changed
+then
+	if (valveEnforceTimer_Living !== null) {
+		valveEnforceTimer_Living.cancel()
+	}
+	writeHeatingTemperatureLogic.apply(HeatingTarget_Living, HeatingTarget_AllModi_Living)
+	writeHeatingTemperatureLogic.apply(HeatingValve_Target_Living, HeatingTarget_AllModi_Living)
+
+	valveEnforceTimer_Living = createTimer(now.plusMinutes(1)) [|
+		writeHeatingTemperatureLogic.apply(HeatingValve_Target_Living, HeatingTarget_AllModi_Living)
+	]
+end
+
+rule "Target Temperature Living Room reading"
+when
+	Item HeatingTarget_Living changed
+then
+	readHeatingTemperatureLogic.apply(HeatingTarget_Living, HeatingTarget_AllModi_Living)
+end
+
+
+rule "Modus for Kitchen Room writing"
+when
+	Item HeatingValve_Modus_Kitchen changed
+then
+	writeHeatingModusLogic.apply(HeatingValve_Modus_Kitchen, HeatingValve_Modus_Control_Kitchen, HeatingValve_Auto_Kitchen, HeatingValve_Target_Kitchen, HeatingValve_Manu_Kitchen, HeatingValve_Boost_Kitchen)
+end
+
+rule "Modus for Kitchen Room reading"
+when
+	Item HeatingValve_Modus_Control_Kitchen changed
+then
+	readHeatingModusLogic.apply(HeatingValve_Modus_Kitchen, HeatingValve_Modus_Control_Kitchen)
+end
+
+rule "Switch Day Night Kitchen Room writing"
+when
+	Item HeatingValve_DayNight_Kitchen changed
+then
+	writeHeatingDayNightLogic.apply(HeatingValve_DayNight_Kitchen, HeatingValve_Target_Kitchen, HeatingValve_Comfort_Kitchen, HeatingValve_Target_AllModi_Kitchen, HeatingValve_Lowering_Kitchen, 22)
+end
+
+rule "Switch Day Night Kitchen Room reading"
+when
+	Item HeatingValve_Target_Kitchen changed
+then
+	readHeatingDayNightLogic.apply(HeatingValve_DayNight_Kitchen, HeatingValve_Target_Kitchen, 22)
+end
+
+rule "Target Temperature Kitchen Room writing"
+when
+	Item HeatingValve_Target_AllModi_Kitchen changed
+then
+	if (valveEnforceTimer_Kitchen !== null) {
+		valveEnforceTimer_Kitchen.cancel()
+	}
+	writeHeatingTemperatureLogic.apply(HeatingValve_Target_Kitchen, HeatingValve_Target_AllModi_Kitchen)
+
+	valveEnforceTimer_Kitchen = createTimer(now.plusMinutes(1)) [|
+		writeHeatingTemperatureLogic.apply(HeatingValve_Target_Kitchen, HeatingValve_Target_AllModi_Kitchen)
+	]
+end
+
+rule "Target Temperature Kitchen Room reading"
+when
+	Item HeatingValve_Target_Kitchen changed
+then
+	readHeatingTemperatureLogic.apply(HeatingValve_Target_Kitchen, HeatingValve_Target_AllModi_Kitchen)
+end
+
+
+rule "Modus for Bath Room writing"
+when
+	Item HeatingModus_Bath changed
+then
+	writeHeatingModusLogic.apply(HeatingModus_Bath, HeatingModus_Control_Bath, HeatingModus_Auto_Bath, HeatingTarget_Bath, HeatingModus_Manu_Bath, HeatingModus_Boost_Bath)
+	writeHeatingModusLogic.apply(HeatingModus_Bath, HeatingValve_Modus_Control_Bath, HeatingValve_Auto_Bath, HeatingValve_Target_Bath, HeatingValve_Manu_Bath, HeatingValve_Boost_Bath)
+end
+
+rule "Modus for Bath Room reading"
+when
+	Item HeatingModus_Control_Bath changed
+then
+	readHeatingModusLogic.apply(HeatingModus_Bath, HeatingModus_Control_Bath)
+end
+
+rule "Switch Day Night Bath Room writing"
+when
+	Item HeatingModus_DayNight_Bath changed
+then
+	writeHeatingDayNightLogic.apply(HeatingModus_DayNight_Bath, HeatingTarget_Bath, HeatingModus_Comfort_Bath, HeatingTarget_AllModi_Bath, HeatingModus_Lowering_Bath, 22)
+	writeHeatingDayNightLogic.apply(HeatingModus_DayNight_Bath, HeatingValve_Target_Bath, HeatingValve_Comfort_Bath, HeatingValve_Target_AllModi_Bath, HeatingValve_Lowering_Bath, 22)
+end
+
+rule "Switch Day Night Bath Room reading"
+when
+	Item HeatingTarget_Bath changed
+then
+	readHeatingDayNightLogic.apply(HeatingModus_DayNight_Bath, HeatingTarget_Bath, 22)
+end
+
+rule "Target Temperature Bath Room writing"
+when
+	Item HeatingTarget_AllModi_Bath changed
+then
+	if (valveEnforceTimer_Bath !== null) {
+		valveEnforceTimer_Bath.cancel()
+	}
+	writeHeatingTemperatureLogic.apply(HeatingTarget_Bath, HeatingTarget_AllModi_Bath)
+	writeHeatingTemperatureLogic.apply(HeatingValve_Target_Bath, HeatingTarget_AllModi_Bath)
+
+	valveEnforceTimer_Bath = createTimer(now.plusMinutes(1)) [|
+		writeHeatingTemperatureLogic.apply(HeatingValve_Target_Bath, HeatingTarget_AllModi_Bath)
+	]
+end
+
+rule "Target Temperature Bath Room reading"
+when
+	Item HeatingTarget_Bath changed
+then
+	readHeatingTemperatureLogic.apply(HeatingTarget_Bath, HeatingTarget_AllModi_Bath)
+end
+
+
+rule "Modus for Sleep Room writing"
+when
+	Item HeatingModus_Sleep changed
+then
+	writeHeatingModusLogic.apply(HeatingModus_Sleep, HeatingModus_Control_Sleep, HeatingModus_Auto_Sleep, HeatingTarget_Sleep, HeatingModus_Manu_Sleep, HeatingModus_Boost_Sleep)
+	writeHeatingModusLogic.apply(HeatingModus_Sleep, HeatingValve_Modus_Control_Sleep, HeatingValve_Auto_Sleep, HeatingValve_Target_Sleep, HeatingValve_Manu_Sleep, HeatingValve_Boost_Sleep)
+end
+
+rule "Modus for Sleep Room reading"
+when
+	Item HeatingModus_Control_Sleep changed
+then
+	readHeatingModusLogic.apply(HeatingModus_Sleep, HeatingModus_Control_Sleep)
+end
+
+rule "Switch Day Night Sleep Room writing"
+when
+	Item HeatingModus_DayNight_Sleep changed
+then
+	writeHeatingDayNightLogic.apply(HeatingModus_DayNight_Sleep, HeatingTarget_Sleep, HeatingModus_Comfort_Sleep, HeatingTarget_AllModi_Sleep, HeatingModus_Lowering_Sleep, 20)
+	writeHeatingDayNightLogic.apply(HeatingModus_DayNight_Sleep, HeatingValve_Target_Sleep, HeatingValve_Comfort_Sleep, HeatingValve_Target_AllModi_Sleep, HeatingValve_Lowering_Sleep, 21)
+end
+
+rule "Switch Day Night Sleep Room reading"
+when
+	Item HeatingTarget_Sleep changed
+then
+	readHeatingDayNightLogic.apply(HeatingModus_DayNight_Sleep, HeatingTarget_Sleep, 20)
+end
+
+rule "Target Temperature Sleep Room writing"
+when
+	Item HeatingTarget_AllModi_Sleep changed
+then
+	if (valveEnforceTimer_Sleep !== null) {
+		valveEnforceTimer_Sleep.cancel()
+	}
+	writeHeatingTemperatureLogic.apply(HeatingTarget_Sleep, HeatingTarget_AllModi_Sleep)
+	writeHeatingTemperatureLogic.apply(HeatingValve_Target_Sleep, HeatingTarget_AllModi_Sleep)
+
+	valveEnforceTimer_Sleep = createTimer(now.plusMinutes(1)) [|
+		writeHeatingTemperatureLogic.apply(HeatingValve_Target_Sleep, HeatingTarget_AllModi_Sleep)
+	]
+end
+
+rule "Target Temperature Sleep Room reading"
+when
+	Item HeatingTarget_Sleep changed
+then
+	readHeatingTemperatureLogic.apply(HeatingTarget_Sleep, HeatingTarget_AllModi_Sleep)
+end
+
+
+rule "Modus for Emilie Room writing"
+when
+	Item HeatingModus_Emilie changed
+then
+	writeHeatingModusLogic.apply(HeatingModus_Emilie, HeatingModus_Control_Emilie, HeatingModus_Auto_Emilie, HeatingTarget_Emilie, HeatingModus_Manu_Emilie, HeatingModus_Boost_Emilie)
+	writeHeatingModusLogic.apply(HeatingModus_Emilie, HeatingValve_Modus_Control_EmilieLi, HeatingValve_Auto_EmilieLi, HeatingValve_Target_EmilieLi, HeatingValve_Manu_EmilieLi, HeatingValve_Boost_EmilieLi)
+	writeHeatingModusLogic.apply(HeatingModus_Emilie, HeatingValve_Modus_Control_EmilieRe, HeatingValve_Auto_EmilieRe, HeatingValve_Target_EmilieRe, HeatingValve_Manu_EmilieRe, HeatingValve_Boost_EmilieRe)
+end
+
+rule "Modus for Emilie Room reading"
+when
+	Item HeatingModus_Control_Emilie changed
+then
+	readHeatingModusLogic.apply(HeatingModus_Emilie, HeatingModus_Control_Emilie)
+end
+
+rule "Switch Day Night Emilie Room writing"
+when
+	Item HeatingModus_DayNight_Emilie changed
+then
+	writeHeatingDayNightLogic.apply(HeatingModus_DayNight_Emilie, HeatingTarget_Emilie, HeatingModus_Comfort_Emilie, HeatingTarget_AllModi_Emilie, HeatingModus_Lowering_Emilie, 21)
+	writeHeatingDayNightLogic.apply(HeatingModus_DayNight_Emilie, HeatingValve_Target_EmilieLi, HeatingValve_Comfort_EmilieLi, HeatingValve_Target_AllModi_EmilieLi, HeatingValve_Lowering_EmilieLi, 21)
+	writeHeatingDayNightLogic.apply(HeatingModus_DayNight_Emilie, HeatingValve_Target_EmilieRe, HeatingValve_Comfort_EmilieRe, HeatingValve_Target_AllModi_EmilieRe, HeatingValve_Lowering_EmilieRe, 21)
+end
+
+rule "Switch Day Night Emilie Room reading"
+when
+	Item HeatingTarget_Emilie changed
+then
+	readHeatingDayNightLogic.apply(HeatingModus_DayNight_Emilie, HeatingTarget_Emilie, 21)
+end
+
+rule "Target Temperature Emilie Room writing"
+when
+	Item HeatingTarget_AllModi_Emilie changed
+then
+	if (valveEnforceTimer_Emilie !== null) {
+		valveEnforceTimer_Emilie.cancel()
+	}
+	writeHeatingTemperatureLogic.apply(HeatingTarget_Emilie, HeatingTarget_AllModi_Emilie)
+	writeHeatingTemperatureLogic.apply(HeatingValve_Target_EmilieLi, HeatingTarget_AllModi_Emilie)
+	writeHeatingTemperatureLogic.apply(HeatingValve_Target_EmilieRe, HeatingTarget_AllModi_Emilie)
+
+	valveEnforceTimer_Emilie = createTimer(now.plusMinutes(1)) [|
+		writeHeatingTemperatureLogic.apply(HeatingValve_Target_EmilieLi, HeatingTarget_AllModi_Emilie)
+		writeHeatingTemperatureLogic.apply(HeatingValve_Target_EmilieRe, HeatingTarget_AllModi_Emilie)
+	]
+end
+
+rule "Target Temperature Emilie Room reading"
+when
+	Item HeatingTarget_Emilie changed
+then
+	readHeatingTemperatureLogic.apply(HeatingTarget_Emilie, HeatingTarget_AllModi_Emilie)
+end
+
+
+rule "Modus for Niklas Room writing"
+when
+	Item HeatingModus_Niklas changed
+then
+	writeHeatingModusLogic.apply(HeatingModus_Niklas, HeatingModus_Control_Niklas, HeatingModus_Auto_Niklas, HeatingTarget_Niklas, HeatingModus_Manu_Niklas, HeatingModus_Boost_Niklas)
+	writeHeatingModusLogic.apply(HeatingModus_Niklas, HeatingValve_Modus_Control_Niklas, HeatingValve_Auto_Niklas, HeatingValve_Target_Niklas, HeatingValve_Manu_Niklas, HeatingValve_Boost_Niklas)
+end
+
+rule "Modus for Niklas Room reading"
+when
+	Item HeatingModus_Control_Niklas changed
+then
+	readHeatingModusLogic.apply(HeatingModus_Niklas, HeatingModus_Control_Niklas)
+end
+
+rule "Switch Day Night Niklas Room writing"
+when
+	Item HeatingModus_DayNight_Niklas changed
+then
+	writeHeatingDayNightLogic.apply(HeatingModus_DayNight_Niklas, HeatingTarget_Niklas, HeatingModus_Comfort_Niklas, HeatingTarget_AllModi_Niklas, HeatingModus_Lowering_Niklas, 21)
+	writeHeatingDayNightLogic.apply(HeatingModus_DayNight_Niklas, HeatingValve_Target_Niklas, HeatingValve_Comfort_Niklas, HeatingValve_Target_AllModi_Niklas, HeatingValve_Lowering_Niklas, 21)
+end
+
+rule "Switch Day Night Niklas Room reading"
+when
+	Item HeatingTarget_Niklas changed
+then
+	readHeatingDayNightLogic.apply(HeatingModus_DayNight_Niklas, HeatingTarget_Niklas, 21)
+end
+
+rule "Target Temperature Niklas Room writing"
+when
+	Item HeatingTarget_AllModi_Niklas changed
+then
+	if (valveEnforceTimer_Niklas !== null) {
+		valveEnforceTimer_Niklas.cancel()
+	}
+	writeHeatingTemperatureLogic.apply(HeatingTarget_Niklas, HeatingTarget_AllModi_Niklas)
+	writeHeatingTemperatureLogic.apply(HeatingValve_Target_Niklas, HeatingTarget_AllModi_Niklas)
+
+	valveEnforceTimer_Niklas = createTimer(now.plusMinutes(1)) [|
+		writeHeatingTemperatureLogic.apply(HeatingValve_Target_Niklas, HeatingTarget_AllModi_Niklas)
+	]
+end
+
+rule "Target Temperature Niklas Room reading"
+when
+	Item HeatingTarget_Niklas changed
+then
+	readHeatingTemperatureLogic.apply(HeatingTarget_Niklas, HeatingTarget_AllModi_Niklas)
+end
+
+
+rule "Modus for Office Room writing"
+when
+	Item HeatingModus_Office changed
+then
+	writeHeatingModusLogic.apply(HeatingModus_Office, HeatingModus_Control_Office, HeatingModus_Auto_Office, HeatingTarget_Office, HeatingModus_Manu_Office, HeatingModus_Boost_Office)
+	writeHeatingModusLogic.apply(HeatingModus_Office, HeatingValve_Modus_Control_Office, HeatingValve_Auto_Office, HeatingValve_Target_Office, HeatingValve_Manu_Office, HeatingValve_Boost_Office)
+end
+
+rule "Modus for Office Room reading"
+when
+	Item HeatingModus_Control_Office changed
+then
+	readHeatingModusLogic.apply(HeatingModus_Office, HeatingModus_Control_Office)
+end
+
+rule "Switch Day Night Office Room writing"
+when
+	Item HeatingModus_DayNight_Office changed
+then
+	writeHeatingDayNightLogic.apply(HeatingModus_DayNight_Office, HeatingTarget_Office, HeatingModus_Comfort_Office, HeatingTarget_AllModi_Office, HeatingModus_Lowering_Office, 20)
+	writeHeatingDayNightLogic.apply(HeatingModus_DayNight_Office, HeatingValve_Target_Office, HeatingValve_Comfort_Office, HeatingValve_Target_AllModi_Office, HeatingValve_Lowering_Office, 21)
+end
+
+rule "Switch Day Night Office Room reading"
+when
+	Item HeatingTarget_Office changed
+then
+	readHeatingDayNightLogic.apply(HeatingModus_DayNight_Office, HeatingTarget_Office, 20)
+end
+
+rule "Target Temperature Office Room writing"
+when
+	Item HeatingTarget_AllModi_Office changed
+then
+	if (valveEnforceTimer_Office !== null) {
+		valveEnforceTimer_Office.cancel()
+	}
+	writeHeatingTemperatureLogic.apply(HeatingTarget_Office, HeatingTarget_AllModi_Office)
+	writeHeatingTemperatureLogic.apply(HeatingValve_Target_Office, HeatingTarget_AllModi_Office)
+
+	valveEnforceTimer_Office = createTimer(now.plusMinutes(1)) [|
+		writeHeatingTemperatureLogic.apply(HeatingValve_Target_Office, HeatingTarget_AllModi_Office)
+	]
+end
+
+rule "Target Temperature Office Room reading"
+when
+	Item HeatingTarget_Office changed
+then
+	readHeatingTemperatureLogic.apply(HeatingTarget_Office, HeatingTarget_AllModi_Office)
+end
+
+
+rule "Modus for Hobby Room writing"
+when
+	Item HeatingModus_Hobby changed
+then
+	writeHeatingModusLogic.apply(HeatingModus_Hobby, HeatingModus_Control_Hobby, HeatingModus_Auto_Hobby, HeatingTarget_Hobby, HeatingModus_Manu_Hobby, HeatingModus_Boost_Hobby)
+	writeHeatingModusLogic.apply(HeatingModus_Hobby, HeatingValve_Modus_Control_Hobby, HeatingValve_Auto_Hobby, HeatingValve_Target_Hobby, HeatingValve_Manu_Hobby, HeatingValve_Boost_Hobby)
+end
+
+rule "Modus for Hobby Room reading"
+when
+	Item HeatingModus_Control_Hobby changed
+then
+	readHeatingModusLogic.apply(HeatingModus_Hobby, HeatingModus_Control_Hobby)
+end
+
+rule "Switch Day Night Hobby Room writing"
+when
+	Item HeatingModus_DayNight_Hobby changed
+then
+	writeHeatingDayNightLogic.apply(HeatingModus_DayNight_Hobby, HeatingTarget_Hobby, HeatingModus_Comfort_Hobby, HeatingTarget_AllModi_Hobby, HeatingModus_Lowering_Hobby, 20)
+	writeHeatingDayNightLogic.apply(HeatingModus_DayNight_Hobby, HeatingValve_Target_Hobby, HeatingValve_Comfort_Hobby, HeatingValve_Target_AllModi_Hobby, HeatingValve_Lowering_Hobby, 21)
+end
+
+rule "Switch Day Night Hobby Room reading"
+when
+	Item HeatingTarget_Hobby changed
+then
+	readHeatingDayNightLogic.apply(HeatingModus_DayNight_Hobby, HeatingTarget_Hobby, 20)
+end
+
+rule "Target Temperature Hobby Room writing"
+when
+	Item HeatingTarget_AllModi_Hobby changed
+then
+	if (valveEnforceTimer_Hobby !== null) {
+		valveEnforceTimer_Hobby.cancel()
+	}
+	writeHeatingTemperatureLogic.apply(HeatingTarget_Hobby, HeatingTarget_AllModi_Hobby)
+	writeHeatingTemperatureLogic.apply(HeatingValve_Target_Hobby, HeatingTarget_AllModi_Hobby)
+
+	valveEnforceTimer_Hobby = createTimer(now.plusMinutes(1)) [|
+		writeHeatingTemperatureLogic.apply(HeatingValve_Target_Hobby, HeatingTarget_AllModi_Hobby)
+	]
+end
+
+rule "Target Temperature Hobby Room reading"
+when
+	Item HeatingTarget_Hobby changed
+then
+	readHeatingTemperatureLogic.apply(HeatingTarget_Hobby, HeatingTarget_AllModi_Hobby)
+end
+
+
+rule "Modus for KidsBath Room writing"
+when
+	Item HeatingModus_KidsBath changed
+then
+	writeHeatingModusLogic.apply(HeatingModus_KidsBath, HeatingModus_Control_KidsBath, HeatingModus_Auto_KidsBath, HeatingTarget_KidsBath, HeatingModus_Manu_KidsBath, HeatingModus_Boost_KidsBath)
+	writeHeatingModusLogic.apply(HeatingModus_KidsBath, HeatingValve_Modus_Control_KidsBath, HeatingValve_Auto_KidsBath, HeatingValve_Target_KidsBath, HeatingValve_Manu_KidsBath, HeatingValve_Boost_KidsBath)
+end
+
+rule "Modus for KidsBath Room reading"
+when
+	Item HeatingModus_Control_KidsBath changed
+then
+	readHeatingModusLogic.apply(HeatingModus_KidsBath, HeatingModus_Control_KidsBath)
+end
+
+rule "Switch Day Night KidsBath Room writing"
+when
+	Item HeatingModus_DayNight_KidsBath changed
+then
+	writeHeatingDayNightLogic.apply(HeatingModus_DayNight_KidsBath, HeatingTarget_KidsBath, HeatingModus_Comfort_KidsBath, HeatingTarget_AllModi_KidsBath, HeatingModus_Lowering_KidsBath, 21)
+	writeHeatingDayNightLogic.apply(HeatingModus_DayNight_KidsBath, HeatingValve_Target_KidsBath, HeatingValve_Comfort_KidsBath, HeatingValve_Target_AllModi_KidsBath, HeatingValve_Lowering_KidsBath, 21)
+end
+
+rule "Switch Day Night KidsBath Room reading"
+when
+	Item HeatingTarget_KidsBath changed
+then
+	readHeatingDayNightLogic.apply(HeatingModus_DayNight_KidsBath, HeatingTarget_KidsBath, 21)
+end
+
+rule "Target Temperature KidsBath Room writing"
+when
+	Item HeatingTarget_AllModi_KidsBath changed
+then
+    logInfo("heating", "Target Temperature KidsBath Room writing")
+	if (valveEnforceTimer_KidsBath !== null) {
+		valveEnforceTimer_KidsBath.cancel()
+	}
+	writeHeatingTemperatureLogic.apply(HeatingTarget_KidsBath, HeatingTarget_AllModi_KidsBath)
+	writeHeatingTemperatureLogic.apply(HeatingValve_Target_KidsBath, HeatingTarget_AllModi_KidsBath)
+
+	valveEnforceTimer_KidsBath = createTimer(now.plusMinutes(1)) [|
+		writeHeatingTemperatureLogic.apply(HeatingValve_Target_KidsBath, HeatingTarget_AllModi_KidsBath)
+	]
+end
+
+rule "Target Temperature KidsBath Room reading"
+when
+	Item HeatingTarget_KidsBath changed
+then
+    logInfo("heating", "Target Temperature KidsBath Room reading")
+	readHeatingTemperatureLogic.apply(HeatingTarget_KidsBath, HeatingTarget_AllModi_KidsBath)
+end
+
+
+// ---------------------------------------------------------------------------
+
+
+// ---------------------------------------------------------------------------
+
+
+rule "update any living window open"
+when
+	Item Window_LivingLeft changed or
+	Item Window_LivingMiddle changed or
+	Item Window_LivingRight changed or
+	Item RoofWindow_Kitchen changed or
+	Item RoofWindowDirection_Kitchen changed
+then
+	if (Window_LivingLeft.state == OPEN || Window_LivingMiddle.state == OPEN || Window_LivingRight.state == OPEN ||
+		(RoofWindow_Kitchen.state < 100 || RoofWindowDirection_Kitchen.state == 'UP')) {
+		if (AnyWindow_Living.state != ON) {
+			postUpdate(AnyWindow_Living, ON)
+		}
+	} else if (Window_LivingLeft.state == CLOSED && Window_LivingMiddle.state == CLOSED && Window_LivingRight.state == CLOSED &&
+			   (RoofWindow_Kitchen.state == 100 && RoofWindowDirection_Kitchen.state == 'NONE')) {
+		if (AnyWindow_Living.state != OFF) {
+			postUpdate(AnyWindow_Living, OFF)
+		}
+	}
+end
+
+rule "living: check for open windows when setting temp - planned"
+when
+	Item PlannedTarget_Living changed
+then
+	if (HeatingPeriod.state == ON) {
+		if (AnyWindow_Living.state == OFF) {
+			postUpdate(HeatingTarget_AllModi_Living, PlannedTarget_Living.state)
+		}
+	}
+end
+
+rule "living: check for open windows when setting temp - target"
+when
+	Item HeatingTarget_AllModi_Living changed
+then
+	if (HeatingPeriod.state == ON) {
+		if (AnyWindow_Living.state == OFF) {
+			postUpdate(PlannedTarget_Living, HeatingTarget_AllModi_Living.state)
+		}
+	}
+end
+
+rule "living: set planned temp when all windows are closed"
+when
+	Item AnyWindow_Living changed to OFF
+then
+	if (HeatingPeriod.state == ON) {
+		if (now.getHour() < 4 || now.getHour() >= 22) {
+			postUpdate(PlannedTarget_Living, 17)		// no heating before bedtime
+		}
+		postUpdate(HeatingTarget_AllModi_Living, PlannedTarget_Living.state)
+	}
+end
+
+rule "living: set 12 deg when any window is open"
+when
+	Item AnyWindow_Living changed to ON
+then
+	if (HeatingPeriod.state == ON) {
+		postUpdate(HeatingTarget_AllModi_Living, 12)
+	}
+end
+
+
+rule "update any sleep window open"
+when
+	Item Window_Sleep changed or
+	Item RoofWindow_Sleep changed or
+	Item RoofWindowDirection_Sleep changed
+then
+	if (Window_Sleep.state == OPEN || (RoofWindow_Sleep.state < 100 || RoofWindowDirection_Sleep.state == 'UP')) {
+		if (AnyWindow_Sleep.state != ON) {
+			postUpdate(AnyWindow_Sleep, ON)
+		}
+	} else if (Window_Sleep.state == CLOSED && (RoofWindow_Sleep.state == 100 && RoofWindowDirection_Sleep.state == 'NONE')) {
+		if (AnyWindow_Sleep.state != OFF) {
+			postUpdate(AnyWindow_Sleep, OFF)
+		}
+	}
+end
+
+rule "sleep: check for open windows when setting temp - planned"
+when
+	Item PlannedTarget_Sleep changed
+then
+	if (HeatingPeriod.state == ON) {
+		if (AnyWindow_Sleep.state == OFF) {
+			postUpdate(HeatingTarget_AllModi_Sleep, PlannedTarget_Sleep.state)
+		}
+	}
+end
+
+rule "sleep: check for open windows when setting temp - target"
+when
+	Item HeatingTarget_AllModi_Sleep changed
+then
+	if (HeatingPeriod.state == ON) {
+		if (AnyWindow_Sleep.state == OFF) {
+			postUpdate(PlannedTarget_Sleep, HeatingTarget_AllModi_Sleep.state)
+		}
+	}
+end
+
+rule "sleep: set planned temp when all windows are closed"
+when
+	Item AnyWindow_Sleep changed to OFF
+then
+	if (HeatingPeriod.state == ON) {
+		postUpdate(HeatingTarget_AllModi_Sleep, PlannedTarget_Sleep.state)
+	}
+end
+
+rule "sleep: set 12 deg when any window is open"
+when
+	Item AnyWindow_Sleep changed to ON
+then
+	if (HeatingPeriod.state == ON) {
+		postUpdate(HeatingTarget_AllModi_Sleep, 12)
+	}
+end
+
+
+rule "update any bath window open"
+when
+	Item RoofWindow_Bath changed or
+	Item RoofWindowDirection_Bath changed
+then
+	if (RoofWindow_Bath.state < 100 || RoofWindowDirection_Bath.state == 'UP') {
+		if (AnyWindow_Bath.state != ON) {
+			postUpdate(AnyWindow_Bath, ON)
+		}
+	} else if (RoofWindow_Bath.state == 100 && RoofWindowDirection_Bath.state == 'NONE') {
+		if (AnyWindow_Bath.state != OFF) {
+			postUpdate(AnyWindow_Bath, OFF)
+		}
+	}
+end
+
+rule "bath: check for open windows when setting temp - planned changed"
+when
+	Item PlannedTarget_Bath changed
+then
+	if (HeatingPeriod.state == ON) {
+		if (AnyWindow_Bath.state == OFF) {
+			if (HeatingTarget_AllModi_Bath.state != PlannedTarget_Bath.state) {
+				postUpdate(HeatingTarget_AllModi_Bath, PlannedTarget_Bath.state)
+			}
+		}
+	}
+end
+
+rule "bath: check for open windows when setting temp - target changed"
+when
+	Item HeatingTarget_AllModi_Bath changed
+then
+	if (HeatingPeriod.state == ON) {
+		if (AnyWindow_Bath.state == OFF) {
+			if (PlannedTarget_Bath.state != HeatingTarget_AllModi_Bath.state) {
+				postUpdate(PlannedTarget_Bath, HeatingTarget_AllModi_Bath.state)
+			}
+		}
+	}
+end
+
+rule "bath: set planned temp when all windows are closed"
+when
+	Item AnyWindow_Bath changed to OFF
+then
+	if (HeatingPeriod.state == ON) {
+		if (now.getHour() < 4 || now.getHour() >= 22) {
+			postUpdate(PlannedTarget_Bath, 19)		// no heating before bedtime
+		}
+		postUpdate(HeatingTarget_AllModi_Bath, PlannedTarget_Bath.state)
+	}
+end
+
+rule "bath: set 12 deg when any window is open"
+when
+	Item AnyWindow_Bath changed to ON
+then
+	if (HeatingPeriod.state == ON) {
+		postUpdate(HeatingTarget_AllModi_Bath, 12)
+	}
+end
+
+
+rule "update any Emilie window open"
+when
+	Item Window_EmilieLeft changed or
+	Item Window_EmilieMiddle changed or
+	Item Window_EmilieRight changed
+then
+	if (Window_EmilieLeft.state == OPEN || Window_EmilieMiddle.state == OPEN || Window_EmilieRight.state == OPEN) {
+		postUpdate(AnyWindow_Emilie, ON)
+	} else {
+		postUpdate(AnyWindow_Emilie, OFF)
+	}
+end
+
+rule "Emilie: check for open windows when setting temp - planned"
+when
+	Item PlannedTarget_Emilie changed
+then
+	if (HeatingPeriod.state == ON) {
+		if (AnyWindow_Emilie.state == OFF) {
+			postUpdate(HeatingTarget_AllModi_Emilie, PlannedTarget_Emilie.state)
+		}
+	}
+end
+
+rule "Emilie: check for open windows when setting temp - target"
+when
+	Item HeatingTarget_AllModi_Emilie changed
+then
+	if (HeatingPeriod.state == ON) {
+		if (AnyWindow_Emilie.state == OFF) {
+			postUpdate(PlannedTarget_Emilie, HeatingTarget_AllModi_Emilie.state)
+		}
+	}
+end
+
+rule "Emilie: set planned temp when all windows are closed"
+when
+	Item AnyWindow_Emilie changed to OFF
+then
+	if (HeatingPeriod.state == ON) {
+		if (now.getHour() < 4 || now.getHour() >= 19) {
+			postUpdate(PlannedTarget_Emilie, 17)		// no heating before bedtime
+		}
+		postUpdate(HeatingTarget_AllModi_Emilie, PlannedTarget_Emilie.state)
+	}
+end
+
+rule "Emilie: set 12 deg when any window is open"
+when
+	Item AnyWindow_Emilie changed to ON
+then
+	if (HeatingPeriod.state == ON) {
+		postUpdate(PlannedTarget_Emilie, HeatingTarget_AllModi_Emilie.state)
+		Thread.sleep(1000)
+		postUpdate(HeatingTarget_AllModi_Emilie, 12)
+	}
+end
+
+
+rule "update any Niklas window open"
+when
+	Item Window_NiklasLeft changed or
+	Item Window_NiklasRight changed
+then
+	if (Window_NiklasLeft.state == OPEN || Window_NiklasRight.state == OPEN) {
+		postUpdate(AnyWindow_Niklas, ON)
+	} else {
+		postUpdate(AnyWindow_Niklas, OFF)
+	}
+end
+
+rule "Niklas: check for open windows when setting temp - planned"
+when
+	Item PlannedTarget_Niklas changed
+then
+	if (HeatingPeriod.state == ON) {
+		if (AnyWindow_Niklas.state == OFF) {
+			postUpdate(HeatingTarget_AllModi_Niklas, PlannedTarget_Niklas.state)
+		}
+	}
+end
+
+rule "Niklas: check for open windows when setting temp - target"
+when
+	Item HeatingTarget_AllModi_Niklas changed
+then
+	if (HeatingPeriod.state == ON) {
+		if (AnyWindow_Niklas.state == OFF) {
+			postUpdate(PlannedTarget_Niklas, HeatingTarget_AllModi_Niklas.state)
+		}
+	}
+end
+
+rule "Niklas: set planned temp when all windows are closed"
+when
+	Item AnyWindow_Niklas changed to OFF
+then
+	if (HeatingPeriod.state == ON) {
+		if (now.getHour() < 4 || now.getHour() >= 19) {
+			postUpdate(PlannedTarget_Niklas, 17)		// no heating before bedtime
+		}
+		postUpdate(HeatingTarget_AllModi_Niklas, PlannedTarget_Niklas.state)
+	}
+end
+
+rule "Niklas: set 12 deg when any window is open"
+when
+	Item AnyWindow_Niklas changed to ON
+then
+	if (HeatingPeriod.state == ON) {
+		postUpdate(PlannedTarget_Niklas, HeatingTarget_AllModi_Niklas.state)
+		Thread.sleep(1000)
+		postUpdate(HeatingTarget_AllModi_Niklas, 12)
+	}
+end
+
+
+rule "update any office window open"
+when
+	Item Window_OfficeDoor changed or
+	Item Window_OfficeLeft changed or
+	Item Window_OfficeRight changed
+then
+	if (Window_OfficeDoor.state == OPEN || Window_OfficeLeft.state == OPEN || Window_OfficeRight.state == OPEN) {
+		postUpdate(AnyWindow_Office, ON)
+	} else {
+		postUpdate(AnyWindow_Office, OFF)
+	}
+end
+
+rule "office: check for open windows when setting temp - planned"
+when
+	Item PlannedTarget_Office changed
+then
+	if (HeatingPeriod.state == ON) {
+		if (AnyWindow_Office.state == OFF) {
+			postUpdate(HeatingTarget_AllModi_Office, PlannedTarget_Office.state)
+		}
+	}
+end
+
+rule "office: check for open windows when setting temp - target"
+when
+	Item HeatingTarget_AllModi_Office changed
+then
+	if (HeatingPeriod.state == ON) {
+		if (AnyWindow_Office.state == OFF) {
+			postUpdate(PlannedTarget_Office, HeatingTarget_AllModi_Office.state)
+		}
+	}
+end
+
+rule "office: set planned temp when all windows are closed"
+when
+	Item AnyWindow_Office changed to OFF
+then
+	if (HeatingPeriod.state == ON) {
+		if (now.getHour() < 4 || now.getHour() >= 22) {
+			postUpdate(PlannedTarget_Office, 17)		// no heating before bedtime
+		}
+		postUpdate(HeatingTarget_AllModi_Office, PlannedTarget_Office.state)
+	}
+end
+
+rule "office: set 12 deg when any window is open"
+when
+	Item AnyWindow_Office changed to ON
+then
+	if (HeatingPeriod.state == ON) {
+		postUpdate(PlannedTarget_Office, HeatingTarget_AllModi_Office.state)
+		Thread.sleep(1000)
+		postUpdate(HeatingTarget_AllModi_Office, 12)
+	}
+end
+
+
+rule "update any hobby window open"
+when
+	Item Window_Hobby changed
+then
+	if (Window_Hobby.state == OPEN) {
+		postUpdate(AnyWindow_Hobby, ON)
+	} else {
+		postUpdate(AnyWindow_Hobby, OFF)
+	}
+end
+
+rule "hobby: check for open windows when setting temp - planned"
+when
+	Item PlannedTarget_Hobby changed
+then
+	if (HeatingPeriod.state == ON) {
+		if (AnyWindow_Hobby.state == OFF) {
+			postUpdate(HeatingTarget_AllModi_Hobby, PlannedTarget_Hobby.state)
+		}
+	}
+end
+
+rule "hobby: check for open windows when setting temp - target"
+when
+	Item HeatingTarget_AllModi_Hobby changed
+then
+	if (HeatingPeriod.state == ON) {
+		if (AnyWindow_Hobby.state == OFF) {
+			postUpdate(PlannedTarget_Hobby, HeatingTarget_AllModi_Hobby.state)
+		}
+	}
+end
+
+rule "hobby: set planned temp when all windows are closed"
+when
+	Item AnyWindow_Hobby changed to OFF
+then
+	if (HeatingPeriod.state == ON) {
+		if (now.getHour() < 4 || now.getHour() >= 22) {
+			postUpdate(PlannedTarget_Hobby, 17)		// no heating before bedtime
+		}
+		postUpdate(HeatingTarget_AllModi_Hobby, PlannedTarget_Hobby.state)
+	}
+end
+
+rule "hobby: set 12 deg when any window is open"
+when
+	Item AnyWindow_Hobby changed to ON
+then
+	if (HeatingPeriod.state == ON) {
+		postUpdate(PlannedTarget_Hobby, HeatingTarget_AllModi_Hobby.state)
+		Thread.sleep(1000)
+		postUpdate(HeatingTarget_AllModi_Hobby, 12)
+	}
+end
+
+
+// ---------------------------------------------------------------------------
+
+
+rule "lower Heating when Away or Sleeping"
+when
+	Item LoftMode changed
+then
+	if (HeatingPeriod.state == ON) {
+		if (LoftMode.state == 1 || LoftMode.state == 2) {
+			logAndWriteReason.apply("lower heating due to Away or Sleeping")
+
+			postUpdate(PlannedTarget_Living, 17)
+
+			postUpdate(HeatingValve_Target_AllModi_Kitchen, 19)
+
+			postUpdate(PlannedTarget_Bath, 19)
+
+			postUpdate(PlannedTarget_Emilie, 17)
+			postUpdate(PlannedTarget_Niklas, 17)
+
+			postUpdate(PlannedTarget_Hobby, 17)
+			postUpdate(PlannedTarget_Office, 17)
+
+			if (Guests.state == ON) {
+				postUpdate(HeatingTarget_KidsBath, 20)
+			} else {
+				postUpdate(HeatingTarget_KidsBath, 18)
+			}
+		}
+	}
+end
+
+rule "Rise Heating Niklas Emilie due to Away -> Present Mode"
+when
+	Item LoftMode changed
+then
+	if (HeatingPeriod.state == ON) {
+		if (LoftMode.state == 0 && previousState == 1) {
+			logAndWriteReason.apply("rise heating Niklas&Emilie (Away -> Present)")
+
+			if ((now.getDayOfWeek() == Saturday || now.getDayOfWeek() == Sunday) &&
+                  now.getHour() >= 9 && now.getHour() < 19 ||
+                (now.getDayOfWeek() != Saturday && now.getDayOfWeek() != Sunday) &&
+                  now.getHour() >= 15 && now.getHour() < 19) {	// in the night (after 19h) do not rise heating
+				postUpdate(PlannedTarget_Niklas, PresentTemp.get("Niklas"))
+				postUpdate(PlannedTarget_Emilie, PresentTemp.get("Emilie"))
+			}
+		}
+	}
+end
+
+rule "Rise Heating due to Away / Sleeping -> Present Mode or Party Mode"
+when
+	Item LoftMode changed
+then
+	if (HeatingPeriod.state == ON) {
+		if ((LoftMode.state == 0 && (previousState == 1 || previousState == 2)) ||
+			LoftMode.state == 3) {
+			logAndWriteReason.apply("rise heating (Away / Sleeping -> Present or Party)")
+
+			if ((now.getHour() >= 6 && now.getHour() < 22) ||
+				LoftMode.state == 3) {
+
+				postUpdate(PlannedTarget_Living, PresentTemp.get("Living"))
+
+				if (Temp_Living.state < (PlannedTarget_Living.state as DecimalType) &&
+					AnyWindow_Living.state == OFF
+				) {
+					createTimer(now.plusSeconds(5)) [|
+						postUpdate(HeatingModus_Living, 2)			// Boost
+					]
+				}
+
+				postUpdate(HeatingValve_Target_AllModi_Kitchen, PresentTemp.get("Kitchen"))
+
+				if (Temp_Kitchen.state < (HeatingValve_Target_AllModi_Kitchen.state as DecimalType) &&
+					AnyWindow_Living.state == OFF
+				) {
+					createTimer(now.plusSeconds(10)) [|
+						postUpdate(HeatingValve_Modus_Kitchen, 2)			// Boost
+					]
+				}
+
+				postUpdate(PlannedTarget_Hobby, PresentTemp.get("Hobby"))
+
+				if (Guests.state == ON) {
+					postUpdate(HeatingTarget_KidsBath, PresentTemp.get("KidsBathGuests"))
+				} else {
+					postUpdate(PlannedTarget_Office, PresentTemp.get("Office"))
+					postUpdate(HeatingTarget_KidsBath, PresentTemp.get("KidsBath"))
+				}
+			}
+
+			postUpdate(PlannedTarget_Bath, PresentTemp.get("Bath"))
+
+			if (Temp_Bath.state < (PlannedTarget_Bath.state as DecimalType)
+				&& AnyWindow_Bath.state == OFF
+			) {
+				createTimer(now.plusSeconds(5)) [|
+					postUpdate(HeatingModus_Bath, 2)				// Boost
+				]
+			}
+		}
+	}
+end
+
+rule "Rise Heating in bath due to early morning when sleeping"
+when
+	Time cron "0 30 5 ? * MON-FRI" or		// 5:30 each weekday
+	Time cron "0 0 7 ? * SAT,SUN"			// 7:00 each Saturday and Sunday
+then
+	if (HeatingPeriod.state == ON) {
+		if (LoftMode.state == 2 || LoftMode.state == 0) {			// sleeping or present
+			logAndWriteReason.apply("rise heating in bath early")
+
+			postUpdate(PlannedTarget_Bath, PresentTemp.get("Bath"))
+		}
+	}
+end
+
+rule "Rise Heating Niklas due to early morning when sleeping"
+when
+	Time cron "0 30 7 ? * MON-FRI" or		// 7:30 each weekday
+	Time cron "0 00 8 ? * SAT,SUN"			// 8:00 each Saturday and Sunday
+then
+	if (HeatingPeriod.state == ON) {
+		if (LoftMode.state == 2 || LoftMode.state == 0) {			// sleeping or present
+			logAndWriteReason.apply("rise heating Niklas early")
+
+//			postUpdate(HeatingModus_Niklas, 1)					// Manu
+			postUpdate(PlannedTarget_Niklas, PresentTemp.get("Niklas"))
+		}
+	}
+end
+
+rule "Rise Heating Emilie due to early morning when sleeping"
+when
+	Time cron "0 30 7 ? * MON-FRI" or		// 7:30 each weekday
+	Time cron "0 30 8 ? * SAT,SUN"			// 8:30 each Saturday and Sunday
+then
+	if (HeatingPeriod.state == ON) {
+		if (LoftMode.state == 2 || LoftMode.state == 0) {			// sleeping or present
+			logAndWriteReason.apply("rise heating Emilie early")
+
+//			postUpdate(HeatingModus_Emilie, 1)					// Manu
+			postUpdate(PlannedTarget_Emilie, PresentTemp.get("Emilie"))
+		}
+	}
+end
+
+rule "Lower Heating Niklas and Emilie before noon"
+when
+	Time cron "0 00 8 ? * MON-FRI"			// 8:00 each weekday
+then
+	if (HeatingPeriod.state == ON) {
+		if (LoftMode.state == 2 || LoftMode.state == 0) {			// sleeping or present
+			logAndWriteReason.apply("lower heating Niklas and Emilie before noon")
+
+//			postUpdate(HeatingModus_Niklas, 1)					// Manu
+			postUpdate(PlannedTarget_Niklas, 17)
+
+//			postUpdate(HeatingModus_Emilie, 1)					// Manu
+			postUpdate(PlannedTarget_Emilie, 17)
+		}
+	}
+end
+
+rule "Rise Heating Niklas and Emilie afternoon when never away"
+when
+	Time cron "0 00 15 ? * MON-FRI"			// 15:00 each weekday
+then
+	if (HeatingPeriod.state == ON) {
+		if (LoftMode.state == 0) {								// present
+			logAndWriteReason.apply("rise heating Niklas and Emilie afternoon")
+
+//			postUpdate(HeatingModus_Niklas, 1)					// Manu
+			postUpdate(PlannedTarget_Niklas, PresentTemp.get("Niklas"))
+
+//			postUpdate(HeatingModus_Emilie, 1)					// Manu
+			postUpdate(PlannedTarget_Emilie, PresentTemp.get("Emilie"))
+		}
+	}
+end
+
+rule "Lower Heating Niklas and Emilie for the night"
+when
+	Time cron "0 30 18 * * ?"			// 18:30 each day
+then
+	if (HeatingPeriod.state == ON) {
+		if (LoftMode.state == 0) {								// present
+			logAndWriteReason.apply("lower heating Niklas and Emilie for the night")
+
+//			postUpdate(HeatingModus_Niklas, 1)					// Manu
+			postUpdate(PlannedTarget_Niklas, 17)
+
+//			postUpdate(HeatingModus_Emilie, 1)					// Manu
+			postUpdate(PlannedTarget_Emilie, 17)
+		}
+	}
+end
+
+rule "Rise heating in Office due to Office present"
+when
+	Item Office_present changed to ON
+then
+	if (HeatingPeriod.state == ON) {
+		if (Guests.state != ON) {
+			postUpdate(PlannedTarget_Office, PresentTemp.get("OfficeGuests"))
+		}
+	}
+end
+
+rule "Lower heating in Office due to Office not present"
+when
+	Item Office_present changed to OFF
+then
+	if (HeatingPeriod.state == ON) {
+		if (Guests.state != ON) {
+			postUpdate(PlannedTarget_Office, 17)
+		}
+	}
+end
+
+rule "Rise heating in Office due to Guests awake"
+when
+	Item Guests_awake changed to ON
+then
+	if (HeatingPeriod.state == ON) {
+		postUpdate(PlannedTarget_Office, PresentTemp.get("OfficeGuests"))
+		postUpdate(HeatingTarget_KidsBath, PresentTemp.get("KidsBathGuests"))
+	}
+end
+
+rule "Lower heating in Office due to Guests not awake"
+when
+	Item Guests_awake changed to OFF
+then
+	if (HeatingPeriod.state == ON) {
+		if (Guests.state == ON) {
+			postUpdate(PlannedTarget_Office, 17)
+			postUpdate(HeatingTarget_KidsBath, PresentTemp.get("KidsBathGuests"))
+		}
+	}
+end
+
+
+rule "Heating change due to Vacation Mode"
+when
+	Item LoftMode changed
+then
+	if (HeatingPeriod.state == ON) {
+		if (LoftMode.state == 4) {
+			logAndWriteReason.apply("lower heating (Vacation Mode)")
+
+			saveModusState.apply()
+			saveTemp.apply()
+
+			sendCommand(HeatingModus_Manu_Living, 17.0)
+			sendCommand(HeatingValve_Manu_Kitchen, 17.0)
+			sendCommand(HeatingModus_Manu_Bath, 17.0)
+			sendCommand(HeatingModus_Manu_Sleep, 14.0)
+			sendCommand(HeatingModus_Manu_Emilie, 17.0)
+			sendCommand(HeatingModus_Manu_Niklas, 17.0)
+			sendCommand(HeatingModus_Manu_Office, 16.0)
+			sendCommand(HeatingModus_Manu_Hobby, 16.0)
+			sendCommand(HeatingModus_Manu_KidsBath, 16.0)
+		} else {
+			if (previousState == 4) {
+				logAndWriteReason.apply("rise heating (end of Vacation Mode)")
+
+				restoreModusState.apply()
+				restoreTemp.apply()
+			}
+		}
+	}
+end
+
+rule "lower Heating in kids bath when guests go away"
+when
+	Item Guests changed
+then
+	if (HeatingPeriod.state == ON) {
+		if (Guests.state == OFF) {
+			if (PlannedTarget_Office.state > PresentTemp.get("Office")) {
+				postUpdate(PlannedTarget_Office, PresentTemp.get("Office"))
+			}
+			if (HeatingTarget_KidsBath.state > PresentTemp.get("KidsBath")) {
+				postUpdate(HeatingTarget_KidsBath, PresentTemp.get("KidsBath"))
+			}
+		}
+	}
+end
+
+// ---------------------------------------------------------------------------
+
+rule "assert heating state living"
+when
+	Item HeatingModus_Control_Living changed
+then
+	if (HeatingModus_Control_Living.state != "MANU-MODE" &&
+	     HeatingModus_Control_Living.state != "BOOST-MODE") {
+		sendNotification("dirk.trescher@web.de", "Wohnzimmer-Heizung ist nicht auf manuell")
+	}
+end
+
+rule "assert heating state bath"
+when
+	Item HeatingModus_Control_Bath changed
+then
+	if (HeatingModus_Control_Bath.state != "MANU-MODE" &&
+		 HeatingModus_Control_Bath.state != "BOOST-MODE") {
+		sendNotification("dirk.trescher@web.de", "Badezimmer-Heizung ist nicht auf manuell")
+	}
+end
+
+rule "assert heating state sleep"
+when
+	Item HeatingModus_Control_Sleep changed
+then
+	if (HeatingModus_Control_Sleep.state != "MANU-MODE" &&
+		 HeatingModus_Control_Sleep.state != "BOOST-MODE") {
+		sendNotification("dirk.trescher@web.de", "Schlafzimmer-Heizung ist nicht auf manuell")
+	}
+end
+
+rule "assert heating state Emilie"
+when
+	Item HeatingModus_Control_Emilie changed
+then
+	if (HeatingModus_Control_Emilie.state != "MANU-MODE" &&
+		 HeatingModus_Control_Emilie.state != "BOOST-MODE") {
+		sendNotification("dirk.trescher@web.de", "Heizung Emilie ist nicht auf manuell")
+	}
+end
+
+rule "assert heating state Niklas"
+when
+	Item HeatingModus_Control_Niklas changed
+then
+	if (HeatingModus_Control_Niklas.state != "MANU-MODE" &&
+		 HeatingModus_Control_Niklas.state != "BOOST-MODE") {
+		sendNotification("dirk.trescher@web.de", "Heizung Niklas ist nicht auf manuell")
+	}
+end
+
+rule "assert heating state office"
+when
+	Item HeatingModus_Control_Office changed
+then
+	if (HeatingModus_Control_Office.state != "MANU-MODE" &&
+		 HeatingModus_Control_Office.state != "BOOST-MODE") {
+		sendNotification("dirk.trescher@web.de", "Arbeitszimmer-Heizung ist nicht auf manuell")
+	}
+end
+
+rule "assert heating state hobby"
+when
+	Item HeatingModus_Control_Hobby changed
+then
+	if (HeatingModus_Control_Hobby.state != "MANU-MODE" &&
+		 HeatingModus_Control_Hobby.state != "BOOST-MODE") {
+		sendNotification("dirk.trescher@web.de", "Bastelzimmer-Heizung ist nicht auf manuell")
+	}
+end
+
+rule "assert heating state kids bath"
+when
+	Item HeatingModus_Control_KidsBath changed
+then
+	if (HeatingModus_Control_KidsBath.state != "MANU-MODE" &&
+		 HeatingModus_Control_KidsBath.state != "BOOST-MODE") {
+		sendNotification("dirk.trescher@web.de", "Gästebad-Heizung ist nicht auf manuell")
+	}
+end
+
+// ---------------------------------------------------------------------------
+
+rule "assert heating off living"
+when
+	Item HeatingTarget_Living changed
+then
+	if (HeatingPeriod.state == OFF) {
+		if (HeatingTarget_Living.state > 17.0) {
+			sendNotification("dirk.trescher@web.de", "Wohnzimmer-Heizung ist an")
+		}
+	}
+end
+
+rule "assert heating off bath"
+when
+	Item HeatingTarget_Bath changed
+then
+	if (HeatingPeriod.state == OFF) {
+		if (HeatingTarget_Bath.state > 17.0) {
+			sendNotification("dirk.trescher@web.de", "Badezimmer-Heizung ist an")
+		}
+	}
+end
+
+rule "assert heating off sleep"
+when
+	Item HeatingTarget_Sleep changed
+then
+	if (HeatingPeriod.state == OFF) {
+		if (HeatingTarget_Sleep.state > 13.0) {
+			sendNotification("dirk.trescher@web.de", "Schlafzimmer-Heizung ist an")
+		}
+	}
+end
+
+rule "assert heating off Emilie"
+when
+	Item HeatingTarget_Emilie changed
+then
+	if (HeatingPeriod.state == OFF) {
+		if (HeatingTarget_Emilie.state > 17.0) {
+			sendNotification("dirk.trescher@web.de", "Heizung Emilie ist an")
+		}
+	}
+end
+
+rule "assert heating off Niklas"
+when
+	Item HeatingTarget_Niklas changed
+then
+	if (HeatingPeriod.state == OFF) {
+		if (HeatingTarget_Niklas.state > 17.0) {
+			sendNotification("dirk.trescher@web.de", "Heizung Niklas ist an")
+		}
+	}
+end
+
+rule "assert heating off office"
+when
+	Item HeatingTarget_Office changed
+then
+	if (HeatingPeriod.state == OFF) {
+		if (HeatingTarget_Office.state > 16.0) {
+			sendNotification("dirk.trescher@web.de", "Arbeitszimmer-Heizung ist an")
+		}
+	}
+end
+
+rule "assert heating off hobby"
+when
+	Item HeatingTarget_Hobby changed
+then
+	if (HeatingPeriod.state == OFF) {
+		if (HeatingTarget_Hobby.state > 16.0) {
+			sendNotification("dirk.trescher@web.de", "Bastelzimmer-Heizung ist an")
+		}
+	}
+end
+
+rule "assert heating off kids bath"
+when
+	Item HeatingTarget_KidsBath changed
+then
+	if (HeatingPeriod.state == OFF) {
+		if (HeatingTarget_KidsBath.state > 17.0) {
+			sendNotification("dirk.trescher@web.de", "Gästebad-Heizung ist an")
+		}
+	}
+end

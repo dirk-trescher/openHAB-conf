@@ -1,0 +1,133 @@
+
+val	Functions.Function3<NumberItem, Number, NumberItem, void> computeUsage = [LastTimeChanged, prevState, Counter |
+
+    if (prevState != NULL && LastTimeChanged.state != NULL && prevState > 0) {
+	    var double deltaHours = (now.toInstant.toEpochMilli - (LastTimeChanged.state as Number).longValue) / (1000.0 * 60.0 * 60.0 * 24.0)
+	    var double deltaUsage = ((prevState).intValue * deltaHours).doubleValue / 100.0
+
+        // logInfo("heating", "Usage of " + Counter.name + " since last change of valve: " + deltaUsage)
+
+        if (Counter.state != NULL) {
+            deltaUsage = deltaUsage + (Counter.state as Number).doubleValue
+        }
+        postUpdate(Counter, deltaUsage)
+    }
+    postUpdate(LastTimeChanged, (now.toInstant.toEpochMilli as Number))
+
+    return null
+]
+
+
+rule "update usage counter Living"
+when
+    Item Heating_Living changed
+then
+    computeUsage.apply(CounterLastTimeChanged_Living, previousState, Counter_Living)
+end
+
+rule "update usage counter Sleep"
+when
+    Item Heating_Sleep changed
+then
+    computeUsage.apply(CounterLastTimeChanged_Sleep, previousState, Counter_Sleep)
+end
+
+rule "update usage counter Kitchen"
+when
+    Item HeatingValve_Kitchen changed
+then
+    computeUsage.apply(CounterLastTimeChanged_Kitchen, previousState, Counter_Kitchen)
+end
+
+rule "update usage counter Bath"
+when
+    Item Heating_Bath changed
+then
+    computeUsage.apply(CounterLastTimeChanged_Bath, previousState, Counter_Bath)
+end
+
+rule "update usage counter Emilie left Heating"
+when
+    Item Heating_EmilieLi changed
+then
+    computeUsage.apply(CounterLastTimeChanged_EmilieLi, previousState, Counter_Emilie)
+end
+
+rule "update usage counter Emilie right heating"
+when
+    Item Heating_EmilieRe changed
+then
+    computeUsage.apply(CounterLastTimeChanged_EmilieRe, previousState, Counter_Emilie)
+end
+
+rule "update usage counter Niklas"
+when
+    Item Heating_Niklas changed
+then
+    computeUsage.apply(CounterLastTimeChanged_Niklas, previousState, Counter_Niklas)
+end
+
+rule "update usage counter Office"
+when
+    Item Heating_Office changed
+then
+    computeUsage.apply(CounterLastTimeChanged_Office, previousState, Counter_Office)
+end
+
+rule "update usage counter Hobby"
+when
+    Item Heating_Hobby changed
+then
+    computeUsage.apply(CounterLastTimeChanged_Hobby, previousState, Counter_Hobby)
+end
+
+rule "update usage counter Hobby"
+when
+    Item Heating_KidsBath changed
+then
+    computeUsage.apply(CounterLastTimeChanged_KidsBath, previousState, Counter_KidsBath)
+end
+
+rule "update usage counter total"
+when
+    Item Counter_Living changed or
+    Item Counter_Sleep changed or
+    Item Counter_Kitchen changed or
+    Item Counter_Bath changed or
+    Item Counter_Emilie changed or
+    Item Counter_Niklas changed or
+    Item Counter_Office changed or
+    Item Counter_Hobby changed or
+    Item Counter_KidsBath changed
+then
+    if (Counter_Living.state != NULL && Counter_Sleep.state != NULL && Counter_Kitchen.state != NULL &&
+        Counter_Bath.state != NULL && Counter_Emilie.state != NULL && Counter_Niklas.state != NULL &&
+        Counter_Office.state != NULL && Counter_Hobby.state != NULL && Counter_KidsBath.state != NULL) {
+        var double sumOfCounters = (Counter_Living.state as Number).doubleValue +
+                                   (Counter_Sleep.state as Number).doubleValue +
+                                   (Counter_Kitchen.state as Number).doubleValue +
+                                   (Counter_Bath.state as Number).doubleValue +
+                                   (Counter_Emilie.state as Number).doubleValue +
+                                   (Counter_Niklas.state as Number).doubleValue +
+                                   (Counter_Office.state as Number).doubleValue +
+                                   (Counter_Hobby.state as Number).doubleValue +
+                                   (Counter_KidsBath.state as Number).doubleValue
+        postUpdate(Counter_total, sumOfCounters)
+    }
+end
+
+rule "reset heating counters"
+when
+    Item CounterResetAll changed to ON
+then
+    postUpdate(Counter_Living, (0.0 as Number))
+    postUpdate(Counter_Sleep, (0.0 as Number))
+    postUpdate(Counter_Kitchen, (0.0 as Number))
+    postUpdate(Counter_Bath, (0.0 as Number))
+    postUpdate(Counter_Emilie, (0.0 as Number))
+    postUpdate(Counter_Niklas, (0.0 as Number))
+    postUpdate(Counter_Office, (0.0 as Number))
+    postUpdate(Counter_Hobby, (0.0 as Number))
+    postUpdate(Counter_KidsBath, (0.0 as Number))
+    postUpdate(CounterResetAll, OFF)
+end

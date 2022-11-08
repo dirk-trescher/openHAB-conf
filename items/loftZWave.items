@@ -1,0 +1,162 @@
+/* Power */
+Number Power_all					"Gesamt-Stromverbrauch [%.0f W]"	<energy>	(gPower)
+Number Power_today					"Energieverbrauch heute (ohne Solar) [%.2f kWh]" <energy>	(gEnergyToday)
+Number Energy_avg					"Durchschnitt 4 Pers."				<energy>	(gEnergyToday)
+Number Power_WaterHeating			"Durchlauferhitzer [%.0f W]"		<energy>	(gPower)
+Number Power_WaterHeating_kWh		"Durchlauferhitzer [%.2f kWh]"		<energy>	(gPowerUsage)
+Number Power_Rest					"ohne Durchlauferhitzer [%.0f W]"	<energy>	(gPower)
+Number Power_Rest_kWh				"ohne Durchlauferhitzer [%.2f kWh]"	<energy>	(gPowerUsage)
+Number Power_bigFlat				"große Wohnung [%.0f W]"			<energy>	(gPower)
+Number Power1_bigFlat				"große Wohnung 1 [%.0f W]"			<energy>	(gPowerTech)	 {channel="zwave:device:3dcec7afdc:node27:meter_watts1"}
+Number Power1_bigFlat_woSolar		"Ess-/Wohnzi/Kochfeld [%.0f W]"			<energy>	(gPowerTech)
+Number Power2_bigFlat				"Schlaf/Bad/Gästeklo/Kühlschr/Geschirrsp [%.0f W]"			<energy>	(gPowerTech)	 {channel="zwave:device:3dcec7afdc:node27:meter_watts2"}
+Number Power3_bigFlat				"Emilie/Flur/Waschm/Ofen [%.0f W]"			<energy>	(gPowerTech)	 {channel="zwave:device:3dcec7afdc:node27:meter_watts3"}
+Number Power_smallFlat				"kleine Wohnung [%.0f W]"			<energy>	(gPower)
+Number Power1_smallFlat				"Bastelzimmer/Gästebad [%.0f W]"			<energy>	(gPowerTech)	 {channel="zwave:device:3dcec7afdc:node9:meter_watts1"}
+Number Power2_smallFlat				"Niklas/Flur [%.0f W]"			<energy>	(gPowerTech)	 {channel="zwave:device:3dcec7afdc:node9:meter_watts2"}
+Number Power3_smallFlat				"kleine Wohnung 3 [%.0f W]"			<energy>	(gPowerTech)	 {channel="zwave:device:3dcec7afdc:node9:meter_watts3"}
+Number Power3_smallFlat_woSolar		"Arbeitszimmer [%.0f W]"			<energy>	(gPowerTech)
+Number Energy_raw_bigFlat                                                           (gPowerTech) {channel="zwave:device:3dcec7afdc:node27:meter_kwh"}
+Number Energy_raw_smallFlat                                                         (gPowerTech) {channel="zwave:device:3dcec7afdc:node9:meter_kwh"}
+Number Energy_offset_bigFlat                                                        (gEnergyTech)
+Number Energy_offset_smallFlat                                                      (gEnergyTech)
+Number Energy_bigFlat               "Energieverbrauch gr. Wohnung [%.2f kWh]"       <energy>   (gEnergy)
+Number Energy_smallFlat             "Energieverbrauch kl. Wohnung [%.2f kWh]"       <energy>   (gEnergy)
+Number Energy_all_yearly            "jährlicher Energieverbrauch (mit Solar) [%.2f kWh]"       <energy>    (gEnergy)
+Number Energy_offset_today                                                          (gEnergyTech)
+Number Energy_today                 "Energieverbrauch heute (mit Solar) [%.2f kWh]"       <energy>    (gEnergyToday)
+Number Energy_daily                 "täglicher Energieverbrauch [%.1f kWh]"     <energy>    (gEnergyDaily)
+
+Switch HotWaterOn					"Es wird gerade geduscht: [%s]"
+Number ShowerDuration				"Duschdauer [%.0f min]"		<water>						(gPowerTech)
+Switch BathingWater					"Badewasser ist eingelassen: [%s]"
+
+/* Wall plugs */
+Switch WLan_Roof			"WLAN Dachterrasse"					<network>			(gWLAN)						{channel="zwave:device:3dcec7afdc:node11:switch_binary"}
+Number WLan_Roof_Power		"WLAN Leistung [%.0f W]"			<energy>			(gPower)					{channel="zwave:device:3dcec7afdc:node11:sensor_power"}
+Number WLan_Roof_EnergyRaw 	                                    <energy>	        (gPowerTech)	            {channel="zwave:device:3dcec7afdc:node11:meter_kwh"}
+Switch WLan_Office			"WLAN Arbeitszimmer"				<network>			(gWLAN)						{channel="zwave:device:3dcec7afdc:node12:switch_binary"}
+Switch Garagentor			"Garagentor"						<garagedoor>									{channel="zwave:device:3dcec7afdc:node6:switch_binary"}
+Switch CameraRoof			"Kamera Dach"						<camera>										{channel="zwave:device:3dcec7afdc:node15:switch_binary"}
+Number CameraRoof_Power		"Kamera Leistung [%.0f W]"			<energy>			(gPower)					{channel="zwave:device:3dcec7afdc:node15:sensor_power"}
+Number CameraRoof_EnergyRaw	                                    <energy>	        (gPowerTech)	            {channel="zwave:device:3dcec7afdc:node15:meter_kwh"}
+Number Fridge   			"Kühlschrank [%.0f W]"				<energy>			(gPower)					{channel="zwave:device:3dcec7afdc:node33:sensor_power"}
+Number Energy_raw_Fridge   	                                        	    <energy>	(gPowerTech)	        {channel="zwave:device:3dcec7afdc:node33:meter_kwh"}
+Number Energy_offset_Fridge                                                             (gPowerTech)
+Number Energy_Fridge   		"Energieverbrauch Kühlschrank [%.2f kWh]"	    <energy>	(gEnergy)
+Number Energy_today_Fridge 	"Energieverbrauch Kühlschrank heute [%.2f kWh]"	<energy>	(gEnergyToday)
+Number Energy_daily_Fridge  "täglicher Energieverbrauch Kühlschrank [%.1f kWh]"	<energy>	(gPowerDaily)
+
+Switch WateringPlug        	"Bewässerung Not-Aus"	    		<error>		(gWatering)	                    {channel="zwave:device:3dcec7afdc:node4:switch_binary"}
+
+/* Switches */
+Switch LueftungLow_Gaestetoilette	"Lüftung Stufe 1"					<fan>			(gSwitches)				{channel="zwave:device:3dcec7afdc:node17:switch_binary1"}
+Switch LueftungHigh_Gaestetoilette	"Lüftung Stufe 2"					<fan>			(gSwitches)				{channel="zwave:device:3dcec7afdc:node17:switch_binary2"}
+Switch Lueftung_Gaestetoilette
+
+Switch DoorBuzzer_Up				"Summer Wohnungstür"				<door>			(gSwitches)				{channel="zwave:device:3dcec7afdc:node24:switch_binary1"}
+Switch DoorBuzzer_Down				"Summer Haustür"				    <door>			(gSwitches)				{channel="zwave:device:3dcec7afdc:node26:switch_binary1"}
+
+Switch DoorBuzzer_Both				"Summer unten und oben"				<door>			(gSwitches)
+
+Switch Light_StairwaysDown			"Taster Licht Treppenhaus unten"	<light>			(gSwitches)				{channel="zwave:device:3dcec7afdc:node31:switch_binary1"}
+
+/* Wall Controller */
+Switch BuzzerSwitch					"Taster [%s]"					<switch>									{channel="zwave:device:3dcec7afdc:node22:switch_dimmer"}
+Number BuzzerButton 				"Taster [%.1f]"					<switch>									{channel="zwave:device:3dcec7afdc:node22:scene_number"}
+Number Batt_SummerTaster_disp 		"Wohnungstür Taster [%.2f %%]"	<battery>			(gBatteries)			{channel="zwave:device:3dcec7afdc:node22:battery-level"}
+
+/* Dimmer */
+Number Light_GuestLooScenes			"Scenen"						<dimmablelight>		(gLightScenes)
+Dimmer Leuchter_Gaestetoilette		"Licht [%.2f %%]"				<light>				(gLights)				{channel="zwave:device:3dcec7afdc:node18:switch_dimmer1"}
+
+/* Air Quality */
+Number CO2							"CO2 Küche [%.0f ppm]"			<carbondioxide>	(gAirQuality)				{channel="zwave:device:3dcec7afdc:node10:sensor_co2"}
+
+Number CO2_Display					 					   			 											{channel="zwave:device:3dcec7afdc:node19:sensor_co2"}
+Number CO2_Display_disp				"CO2 Schlafen [%.0f ppm]"		<carbondioxide>	(gAirQuality)
+
+Number CO2_Avg						"CO2 [%.0f ppm]"				<carbondioxide>
+
+Switch CO_Alarm						"Kohlenmonoxid (CO) [%s]"	                <fire>	        (gSmokeSensor)		        {channel="zwave:device:3dcec7afdc:node40:alarm_co"}
+Switch CO_2							"Kohlenmonoxid2 (CO) [MAP(smokeSensors.map):%s]" <fire>	    (gSmokeSensor)		        {channel="zwave:device:3dcec7afdc:node40:sensor_binary"}
+Number CO_Temp			            "Kohlenmonoxid Temperatur [%.1f °C]"	    <temperature>	(gSmokeSensor)			    {channel="zwave:device:3dcec7afdc:node40:sensor_temperature"}
+Number CO_Level                     "Kohlenmonoxid (CO) [%.0f ppm]"             <fire>          (gAirQuality)               {channel="zwave:device:3dcec7afdc:node40:sensor_co"}
+Number Batt_CO_disp 				"Kohlenmonoxid (CO) [%.2f %%]"	            <battery>	    (gSmokeSensor, gBatteries)	{channel="zwave:device:3dcec7afdc:node40:battery-level"}
+
+/* Smoke Detectors */
+Number Smoke_Sleep_Temp			"Rauchmelder Schlafzimmer Temperatur [%.1f °C]"	<temperature>	(gSmokeSensor)				{channel="zwave:device:3dcec7afdc:node44:sensor_temperature"}
+Switch Smoke_Sleep_Heat			"Rauchmelder Schlafzimmer Hitze [%s]"			<fire>			(gSmokeSensor)				{channel="zwave:device:3dcec7afdc:node44:alarm_heat"}
+Switch Smoke_Sleep				"Rauchmelder Schlafzimmer [%s]"					<fire>			(gSmokeSensor)				{channel="zwave:device:3dcec7afdc:node44:alarm_smoke"}
+Number Batt_Smoke_Sleep_disp	"Rauchmelder Schlafzimmer [%.2f %%]"			<battery>		(gSmokeSensor, gBatteries)	{channel="zwave:device:3dcec7afdc:node44:battery-level"}
+
+Number Smoke_Niklas_Temp		"Rauchmelder Niklas Temperatur [%.1f °C]"		<temperature>	(gSmokeSensor)				{channel="zwave:device:3dcec7afdc:node41:sensor_temperature"}
+Switch Smoke_Niklas_Heat		"Rauchmelder Niklas Hitze [%s]"					<fire>			(gSmokeSensor)				{channel="zwave:device:3dcec7afdc:node41:alarm_heat"}
+Switch Smoke_Niklas				"Rauchmelder Niklas [%s]"						<fire>			(gSmokeSensor)				{channel="zwave:device:3dcec7afdc:node41:alarm_smoke"}
+Number Batt_Smoke_Niklas_disp	"Rauchmelder Niklas [%.2f %%]"					<battery>		(gSmokeSensor, gBatteries)	{channel="zwave:device:3dcec7afdc:node41:battery-level"}
+
+Number Smoke_Emilie_Temp		"Rauchmelder Emilie Temperatur [%.1f °C]"		<temperature>	(gSmokeSensor)				{channel="zwave:device:3dcec7afdc:node45:sensor_temperature"}
+Switch Smoke_Emilie_Heat		"Rauchmelder Emilie Hitze [%s]"					<fire>			(gSmokeSensor)				{channel="zwave:device:3dcec7afdc:node45:alarm_heat"}
+Switch Smoke_Emilie				"Rauchmelder Emilie [%s]"						<fire>			(gSmokeSensor)				{channel="zwave:device:3dcec7afdc:node45:alarm_smoke"}
+Number Batt_Smoke_Emilie_disp	"Rauchmelder Emilie [%.2f %%]"					<battery>		(gSmokeSensor, gBatteries)	{channel="zwave:device:3dcec7afdc:node45:battery-level"}
+
+Number Smoke_Office_Temp		"Rauchmelder Arbeitszimmer Temperatur [%.1f °C]"<temperature>	(gSmokeSensor)				{channel="zwave:device:3dcec7afdc:node42:sensor_temperature"}
+Switch Smoke_Office_Heat		"Rauchmelder Arbeitszimmer Hitze [%s]"			<fire>			(gSmokeSensor)				{channel="zwave:device:3dcec7afdc:node42:alarm_heat"}
+Switch Smoke_Office				"Rauchmelder Arbeitszimmer [%s]"				<fire>			(gSmokeSensor)				{channel="zwave:device:3dcec7afdc:node42:alarm_smoke"}
+Number Batt_Smoke_Office_disp	"Rauchmelder Arbeitszimmer [%.2f %%]"			<battery>		(gSmokeSensor, gBatteries)	{channel="zwave:device:3dcec7afdc:node42:battery-level"}
+
+/* Motion Sensors */
+Switch StairwayMotion			"Bewegung [MAP(motion.map):%s]"			<motion>		(gMotionSensor)					{channel="zwave:device:3dcec7afdc:node23:alarm_motion"}
+Number Stairway_Temperature		"Temperatur [%.1f °C]"					<temperature>	(gMotionSensor)					{channel="zwave:device:3dcec7afdc:node23:sensor_temperature"}
+Number Stairway_Luminance		"Helligkeit [%.0f Lux]"					<sun>			(gMotionSensor)					{channel="zwave:device:3dcec7afdc:node23:sensor_luminance"}
+Number Batt_StairwayMotion_disp	"Bewegungsmelder Treppenhaus [%.2f %%]"	<battery>		(gMotionSensor, gBatteries)		{channel="zwave:device:3dcec7afdc:node23:battery-level"}
+
+Switch HallMotion				"Bewegung [MAP(motion.map):%s]"			<motion>		(gMotionSensor)					{channel="zwave:device:3dcec7afdc:node46:alarm_motion"}
+Number Hall_Temperature			"Temperatur [%.2f °C]"					<temperature>	(gMotionSensor)					{channel="zwave:device:3dcec7afdc:node46:sensor_temperature"}
+Number Hall_Luminance			"Helligkeit [%.0f Lux]"					<sun>			(gMotionSensor)					{channel="zwave:device:3dcec7afdc:node46:sensor_luminance"}
+Number Batt_HallMotion_disp		"Bewegungsmelder Flur [%.2f %%]"		<battery>		(gMotionSensor, gBatteries)		{channel="zwave:device:3dcec7afdc:node46:battery-level"}
+
+Switch OfficeMotion				"Bewegung [MAP(motion.map):%s]"			<motion>		(gMotionSensor)					{channel="zwave:device:3dcec7afdc:node32:alarm_motion"}
+Number Office_Temperature		"Temperatur [%.1f °C]"					<temperature>	(gMotionSensor)					{channel="zwave:device:3dcec7afdc:node32:sensor_temperature"}
+Number Office_Luminance			"Helligkeit [%.0f Lux]"					<sun>			(gMotionSensor)					{channel="zwave:device:3dcec7afdc:node32:sensor_luminance"}
+Number Batt_OfficeMotion_disp	"Bewegungsmelder Arbeitszimmer [%.2f %%]"	<battery>	(gMotionSensor, gBatteries)		{channel="zwave:device:3dcec7afdc:node32:battery-level"}
+Switch Office_present			"im Arbeitszimmer [%s]"					<present>		(gMotionSensor)
+Switch Guests_awake             "Gäste wach [%s]"				    	<present>		(gMotionSensor)
+
+/* Watering */
+Switch StartWatering		"jetzt starten"         	            <faucet>	(gWatering)
+Switch StartWateringWinSills	"jetzt starten"         	        <faucet>	(gWatering)
+
+Number HeatFactor			"Hitze-Wert [%.0f]"					<sun>   	(gWateringInternal)
+Number HeatFactorWinSills	"Hitze-Wert [%.0f]"					<sun>   	(gWateringInternal)
+Number MonthFactor          "Monats-Wert [%.0f]"              <calendar>    (gWateringInternal)
+Number ManMaxWateringTime	"Man. max. Bew. Zeit [%.0f min]"	<time>	    (gWateringInternal)
+Number AutoMaxWateringTime	"Autom. max. Bew. Zeit [%.0f sec]"	<time>	    (gWateringInternal)
+Number ManWateringTimeWinSills	"Man. Bew. Zeit [%.0f min]"	    <time>	    (gWateringInternal)
+Number AutoWateringTimeWinSills	"Autom. Bew. Zeit [%.0f sec]"	    <time>	(gWateringInternal)
+Number TargetSoilHumidity   "Ziel-Feuchtigkeit Erde [%.0f]"    <humidity>   (gWatering)
+Number IrrigationLane														(gWateringInternal)
+Number WateringStatus														(gWateringInternal)
+Number WateringStatusWinSills												(gWateringInternal)
+Number WateringStatusDisplay												(gWateringInternal)
+String NextIrrigationTime   "Nächste Bewässerung [%s]"          <time>      (gWateringInternal)
+String NextIrrigationTimeWinSills "Nächste Bewässerung [%s]"    <time>      (gWateringInternal)
+
+Number AutoWaterTime_1		"Wiese Süd [%.0f %%]"							(gWateringInternal)
+Number AutoWaterTime_2		"Wiese Nord [%.0f %%]"							(gWateringInternal)
+Number AutoWaterTime_3		"Tröge [%.0f %%]"								(gWateringInternal)
+Number AutoWaterTime_4		"Erdbeeren [%.0f %%]"							(gWateringInternal)
+Number AutoWaterTime_5		"Obstbäume [%.0f %%]"							(gWateringInternal)
+Number AutoModifyWinSills   "Fensterbänke [%.0f %%]"						(gWateringInternal)
+
+Number CurrWaterTime_1		"Wiese Süd [noch %.0f Sek]"						(gWateringInternal)
+Number CurrWaterTime_2		"Wiese Nord [noch %.0f Sek]"					(gWateringInternal)
+Number CurrWaterTime_3		"Tröge [noch %.0f Sek]"							(gWateringInternal)
+Number CurrWaterTime_4		"Erdbeeren [noch %.0f Sek]"						(gWateringInternal)
+Number CurrWaterTime_5		"Obstbäume [noch %.0f Sek]"						(gWateringInternal)
+Number CurrWaterTimeWinSills "Fensterbänke [noch %.0f Sek]"					(gWateringInternal)
+
+/* Wasserzähler */
+Number DailyWaterUsage		"Wasserverbrauch pro Tag [%.1f l]"	<water>	(gWaterUsage, gWaterUsageChart)
+Number WaterStatus			"Bewässerung Strang [%.0f]"			<water>		(gWaterUsageChart)
+Number WaterUsagePing		"Wasserverbrauch Ping"				<water>		(gWaterUsageChart)

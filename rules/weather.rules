@@ -1,0 +1,61 @@
+var boolean windWarningSent = false
+
+
+rule "correct Fahrenheit to Celsius for Temperature"
+when
+	Item Temp changed
+then
+	postUpdate(Temperature, Temp.state)
+end
+
+rule "correct Fahrenheit to Celsius for Dewpoint"
+when
+	Item Temp_Dew changed
+then
+	postUpdate(Temp_Dewpoint, Temp_Dew.state)
+end
+
+
+rule "Warn if too windy"
+when
+	Item Wind_Speed changed
+then
+	if (windWarningSent == false && Wind_Speed.state > 20) {
+		sendNotification("dirk.trescher@web.de", "Sehr windig " + Wind_Speed.state + "km/h - Schirme auf Dachterrasse versorgen")
+		windWarningSent = true
+	}
+end
+
+rule "reset wind warning"
+when
+	Time cron "0 0 0 * * ?"		// 0:00 each day
+then
+	windWarningSent = false
+end
+
+
+rule "Warn if too long no rain in winter - reset"
+when
+	Item Condition changed
+then
+	if (Condition.state == "Rain" || Condition.state == "Ice Pellets" || Condition.state == "Sleet") {
+		postUpdate(Warn_no_rain, 0)
+	}
+end
+
+rule "Warn if too long no rain in winter - increment"
+when
+	Time cron "0 0 0 * * ?"		// 0:00 each day
+then
+	if (WateringPeriod.state == OFF) {
+		if (Warn_no_rain.state == NULL) {
+			postUpdate(Warn_no_rain, 0)
+		}
+		var days = (Warn_no_rain.state as DecimalType).intValue + 1
+		if (days > 7) {
+			sendNotification("dirk.trescher@web.de", "Zu lange kein Regen - Dachterrasse gießen")
+			days = 0
+		}
+		postUpdate(Warn_no_rain, days)
+	}
+end

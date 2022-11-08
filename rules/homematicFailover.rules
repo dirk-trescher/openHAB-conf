@@ -1,0 +1,95 @@
+var Timer FailoverHomematicTimer = null
+var Timer FailoverHomeGearTimer = null
+
+rule "System started, create initial timers"
+when
+    System started
+then
+    HomematicFailoverActive.postUpdate(OFF)
+    HomeGearFailoverActive.postUpdate(OFF)
+
+	FailoverHomematicTimer = createTimer(now.plusMinutes(5)) [|
+		HomematicFailoverActive.postUpdate(ON)
+	]
+end
+
+rule "Homematic sending"
+when
+    Item Humid_Living changed or
+    Item Humid_Bath changed or
+    Item Humid_Sleep changed or
+    Item Humid_Emilie changed or
+    Item Humid_Niklas changed or
+    Item Humid_Office changed or
+    Item Humid_Hobby changed or
+    Item Humid_KidsBath changed or
+    Item Temp_Living changed or
+    Item Temp_Bath changed or
+    Item Temp_Sleep changed or
+    Item Temp_Emilie changed or
+    Item Temp_Niklas changed or
+    Item Temp_Office changed or
+    Item Temp_Hobby changed or
+    Item Temp_KidsBath changed or
+    Item ThermoSignal_Living changed or
+    Item ThermoSignal_Bath changed or
+    Item ThermoSignal_Sleep changed or
+    Item ThermoSignal_Emilie changed or
+    Item ThermoSignal_Niklas changed or
+    Item ThermoSignal_Office changed or
+    Item ThermoSignal_Hobby changed or
+    Item ThermoSignal_KidsBath changed or
+    Item Soil1 changed or
+    Item Temp_Outside changed or
+    Item Soil1_Signal changed or
+    Item HeatingLiving_Signal changed or
+    Item HeatingBath_Signal changed or
+    Item HeatingSleep_Signal changed or
+    Item HeatingKitchen_Signal changed or
+    Item HeatingEmilieRe_Signal changed or
+    Item HeatingEmilieLi_Signal changed or
+    Item HeatingNiklas_Signal changed or
+    Item HeatingOffice_Signal changed or
+    Item HeatingHobby_Signal changed or
+    Item HeatingKidsBath_Signal changed
+then
+    HomematicFailoverActive.postUpdate(OFF)
+
+    FailoverHomeGearTimer?.cancel
+    FailoverHomematicTimer?.cancel
+	FailoverHomematicTimer = createTimer(now.plusMinutes(5)) [|
+		HomematicFailoverActive.postUpdate(ON)
+	]
+end
+
+rule "auto-restart Homematic"
+when
+    Item HomematicFailoverActive changed to ON
+then
+    logInfo("homematicFailover", "Restart Homematic Binding")
+    sendNotification("dirk.trescher@web.de", "Homematic Binding neu gestartet")
+    RestartHomematic.sendCommand(ON)
+
+    HomematicFailoverActive.postUpdate(OFF)
+
+    FailoverHomeGearTimer?.cancel
+	FailoverHomeGearTimer = createTimer(now.plusMinutes(5)) [|
+		HomeGearFailoverActive.postUpdate(ON)
+	]
+end
+
+
+rule "auto-restart HomeGear"
+when
+    Item HomeGearFailoverActive changed to ON
+then
+    logInfo("homematicFailover", "Restart HomeGear")
+    sendNotification("dirk.trescher@web.de", "HomeGear neu gestartet")
+    RestartHomeGear.sendCommand(ON)
+
+    createTimer(now.plusSeconds(30)) [|
+		RestartHomematic.postUpdate(ON)
+	]
+
+    HomeGearFailoverActive.postUpdate(OFF)
+end

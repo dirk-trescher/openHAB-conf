@@ -1,0 +1,209 @@
+var int rollershuttersDown = 0
+var boolean automatic = false
+var boolean manualOverride = false
+var rollerLivingDown = false
+var rollerSleepDown = false
+var Timer rollerLivingEndPosTimer = null
+var Timer rollerSleepEndPosTimer = null
+
+/* ---------------------------------- */
+
+val	Functions.Function1<String, Void> logAndWriteReason = [
+    String reason |
+
+	logInfo("rollershutters", reason)
+	postUpdate(DecisionReasons, now.getHour() + "h" + now.getMinute() + ": " + reason)
+	return null
+]
+
+/* ---------------------------------- */
+
+rule "stop rollershutter sleep at end position"
+when
+	Item Rollershutter_Sleep changed or
+	Item RollershutterDirection_Sleep changed
+then
+	logAndWriteReason.apply("start Sleep stop at end pos")
+	if (RollershutterDirection_Sleep.state == "DOWN") {
+		logAndWriteReason.apply("Sleep stop at end pos: dir DOWN")
+		if (RollershutterEndPos_Sleep.state != NULL) {
+			logAndWriteReason.apply("Sleep stop at end pos: end pos != NULL, prev: " + previousState)
+			if (previousState == "NONE" || previousState < (RollershutterEndPos_Sleep.state as DecimalType)) {
+				logAndWriteReason.apply("Sleep stop at end pos: prev < endPos")
+				if (RollerShutterDown_Sleep.state != ON) {
+					logAndWriteReason.apply("Sleep stop at end pos: down != ON")
+					postUpdate(RollerShutterDown_Sleep, ON)
+
+					logAndWriteReason.apply("Sleep stop at end pos")
+					sendCommand(Rollershutter_Sleep, RollershutterEndPos_Sleep.state.toString)
+				}
+			}
+		}
+	} else if (RollershutterDirection_Sleep.state != "DOWN") {
+		postUpdate(RollerShutterDown_Sleep, OFF)
+	}
+end
+
+rule "stop rollershutter living at end position"
+when
+	Item Rollershutter_Living changed or
+	Item RollershutterDirection_Living changed
+then
+	if (RollershutterDirection_Living.state == "DOWN" &&
+		RollershutterEndPos_Living.state != NULL &&
+		previousState < (RollershutterEndPos_Living.state as DecimalType) &&
+		RollerShutterDown_Living.state != ON)
+	{
+		postUpdate(RollerShutterDown_Living, ON)
+
+		logAndWriteReason.apply("Living stop at end pos")
+		sendCommand(Rollershutter_Living, RollershutterEndPos_Living.state.toString)
+	} else if (RollershutterDirection_Living.state != "DOWN") {
+		postUpdate(RollerShutterDown_Living, OFF)
+	}
+end
+
+rule "stop rollershutter Emilie rechts at end position"
+when
+	Item Rollershutter_EmilieRe changed or
+	Item RollershutterDirection_EmilieRe changed
+then
+	if (RollershutterDirection_EmilieRe.state == "DOWN" &&
+		RollershutterEndPos_EmilieRe.state != NULL &&
+		previousState < (RollershutterEndPos_EmilieRe.state as DecimalType) &&
+		RollerShutterDown_EmilieRe.state != ON)
+	{
+		postUpdate(RollerShutterDown_EmilieRe, ON)
+
+		logAndWriteReason.apply("Emilie rechts stop at end pos")
+		sendCommand(Rollershutter_EmilieRe, RollershutterEndPos_EmilieRe.state.toString)
+	} else if (RollershutterDirection_EmilieRe.state != "DOWN") {
+		postUpdate(RollerShutterDown_EmilieRe, OFF)
+	}
+end
+
+rule "stop rollershutter Emilie links at end position"
+when
+	Item Rollershutter_EmilieLi changed or
+	Item RollershutterDirection_EmilieLi changed
+then
+	if (RollershutterDirection_EmilieLi.state == "DOWN" &&
+		RollershutterEndPos_EmilieLi.state != NULL &&
+		previousState < (RollershutterEndPos_EmilieLi.state as DecimalType) &&
+		RollerShutterDown_EmilieLi.state != ON)
+	{
+		postUpdate(RollerShutterDown_EmilieLi, ON)
+
+		logAndWriteReason.apply("Emilie links stop at end pos")
+		sendCommand(Rollershutter_EmilieLi, RollershutterEndPos_EmilieLi.state.toString)
+	} else if (RollershutterDirection_EmilieLi.state != "DOWN") {
+		postUpdate(RollerShutterDown_EmilieLi, OFF)
+	}
+end
+
+// --------------------------------------------------------
+
+rule "protect sofa from sun: manual override"
+when
+	Item Rollershutter_Living changed
+then
+	if (!automatic) {
+		if (Sun_Elevation.state > 26 && Sun_Azimuth.state < 170) {
+			logAndWriteReason.apply( "Living room shades: manual override by operation" )
+
+			manualOverride = true
+		}
+	}
+end
+
+rule "protect sofa from sun: down"
+when
+	Item Sun_Elevation changed
+then
+	if (rollershuttersDown == 0) {
+		if (Sun_Elevation.state > 26 && Sun_Azimuth.state < 170) {
+			if (Rollershutter_Living.state > 0) {
+				manualOverride = true
+				logAndWriteReason.apply( "Living room shades: manual override due to state" )
+			}
+			if (!manualOverride) {
+				if (SolarEnergy1.state >= 300) {
+					logAndWriteReason.apply( "Living room shades down to protect sofa from sun" )
+
+					automatic = true
+
+					if (Sun_Azimuth.state > 170) {
+						var halfDown = (RollershutterEndPos_Living.state as DecimalType).doubleValue
+						halfDown = halfDown / 2.0
+						sendCommand(Rollershutter_Living, halfDown.toString)
+
+						rollershuttersDown = 2
+					} else {
+						sendCommand(Rollershutter_Living, RollershutterEndPos_Living.state.toString)
+
+						rollershuttersDown = 1
+					}
+
+					createTimer(now.plusSeconds(30)) [|
+						sendCommand(Rollershutter_Living, UP)
+						createTimer(now.plusSeconds(1)) [|
+							sendCommand(Rollershutter_Living, STOP)
+							createTimer(now.plusSeconds(1)) [|
+								automatic = false
+							]
+						]
+					]
+				}
+			}
+		}
+	}
+end
+
+rule "protect sofa from sun: up 1"
+when
+	Item Sun_Azimuth changed
+then
+	if (rollershuttersDown == 1 && !manualOverride) {
+		if (Sun_Azimuth.state > 170) {
+			logAndWriteReason.apply( "Living room shades up half" )
+
+			automatic = true
+			sendCommand(Rollershutter_Living, UP)
+			createTimer(now.plusSeconds(10)) [|
+				sendCommand(Rollershutter_Living, STOP)
+				createTimer(now.plusSeconds(1)) [|
+					automatic = false
+				]
+
+				rollershuttersDown = 2
+			]
+		}
+	}
+end
+
+rule "protect sofa from sun: up 2"
+when
+	Item Sun_Azimuth changed
+then
+	if ((rollershuttersDown == 1 || rollershuttersDown == 2) && !manualOverride) {
+		if (Sun_Azimuth.state > 180) {
+			logAndWriteReason.apply( "Living room shades up full" )
+
+			automatic = true
+			sendCommand(Rollershutter_Living, UP)
+			createTimer(now.plusSeconds(1)) [|
+				automatic = false
+			]
+
+			rollershuttersDown = 3
+		}
+	}
+end
+
+rule "reset rollershuttersDown state"
+when
+	Time cron "0 1 0 * * ?"		// 00:01 each day
+then
+	rollershuttersDown = 0
+	manualOverride = false
+end

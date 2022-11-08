@@ -1,0 +1,468 @@
+
+rule "toggle roof window sleep"
+when
+    Item RoofWindow_Sleep changed to "-1"    // only triggered from UI
+then
+    if (RoofWindowDirection_Sleep.state != 'NONE') {
+        sendCommand(RoofWindow_Sleep, STOP)
+    } else if (RoofWindow_Sleep.state < 100) {
+        sendCommand(RoofWindow_Sleep, DOWN)
+    } else {
+        sendCommand(RoofWindow_Sleep, UP)
+    }
+end
+
+rule "toggle roof window bath"
+when
+    Item RoofWindow_Bath changed to "-1"    // only triggered from UI
+then
+    if (RoofWindowDirection_Bath.state != 'NONE') {
+        sendCommand(RoofWindow_Bath, STOP)
+    } else if (RoofWindow_Bath.state < 100) {
+        sendCommand(RoofWindow_Bath, DOWN)
+    } else {
+        sendCommand(RoofWindow_Bath, UP)
+    }
+end
+
+rule "toggle roof window kitchen"
+when
+    Item RoofWindow_Kitchen changed to "-1"    // only triggered from UI
+then
+    if (RoofWindowDirection_Kitchen.state != 'NONE') {
+        sendCommand(RoofWindow_Kitchen, STOP)
+    } else if (RoofWindow_Kitchen.state < 100) {
+        sendCommand(RoofWindow_Kitchen, DOWN)
+    } else {
+        sendCommand(RoofWindow_Kitchen, UP)
+    }
+end
+
+
+rule "toggle blinds sleep"
+when
+    Item Rollershutter_Sleep changed to "-1"    // only triggered from UI
+then
+    if (RollershutterDirection_Sleep.state != 'NONE') {
+        sendCommand(Rollershutter_Sleep, STOP)
+    } else if (Rollershutter_Sleep.state < 100) {
+        sendCommand(Rollershutter_Sleep, DOWN)
+    } else {
+        sendCommand(Rollershutter_Sleep, UP)
+    }
+end
+
+
+rule "update floorplan CO2 hobby"
+when
+    Item CO2level1 changed
+then
+    var double co_percentage = (CO2level1.state as Number).doubleValue / 2000 * 100
+    postUpdate(CO2_hobby, co_percentage)
+end
+
+rule "update floorplan CO2 kitchen"
+when
+    Item CO2 changed
+then
+    var double co_percentage = (CO2.state as Number).doubleValue / 2000 * 100
+    postUpdate(CO2_kitchen, co_percentage)
+end
+
+rule "update floorplan CO2 sleep"
+when
+    Item CO2_Display_disp changed
+then
+    var double co_percentage = (CO2_Display_disp.state as Number).doubleValue / 2000 * 100
+    postUpdate(CO2_sleep, co_percentage)
+end
+
+rule "update floorplan temp sleep"
+when
+    Item Temp_Sleep changed
+then
+    if (Temp_Sleep.state >= 23) {
+        postUpdate(RelTempSleep, "burning")
+    } else if (Temp_Sleep.state >= 21) {
+        postUpdate(RelTempSleep, "hot")
+    } else if (Temp_Sleep.state >= 19) {
+        postUpdate(RelTempSleep, "warm")
+    } else if (Temp_Sleep.state >= 17) {
+        postUpdate(RelTempSleep, "good")
+    } else if (Temp_Sleep.state >= 16) {
+        postUpdate(RelTempSleep, "chilly")
+    } else if (Temp_Sleep.state >= 15) {
+        postUpdate(RelTempSleep, "cold")
+    } else{
+        postUpdate(RelTempSleep, "freezing")
+    }
+end
+
+rule "update floorplan temp living"
+when
+    Item Temp_Living changed
+then
+    if (Temp_Living.state >= 26) {
+        postUpdate(RelTempLiving, "burning")
+    } else if (Temp_Living.state >= 24) {
+        postUpdate(RelTempLiving, "hot")
+    } else if (Temp_Living.state >= 22) {
+        postUpdate(RelTempLiving, "warm")
+    } else if (Temp_Living.state >= 20) {
+        postUpdate(RelTempLiving, "good")
+    } else if (Temp_Living.state >= 19) {
+        postUpdate(RelTempLiving, "chilly")
+    } else if (Temp_Living.state >= 18) {
+        postUpdate(RelTempLiving, "cold")
+    } else{
+        postUpdate(RelTempLiving, "freezing")
+    }
+end
+
+rule "update floorplan temp bath"
+when
+    Item Temp_Bath changed
+then
+    if (Temp_Bath.state >= 27) {
+        postUpdate(RelTempBath, "burning")
+    } else if (Temp_Bath.state >= 25) {
+        postUpdate(RelTempBath, "hot")
+    } else if (Temp_Bath.state >= 23) {
+        postUpdate(RelTempBath, "warm")
+    } else if (Temp_Bath.state >= 21) {
+        postUpdate(RelTempBath, "good")
+    } else if (Temp_Bath.state >= 20) {
+        postUpdate(RelTempBath, "chilly")
+    } else if (Temp_Bath.state >= 19) {
+        postUpdate(RelTempBath, "cold")
+    } else{
+        postUpdate(RelTempBath, "freezing")
+    }
+end
+
+rule "update floorplan temp Emilie"
+when
+    Item Temp_Emilie changed
+then
+    if (now.getHour() < 7 || now.getHour() >= 20) {
+        if (Temp_Emilie.state >= 23) {
+            postUpdate(RelTempEmilie, "burning")
+        } else if (Temp_Emilie.state >= 21) {
+            postUpdate(RelTempEmilie, "hot")
+        } else if (Temp_Emilie.state >= 19) {
+            postUpdate(RelTempEmilie, "warm")
+        } else if (Temp_Emilie.state >= 17) {
+            postUpdate(RelTempEmilie, "good")
+        } else if (Temp_Emilie.state >= 16) {
+            postUpdate(RelTempEmilie, "chilly")
+        } else if (Temp_Emilie.state >= 15) {
+            postUpdate(RelTempEmilie, "cold")
+        } else{
+            postUpdate(RelTempEmilie, "freezing")
+        }
+    } else {
+        if (Temp_Emilie.state >= 26) {
+            postUpdate(RelTempEmilie, "burning")
+        } else if (Temp_Emilie.state >= 24) {
+            postUpdate(RelTempEmilie, "hot")
+        } else if (Temp_Emilie.state >= 22) {
+            postUpdate(RelTempEmilie, "warm")
+        } else if (Temp_Emilie.state >= 20) {
+            postUpdate(RelTempEmilie, "good")
+        } else if (Temp_Emilie.state >= 19) {
+            postUpdate(RelTempEmilie, "chilly")
+        } else if (Temp_Emilie.state >= 18) {
+            postUpdate(RelTempEmilie, "cold")
+        } else{
+            postUpdate(RelTempEmilie, "freezing")
+        }
+    }
+end
+
+rule "update floorplan temp Niklas"
+when
+    Item Temp_Niklas changed
+then
+    if (now.getHour() < 7 || now.getHour() >= 20) {
+        if (Temp_Niklas.state >= 23) {
+            postUpdate(RelTempNiklas, "burning")
+        } else if (Temp_Niklas.state >= 21) {
+            postUpdate(RelTempNiklas, "hot")
+        } else if (Temp_Niklas.state >= 19) {
+            postUpdate(RelTempNiklas, "warm")
+        } else if (Temp_Niklas.state >= 17) {
+            postUpdate(RelTempNiklas, "good")
+        } else if (Temp_Niklas.state >= 16) {
+            postUpdate(RelTempNiklas, "chilly")
+        } else if (Temp_Niklas.state >= 15) {
+            postUpdate(RelTempNiklas, "cold")
+        } else{
+            postUpdate(RelTempNiklas, "freezing")
+        }
+    } else {
+        if (Temp_Niklas.state >= 26) {
+            postUpdate(RelTempNiklas, "burning")
+        } else if (Temp_Niklas.state >= 24) {
+            postUpdate(RelTempNiklas, "hot")
+        } else if (Temp_Niklas.state >= 22) {
+            postUpdate(RelTempNiklas, "warm")
+        } else if (Temp_Niklas.state >= 20) {
+            postUpdate(RelTempNiklas, "good")
+        } else if (Temp_Niklas.state >= 19) {
+            postUpdate(RelTempNiklas, "chilly")
+        } else if (Temp_Niklas.state >= 18) {
+            postUpdate(RelTempNiklas, "cold")
+        } else{
+            postUpdate(RelTempNiklas, "freezing")
+        }
+    }
+end
+
+rule "update floorplan temp Office"
+when
+    Item Temp_Office changed
+then
+    if (Office_present.state == ON) {
+        if (Temp_Office.state >= 26) {
+            postUpdate(RelTempOffice, "burning")
+        } else if (Temp_Office.state >= 24) {
+            postUpdate(RelTempOffice, "hot")
+        } else if (Temp_Office.state >= 22) {
+            postUpdate(RelTempOffice, "warm")
+        } else if (Temp_Office.state >= 20) {
+            postUpdate(RelTempOffice, "good")
+        } else if (Temp_Office.state >= 19) {
+            postUpdate(RelTempOffice, "chilly")
+        } else if (Temp_Office.state >= 18) {
+            postUpdate(RelTempOffice, "cold")
+        } else{
+            postUpdate(RelTempOffice, "freezing")
+        }
+    } else {
+        if (Temp_Office.state >= 23) {
+            postUpdate(RelTempOffice, "burning")
+        } else if (Temp_Office.state >= 21) {
+            postUpdate(RelTempOffice, "hot")
+        } else if (Temp_Office.state >= 19) {
+            postUpdate(RelTempOffice, "warm")
+        } else if (Temp_Office.state >= 17) {
+            postUpdate(RelTempOffice, "good")
+        } else if (Temp_Office.state >= 16) {
+            postUpdate(RelTempOffice, "chilly")
+        } else if (Temp_Office.state >= 15) {
+            postUpdate(RelTempOffice, "cold")
+        } else{
+            postUpdate(RelTempOffice, "freezing")
+        }
+    }
+end
+
+rule "update floorplan temp Hobby"
+when
+    Item Temp_Hobby changed
+then
+    if (Temp_Hobby.state >= 25) {
+        postUpdate(RelTempHobby, "burning")
+    } else if (Temp_Hobby.state >= 23) {
+        postUpdate(RelTempHobby, "hot")
+    } else if (Temp_Hobby.state >= 21) {
+        postUpdate(RelTempHobby, "warm")
+    } else if (Temp_Hobby.state >= 19) {
+        postUpdate(RelTempHobby, "good")
+    } else if (Temp_Hobby.state >= 18) {
+        postUpdate(RelTempHobby, "chilly")
+    } else if (Temp_Hobby.state >= 17) {
+        postUpdate(RelTempHobby, "cold")
+    } else{
+        postUpdate(RelTempHobby, "freezing")
+    }
+end
+
+rule "update floorplan temp KidsBath"
+when
+    Item Temp_KidsBath changed
+then
+    if (Temp_KidsBath.state >= 26) {
+        postUpdate(RelTempKidsBath, "burning")
+    } else if (Temp_KidsBath.state >= 24) {
+        postUpdate(RelTempKidsBath, "hot")
+    } else if (Temp_KidsBath.state >= 22) {
+        postUpdate(RelTempKidsBath, "warm")
+    } else if (Temp_KidsBath.state >= 20) {
+        postUpdate(RelTempKidsBath, "good")
+    } else if (Temp_KidsBath.state >= 19) {
+        postUpdate(RelTempKidsBath, "chilly")
+    } else if (Temp_KidsBath.state >= 18) {
+        postUpdate(RelTempKidsBath, "cold")
+    } else{
+        postUpdate(RelTempKidsBath, "freezing")
+    }
+end
+
+rule "update floorplan humid sleep"
+when
+    Item Humid_Sleep changed
+then
+    if (Humid_Sleep.state >= 65) {
+        postUpdate(RelHumidSleep, "floody")
+    } else if (Humid_Sleep.state >= 60) {
+        postUpdate(RelHumidSleep, "wet")
+    } else if (Humid_Sleep.state >= 55) {
+        postUpdate(RelHumidSleep, "normwet")
+    } else if (Humid_Sleep.state >= 45) {
+        postUpdate(RelHumidSleep, "normal")
+    } else if (Humid_Sleep.state >= 40) {
+        postUpdate(RelHumidSleep, "normdry")
+    } else if (Humid_Sleep.state >= 35) {
+        postUpdate(RelHumidSleep, "dry")
+    } else{
+        postUpdate(RelHumidSleep, "dusty")
+    }
+end
+
+rule "update floorplan humid living"
+when
+    Item Humid_Living changed
+then
+    if (Humid_Living.state >= 65) {
+        postUpdate(RelHumidLiving, "floody")
+    } else if (Humid_Living.state >= 60) {
+        postUpdate(RelHumidLiving, "wet")
+    } else if (Humid_Living.state >= 55) {
+        postUpdate(RelHumidLiving, "normwet")
+    } else if (Humid_Living.state >= 45) {
+        postUpdate(RelHumidLiving, "normal")
+    } else if (Humid_Living.state >= 40) {
+        postUpdate(RelHumidLiving, "normdry")
+    } else if (Humid_Living.state >= 35) {
+        postUpdate(RelHumidLiving, "dry")
+    } else{
+        postUpdate(RelHumidLiving, "dusty")
+    }
+end
+
+rule "update floorplan humid living"
+when
+    Item Humid_Bath changed
+then
+    if (Humid_Bath.state >= 65) {
+        postUpdate(RelHumidBath, "floody")
+    } else if (Humid_Bath.state >= 60) {
+        postUpdate(RelHumidBath, "wet")
+    } else if (Humid_Bath.state >= 55) {
+        postUpdate(RelHumidBath, "normwet")
+    } else if (Humid_Bath.state >= 45) {
+        postUpdate(RelHumidBath, "normal")
+    } else if (Humid_Bath.state >= 40) {
+        postUpdate(RelHumidBath, "normdry")
+    } else if (Humid_Bath.state >= 35) {
+        postUpdate(RelHumidBath, "dry")
+    } else{
+        postUpdate(RelHumidBath, "dusty")
+    }
+end
+
+rule "update floorplan humid living"
+when
+    Item Humid_Emilie changed
+then
+    if (Humid_Emilie.state >= 65) {
+        postUpdate(RelHumidEmilie, "floody")
+    } else if (Humid_Emilie.state >= 60) {
+        postUpdate(RelHumidEmilie, "wet")
+    } else if (Humid_Emilie.state >= 55) {
+        postUpdate(RelHumidEmilie, "normwet")
+    } else if (Humid_Emilie.state >= 45) {
+        postUpdate(RelHumidEmilie, "normal")
+    } else if (Humid_Emilie.state >= 40) {
+        postUpdate(RelHumidEmilie, "normdry")
+    } else if (Humid_Emilie.state >= 35) {
+        postUpdate(RelHumidEmilie, "dry")
+    } else{
+        postUpdate(RelHumidEmilie, "dusty")
+    }
+end
+
+rule "update floorplan humid living"
+when
+    Item Humid_Niklas changed
+then
+    if (Humid_Niklas.state >= 65) {
+        postUpdate(RelHumidNiklas, "floody")
+    } else if (Humid_Niklas.state >= 60) {
+        postUpdate(RelHumidNiklas, "wet")
+    } else if (Humid_Niklas.state >= 55) {
+        postUpdate(RelHumidNiklas, "normwet")
+    } else if (Humid_Niklas.state >= 45) {
+        postUpdate(RelHumidNiklas, "normal")
+    } else if (Humid_Niklas.state >= 40) {
+        postUpdate(RelHumidNiklas, "normdry")
+    } else if (Humid_Niklas.state >= 35) {
+        postUpdate(RelHumidNiklas, "dry")
+    } else{
+        postUpdate(RelHumidNiklas, "dusty")
+    }
+end
+
+rule "update floorplan humid living"
+when
+    Item Humid_Office changed
+then
+    if (Humid_Office.state >= 65) {
+        postUpdate(RelHumidOffice, "floody")
+    } else if (Humid_Office.state >= 60) {
+        postUpdate(RelHumidOffice, "wet")
+    } else if (Humid_Office.state >= 55) {
+        postUpdate(RelHumidOffice, "normwet")
+    } else if (Humid_Office.state >= 45) {
+        postUpdate(RelHumidOffice, "normal")
+    } else if (Humid_Office.state >= 40) {
+        postUpdate(RelHumidOffice, "normdry")
+    } else if (Humid_Office.state >= 35) {
+        postUpdate(RelHumidOffice, "dry")
+    } else{
+        postUpdate(RelHumidOffice, "dusty")
+    }
+end
+
+rule "update floorplan humid living"
+when
+    Item Humid_Hobby changed
+then
+    if (Humid_Hobby.state >= 65) {
+        postUpdate(RelHumidHobby, "floody")
+    } else if (Humid_Hobby.state >= 60) {
+        postUpdate(RelHumidHobby, "wet")
+    } else if (Humid_Hobby.state >= 55) {
+        postUpdate(RelHumidHobby, "normwet")
+    } else if (Humid_Hobby.state >= 45) {
+        postUpdate(RelHumidHobby, "normal")
+    } else if (Humid_Hobby.state >= 40) {
+        postUpdate(RelHumidHobby, "normdry")
+    } else if (Humid_Hobby.state >= 35) {
+        postUpdate(RelHumidHobby, "dry")
+    } else{
+        postUpdate(RelHumidHobby, "dusty")
+    }
+end
+
+rule "update floorplan humid living"
+when
+    Item Humid_KidsBath changed
+then
+    if (Humid_KidsBath.state >= 65) {
+        postUpdate(RelHumidKidsBath, "floody")
+    } else if (Humid_KidsBath.state >= 60) {
+        postUpdate(RelHumidKidsBath, "wet")
+    } else if (Humid_KidsBath.state >= 55) {
+        postUpdate(RelHumidKidsBath, "normwet")
+    } else if (Humid_KidsBath.state >= 45) {
+        postUpdate(RelHumidKidsBath, "normal")
+    } else if (Humid_KidsBath.state >= 40) {
+        postUpdate(RelHumidKidsBath, "normdry")
+    } else if (Humid_KidsBath.state >= 35) {
+        postUpdate(RelHumidKidsBath, "dry")
+    } else{
+        postUpdate(RelHumidKidsBath, "dusty")
+    }
+end

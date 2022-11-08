@@ -1,0 +1,8 @@
+
+String      SpeedtestSummary        "Speedtest [%s]"
+Number      SpeedtestResultPing     "Ping [%.3f ms]"                    <time>                    (gFritzBoxPing)
+Number      SpeedtestResultDown     "True Downstream [%.2f Mbit/s]"     <returnpipe>              (gFritzBoxDown)
+Number      SpeedtestResultUp       "True Upstream [%.2f Mbit/s]"       <flowpipe>                (gFritzBoxUp)
+String      SpeedtestRunning        "Speedtest running ... [%s]"
+Switch      SpeedtestRerun          "Start manually"
+DateTime    SpeedtestResultDate     "Last executed [%1$td.%1$tm.%1$tY, %1$tH:%1$tM Uhr]"    <time>

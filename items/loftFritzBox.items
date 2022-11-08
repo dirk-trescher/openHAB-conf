@@ -1,0 +1,42 @@
+Switch  WLAN_Loft				"WLAN Loft"               								        	(gWLAN)
+Switch  WLAN24_Loft         	"2,4GHz WLAN"               							<network>	            {channel="tr064:subdeviceLan:b130bacd7e:uuid_3A75802409_2Dbccb_2D40e7_2D8e6b_2DC80E14899A5F:wifi24GHzEnable"}
+Switch  WLAN50_Loft         	"5,0GHz WLAN"               							<network>				{channel="tr064:subdeviceLan:b130bacd7e:uuid_3A75802409_2Dbccb_2D40e7_2D8e6b_2DC80E14899A5F:wifi5GHzEnable"}
+
+Switch  WLAN_Office_DelayOff    "WLAN Arbeitszimmer"
+Switch  WLAN24_LoftWork        	"2,4GHz WLAN Arbeitszimmer"   							<network>	            {channel="tr064:subdeviceLan:1d2b7bc20f:uuid_3A75802409_2Dbccb_2D40e7_2D8e6b_2D989BCBBD42D8:wifi24GHzEnable"}
+Switch  WLAN50_LoftWork        	"5,0GHz WLAN Arbeitszimmer"      						<network>				{channel="tr064:subdeviceLan:1d2b7bc20f:uuid_3A75802409_2Dbccb_2D40e7_2D8e6b_2D989BCBBD42D8:wifi5GHzEnable"}
+
+Switch  WLAN_Roof_DelayOff      "WLAN Dachterrasse"
+Switch  WLAN24_LoftRoof        	"2,4GHz WLAN Dachterrasse"   							<network>	            {channel="tr064:subdeviceLan:091333ffc3:uuid_3A75802409_2Dbccb_2D40e7_2D8e6b_2DF0B014FA9820:wifi24GHzEnable"}
+Switch  WLAN50_LoftRoof        	"5,0GHz WLAN Dachterrasse"      						<network>				{channel="tr064:subdeviceLan:091333ffc3:uuid_3A75802409_2Dbccb_2D40e7_2D8e6b_2DF0B014FA9820:wifi5GHzEnable"}
+
+Number NrWLAN					"WLAN [%d]"												<network>
+
+Switch FritzBoxMacOnlineDirk	"Presence Dirk (WiFi) [MAP(presence.map):%s]"			<present>	{channel="tr064:subdeviceLan:b130bacd7e:uuid_3A75802409_2Dbccb_2D40e7_2D8e6b_2DC80E14899A5F:macOnline_12_3AF3_3A75_3A9D_3A81_3A71"}
+Switch FritzBoxMacOnlineHeike	"Presence Heike (WiFi) [MAP(presence.map):%s]"			<present>	{channel="tr064:subdeviceLan:b130bacd7e:uuid_3A75802409_2Dbccb_2D40e7_2D8e6b_2DC80E14899A5F:macOnline_F6_3A4F_3A6C_3AA7_3AC0_3A2E"}
+Switch FritzBoxMacOnlineNiklas  "Presence Niklas (WiFi) [MAP(presence.map):%s]"			<present>	{channel="tr064:subdeviceLan:b130bacd7e:uuid_3A75802409_2Dbccb_2D40e7_2D8e6b_2DC80E14899A5F:macOnline_E6_3AF2_3A5D_3A6A_3ACB_3A92"}
+Switch FritzBoxMacOnlineEmilie	"Presence Emilie (WiFi) [MAP(presence.map):%s]"			<present>	{channel="tr064:subdeviceLan:b130bacd7e:uuid_3A75802409_2Dbccb_2D40e7_2D8e6b_2DC80E14899A5F:macOnline_64_3A9A_3ABE_3A04_3A95_3AA2"}
+
+Number WifiDirk_disp		    "Presence Dirk (WiFi)"					(gPresence)
+Number WifiHeike_disp		    "Presence Heike (WiFi)"					(gPresence)
+
+Switch FritzBoxMacOnlineLaptop	"Laptop [MAP(presence.map):%s]"							<present>	{channel="tr064:subdeviceLan:b130bacd7e:uuid_3A75802409_2Dbccb_2D40e7_2D8e6b_2DC80E14899A5F:macOnline_00_3A23_3A14_3A1F_3ABB_3AB0"}
+Switch FritzBoxMacOnlineMacBook	"Mac Book [MAP(presence.map):%s]"						<present>	{channel="tr064:subdeviceLan:b130bacd7e:uuid_3A75802409_2Dbccb_2D40e7_2D8e6b_2DC80E14899A5F:macOnline_AC_3ABC_3A32_3AD5_3ADA_3A7F"}
+Number WifiLaptop_disp		    "Presence Laptop (Wifi)"				(gPresence)
+
+// WAN statistics
+
+String fboxWanAccessType                    "FBox WAN access type [%s]"             {channel="tr064:subdevice:b130bacd7e:uuid_3A75802409_2Dbccb_2D40e7_2D8e6a_2DC80E14899A5F:wanAccessType"}
+Number fboxWanLayer1UpstreamMaxBitRate      "Max. Upstream [%s]"                    {channel="tr064:subdevice:b130bacd7e:uuid_3A75802409_2Dbccb_2D40e7_2D8e6a_2DC80E14899A5F:wanMaxUpstreamRate"}
+Number fboxWanLayer1DownstreamMaxBitRate    "Max. Downstream [%s]"                  {channel="tr064:subdevice:b130bacd7e:uuid_3A75802409_2Dbccb_2D40e7_2D8e6a_2DC80E14899A5F:wanMaxDownstreamRate"}
+String fboxWanPhysicalLinkStatus            "FBox WAN physical link status [%s]"    {channel="tr064:subdevice:b130bacd7e:uuid_3A75802409_2Dbccb_2D40e7_2D8e6a_2DC80E14899A5F:wanPhysicalLinkStatus"}
+Number fboxWanTotalBytesSent                "WAN total bytes sent [%s]"             {channel="tr064:subdevice:b130bacd7e:uuid_3A75802409_2Dbccb_2D40e7_2D8e6a_2DC80E14899A5F:wanTotalBytesSent"}
+Number fboxWanTotalBytesReceived            "WAN total bytes received [%s]"         {channel="tr064:subdevice:b130bacd7e:uuid_3A75802409_2Dbccb_2D40e7_2D8e6a_2DC80E14899A5F:wanTotalBytesReceived"}
+Number FritzBoxMaxDownstream                "Max. Downstream [%s Mbit/s]"         <returnpipe>     (gFritzBoxDown)
+Number FritzBoxMaxUpstream                  "Max. Upstream [%s Mbit/s]"           <flowpipe>       (gFritzBoxUp)
+Number FritzBoxDownstreamDaily              "Daten heute empfangen [%dMB]"     <returnpipe>     (gFritzBoxDaily)
+Number FritzBoxUpstreamDaily                "Daten heute gesendet [%dMB]"      <flowpipe>       (gFritzBoxDaily)
+Number FritzBoxDownloadRate                 "Current Downstream [%.4f Mbit/s]" <returnpipe>     (gFritzBoxDown)
+Number FritzBoxUploadRate                   "Current UpStream [%.4f Mbit/s]"   <flowpipe>       (gFritzBoxUp)
+
+Switch StreamingMovie                       "Film wird gerade geschaut"

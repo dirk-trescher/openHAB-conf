@@ -1,0 +1,58 @@
+
+Number   Warn_no_rain   "[%d] Tage ohne Regen"  <water>
+
+String   Station_Id     "Stations-Id [%s]"                          {channel="weathercompany:weather-observations:2ce9ffd49a:stationId"}
+
+// atmosphere
+Number   Humidity       "Feuchtigkeit [%d %%]"    	                {channel="weathercompany:weather-observations:ececb0ae89:1f960ac810:currentHumidity"}
+
+Number   UV_Index       "UV Index [%d]"                 (gClouds)   {channel="weathercompany:weather-observations:2ce9ffd49a:currentUv"}
+Number   Solar_Radiation  "Sonneneinstrahlung [%.2f]"   (gClouds)   {channel="weathercompany:weather-observations:2ce9ffd49a:currentSolarRadiation"}
+
+// clouds
+Number   CloudsDay      "Bewölkung Tag [%.0f %%]"	<sun_clouds>  (gClouds) {channel="weathercompany:weather-forecast:ececb0ae89:local:forecastDay0Day#cloudCover"}
+Number   CloudsNight    "Bewölkung Nacht [%.0f %%]"	<sun_clouds>  (gClouds) {channel="weathercompany:weather-forecast:ececb0ae89:local:forecastDay0Night#cloudCover"}
+
+// condition
+String   Condition      "Wetter heute [%s]"                         {channel="weathercompany:weather-forecast:ececb0ae89:local:forecastDay0#narrative"}
+
+String   CommonIdDay    "ID Tag [%s]"                               {channel="weathercompany:weather-forecast:ececb0ae89:local:forecastDay0Day#iconCode"}
+String   CommonIdNight  "ID Nacht [%s]"                             {channel="weathercompany:weather-forecast:ececb0ae89:local:forecastDay0Night#iconCode"}
+
+Image    IconDay0       "Icon today"                                {channel="weathercompany:weather-forecast:ececb0ae89:local:forecastDay0Day#iconImage"}
+Image    IconNight0     "Icon tonight"                              {channel="weathercompany:weather-forecast:ececb0ae89:local:forecastDay0Night#iconImage"}
+
+Number:Pressure   Pressure       "Luftdruck [%.0f %unit%]"          {channel="weathercompany:weather-observations:2ce9ffd49a:currentPressure"}
+
+DateTime ObservationTime  "Beobachtungszeit [%1$td.%1$tm.%1$tY %1$tH:%1$tM]"   {channel="weathercompany:weather-observations:2ce9ffd49a:observationTimeLocal"}
+
+// precipitation
+Number:Speed   Rain_cur       "momentaner Regen [%.2f mm/h]"  (gRain)     {channel="weathercompany:weather-observations:ececb0ae89:1f960ac810:currentPrecipitationRate"}
+Number:Length   Precip_Total   "Gesamtniederschlag [%d mm]"    (gRain)     {channel="weathercompany:weather-observations:ececb0ae89:1f960ac810:currentPrecipitationTotal"}
+
+Number:Length   Rain           "Regen heute [%.2f mm]"         (gRain)     {channel="weathercompany:weather-forecast:ececb0ae89:local:forecastDay0#precipitationRain"}
+Number:Length   RainDay        "Regen tags [%.2f mm]"          (gRain)     {channel="weathercompany:weather-forecast:ececb0ae89:local:forecastDay0Day#precipitationRain"}
+Number:Length   RainNight      "Regen nachts [%.2f mm]"        (gRain)     {channel="weathercompany:weather-forecast:ececb0ae89:local:forecastDay0Night#precipitationRain"}
+Number   PrecipProbabDay   "Niederschlagswahrscheinlichtkeit tags [%d %%]"      {channel="weathercompany:weather-forecast:ececb0ae89:local:forecastDay0Day#precipitationChance"}
+Number   PrecipProbabNight   "Niederschlagswahrscheinlichtkeit nachts [%d %%]"  {channel="weathercompany:weather-forecast:ececb0ae89:local:forecastDay0Night#precipitationChance"}
+
+// temperature
+Number:Temperature   Temp                                                       {channel="weathercompany:weather-observations:2ce9ffd49a:currentTemperature"}
+Number   Temperature    "aktuelle Temperatur [%.1f °C]" (gOutsideTemp)
+Number:Temperature   Temp_Dew                                     	            {channel="weathercompany:weather-observations:ececb0ae89:1f960ac810:currentTemperatureDewPoint"}
+Number   Temp_Dewpoint  "Taupunkt [%.1f °C]"            (gWeather)
+
+Number:Temperature   TempDay        "Temperatur tags [%.2f °C]"   	(gOutsideTemp)   {channel="weathercompany:weather-forecast:ececb0ae89:local:forecastDay0Day#temperature"}
+Number:Temperature   TempNight      "Temperatur nachts [%.2f °C]"   (gOutsideTemp)   {channel="weathercompany:weather-forecast:ececb0ae89:local:forecastDay0Night#temperature"}
+
+Number:Temperature   Temp_Min_0     "Tiefsttemperatur [%.2f °C]"   		        {channel="weathercompany:weather-forecast:ececb0ae89:local:forecastDay0#temperatureMin"}
+Number:Temperature   Temp_Min_1     "Tiefsttemperatur morgen [%.2f °C]"         {channel="weathercompany:weather-forecast:ececb0ae89:local:forecastDay1#temperatureMin"}
+Number:Temperature   Temp_Min_2     "Tiefsttemperatur übermorgen [%.2f °C]"     {channel="weathercompany:weather-forecast:ececb0ae89:local:forecastDay2#temperatureMin"}
+Number:Temperature   Temp_Max_0     "Höchsttemperatur [%.2f °C]"   		        {channel="weathercompany:weather-forecast:ececb0ae89:local:forecastDay0#temperatureMax"}
+Number:Temperature   Temp_Max_1     "Höchsttemperatur morgen [%.2f °C]"         {channel="weathercompany:weather-forecast:ececb0ae89:local:forecastDay1#temperatureMax"}
+Number:Temperature   Temp_Max_2     "Höchsttemperatur übermorgen [%.2f °C]"     {channel="weathercompany:weather-forecast:ececb0ae89:local:forecastDay2#temperatureMax"}
+
+// wind
+Number:Speed   Wind_Speed     "Windgeschwindigkeit [%.1f %unit%]" <wind>	(gWind, gWindSpeed)	{channel="weathercompany:weather-observations:2ce9ffd49a:currentWindSpeed"}
+Number:Speed   Wind_Gusts     "Böengeschwindigkeit [%.1f %unit%]" <wind>	(gWind, gWindSpeed)	{channel="weathercompany:weather-observations:2ce9ffd49a:currentWindSpeedGust"}
+Number:Angle   Wind_Degree    "Windrichtung [%.0f °]"           <wind>	(gWind)	{channel="weathercompany:weather-observations:2ce9ffd49a:currentWindDirection"}

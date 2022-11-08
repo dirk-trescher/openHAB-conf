@@ -1,0 +1,393 @@
+import org.eclipse.smarthome.core.library.types.DecimalType
+import org.eclipse.smarthome.model.script.actions.Timer
+
+var boolean bathWindowOpenScheduled = false
+var boolean triggerBathOpenWindow = false
+var boolean bathWindowOpenDueToHumidity = false
+var boolean automatic = false
+var Timer timerBathHumid = null
+
+var Timer timerSleep = null
+var Timer timerKitchen = null
+var Timer timerBath = null
+var boolean overrideSleep = false
+var boolean overrideKitchen = false
+var boolean overrideBath = false
+var boolean overrideSleepOnce = false
+var boolean overrideKitchenOnce = false
+var boolean overrideBathOnce = false
+
+var Timer timerCO2Override = null
+var boolean overrideCO2 = false
+
+var int sleepDirection = 0
+
+/* ---------------------------------- */
+
+val	Functions.Function1<String, Void> logAndWriteReason = [
+    String reason |
+
+	logInfo("roofWindows", reason)
+	postUpdate(DecisionReasons, now.getHour() + "h" + now.getMinute() + ": " + reason)
+	return null
+]
+
+/* ---------------------------------- */
+
+
+rule "schedule open bath window when too humid"
+when
+	Item Humid_Bath changed or
+	Item HotWaterOn changed or
+	Item BathingWater changed to OFF
+then
+	if (SnowOnRoof.state != ON) {
+		if (Humid_Bath.state >= (gHumidity.state as DecimalType) + 10 &&
+			  Humid_Bath.state >= 65 &&
+			  (gHumidity.state as DecimalType) > 50) {
+			if ((Temp_Outside.state as DecimalType) < 27 &&
+					HotWaterOn.state == ON && bathWindowOpenScheduled && !triggerBathOpenWindow) {
+				logAndWriteReason.apply( "too humid in bathroom, water on: re-schedule roof window up in 10 mins" )
+
+				timerBathHumid.reschedule(now.plusMinutes(10))
+			}
+			if (!bathWindowOpenScheduled && !triggerBathOpenWindow) {
+				if (HotWaterOn.state == OFF && BathingWater.state == OFF) {
+					var timeToOpen = 10
+					if ((Temp_Outside.state as DecimalType) >= 27) {
+						timeToOpen = 1
+					}
+					logAndWriteReason.apply( "too humid in bathroom: schedule roof window up in " + timeToOpen + " min" )
+
+					bathWindowOpenScheduled = true
+
+					timerBathHumid = createTimer(now.plusMinutes(timeToOpen)) [|
+						logAndWriteReason.apply( "too humid in bathroom: trigger roof window up now" )
+
+						triggerBathOpenWindow = true
+					]
+				}
+			}
+		} else if (Humid_Bath.state < (gHumidity.state as DecimalType) + 2 || Temp_Bath.state < 21.5) {
+			if (bathWindowOpenDueToHumidity) {
+				if (Humid_Bath.state < (gHumidity.state as DecimalType) + 2) {
+					logAndWriteReason.apply( "dry enough in bathroom: close roof window" )
+				} else {
+					logAndWriteReason.apply( "too cold in bathroom: close roof window" )
+				}
+
+				automatic = true
+				sendCommand(RoofWindow_Bath, DOWN)
+				createTimer(now.plusSeconds(1)) [|
+					automatic = false
+				]
+
+				bathWindowOpenDueToHumidity = false
+			}
+		}
+		if (Humid_Bath.state < (gHumidity.state as DecimalType) + 4) {
+			if (bathWindowOpenScheduled || triggerBathOpenWindow) {
+				logAndWriteReason.apply( "not too humid in bathroom: cancel schedule bath window up" )
+
+				if (timerBathHumid !== null) {
+					timerBathHumid.cancel()
+					timerBathHumid = null
+				}
+				bathWindowOpenScheduled = false
+				triggerBathOpenWindow = false
+			}
+		}
+	} else {
+		if (Humid_Bath.state >= (gHumidity.state as DecimalType) + 10 &&
+			  (gHumidity.state as DecimalType) > 40) {
+			logAndWriteReason.apply( "too humid in bathroom, snow on roof: roof window stays closed" )
+		}
+	}
+end
+
+rule "open bath window when scheduled"
+when
+	Time cron "0 * * * * ?"		// every min
+then
+	if (triggerBathOpenWindow) {
+		if (Rainsensor.state == NULL || Rainsensor.state == "DRY") {
+			if (Light_BathLSwitch.state == OFF) {
+				logAndWriteReason.apply( "too humid in bathroom: open roof window" )
+
+				automatic = true
+				sendCommand(RoofWindow_Bath, UP)
+				createTimer(now.plusSeconds(1)) [|
+					automatic = false
+				]
+
+				bathWindowOpenDueToHumidity = true
+				triggerBathOpenWindow = false
+			}
+		}
+	}
+end
+
+
+rule "count open roof windows"
+when
+	Item RoofWindow_Sleep changed or
+	Item RoofWindow_Kitchen changed or
+	Item RoofWindow_Bath changed
+then
+	var int windowsOpen = 0
+
+	if (RoofWindow_Sleep.state < 100) {
+		windowsOpen = windowsOpen + 1
+	}
+	if (RoofWindow_Kitchen.state < 100) {
+		windowsOpen = windowsOpen + 1
+	}
+	if (RoofWindow_Bath.state < 100) {
+		windowsOpen = windowsOpen + 1
+	}
+	postUpdate(NrRoofWindowsOpen, windowsOpen)
+end
+
+
+rule "override sleep"
+when
+	Item RoofWindow_Sleep changed
+then
+	if (!automatic && !overrideSleepOnce) {
+		overrideSleepOnce = true
+		createTimer(now.plusSeconds(40)) [|
+			overrideSleepOnce = false
+		]
+
+		logAndWriteReason.apply( "manual override sleeping room" )
+
+		timerSleep?.cancel()
+		timerSleep = null
+
+		overrideSleep = true
+		timerSleep = createTimer(now.plusMinutes(60)) [|
+			overrideSleep = false
+		]
+	}
+end
+
+
+rule "override kitchen"
+when
+	Item RoofWindow_Kitchen changed
+then
+	if (!automatic && !overrideKitchenOnce) {
+		overrideKitchenOnce = true
+		createTimer(now.plusSeconds(40)) [|
+			overrideKitchenOnce = false
+		]
+
+		logAndWriteReason.apply( "manual override kitchen" )
+
+        timerKitchen?.cancel()
+        timerKitchen = null
+
+		overrideKitchen = true
+		timerKitchen = createTimer(now.plusMinutes(60)) [|
+			overrideKitchen = false
+		]
+	}
+end
+
+
+rule "override bath"
+when
+	Item RoofWindow_Bath changed
+then
+	if (!automatic && !overrideBathOnce) {
+		overrideBathOnce = true
+		createTimer(now.plusSeconds(40)) [|
+			overrideBathOnce = false
+		]
+
+		logAndWriteReason.apply( "manual override bathroom" )
+
+		overrideBath = true
+        timerBath?.cancel()
+		timerBath = createTimer(now.plusMinutes(60)) [|
+			overrideBath = false
+		]
+	}
+end
+
+
+rule "no snow on roof due to roof window operating"
+when
+	Item RoofWindow_Sleep changed or
+	Item RoofWindow_Kitchen changed or
+	Item RoofWindow_Bath changed
+then
+	if (SnowOnRoof.state == ON) {
+		postUpdate(SnowOnRoof, OFF)
+	}
+end
+
+
+rule "outside temp too high"
+when
+	Item Temp_Outside changed
+then
+	if (Temp_Max_0.state != NULL && Temp_Max_0.state > 27 ||
+	    Temp_Max_0.state == NULL && Temp_Max_1.state != NULL && Temp_Max_1.state > 27)
+	{
+		if (RoofWindow_Sleep.state < 100) {
+			if (Temp_Sleep.state <= (Temp_Outside.state as DecimalType - 1)) {
+				if (!overrideSleep) {
+					if (now.getHour < 23 && now.getHour > 8) {
+						logAndWriteReason.apply( "prevent sleeping room heat up: close roof window" )
+
+						automatic = true
+						sendCommand(RoofWindow_Sleep, DOWN)
+						createTimer(now.plusSeconds(1)) [|
+							automatic = false
+						]
+						createTimer(now.plusSeconds(33)) [|
+							automatic = true
+							createTimer(now.plusSeconds(4)) [|
+								automatic = false
+							]
+						]
+					}
+				}
+			}
+		}
+
+		if (RoofWindow_Kitchen.state < 100) {
+			if (Temp_Living.state <= (Temp_Outside.state as DecimalType - 1)) {
+				if (!overrideKitchen) {
+					logAndWriteReason.apply( "prevent kitchen heat up: close roof window" )
+
+					automatic = true
+					sendCommand(RoofWindow_Kitchen, DOWN)
+					createTimer(now.plusSeconds(1)) [|
+						automatic = false
+					]
+					createTimer(now.plusSeconds(33)) [|
+						automatic = true
+						createTimer(now.plusSeconds(4)) [|
+							automatic = false
+						]
+					]
+				}
+			}
+		}
+		if (RoofWindow_Bath.state < 100) {
+			if (Temp_Bath.state <= (Temp_Outside.state as DecimalType)) {
+				if (!overrideBath && !bathWindowOpenScheduled) {
+					logAndWriteReason.apply( "prevent bath room heat up: close roof window" )
+
+					automatic = true
+					sendCommand(RoofWindow_Bath, DOWN)
+					createTimer(now.plusSeconds(1)) [|
+						automatic = false
+					]
+					createTimer(now.plusSeconds(33)) [|
+						automatic = true
+						createTimer(now.plusSeconds(4)) [|
+							automatic = false
+						]
+					]
+				}
+			}
+		}
+	}
+end
+
+
+rule "Switch Sleep Roof Window Up"
+when
+    Item Switch_Sleep3ShortUp changed to ON
+then
+	if (sleepDirection == 0) {
+		sleepDirection = 1
+
+		automatic = true
+		sendCommand(RoofWindow_Sleep, UP)
+		createTimer(now.plusSeconds(1)) [|
+			automatic = false
+		]
+		createTimer(now.plusSeconds(33)) [|
+			automatic = true
+			createTimer(now.plusSeconds(4)) [|
+				automatic = false
+			]
+			sleepDirection = 0
+		]
+	}
+	else if (sleepDirection == 2) {
+		automatic = true
+		sendCommand(RoofWindow_Sleep, STOP)
+		createTimer(now.plusSeconds(1)) [|
+			automatic = false
+		]
+		sleepDirection = 0
+	}
+end
+
+rule "Switch Sleep Roof Window Down"
+when
+    Item Switch_Sleep3ShortDown changed to ON
+then
+	if (sleepDirection == 0) {
+		sleepDirection = 2
+
+		automatic = true
+		sendCommand(RoofWindow_Sleep, DOWN)
+		createTimer(now.plusSeconds(1)) [|
+			automatic = false
+		]
+		createTimer(now.plusSeconds(33)) [|
+			automatic = true
+			createTimer(now.plusSeconds(4)) [|
+				automatic = false
+			]
+			sleepDirection = 0
+		]
+	}
+	else if (sleepDirection == 1) {
+		automatic = true
+		sendCommand(RoofWindow_Sleep, STOP)
+		createTimer(now.plusSeconds(1)) [|
+			automatic = false
+		]
+		sleepDirection = 0
+	}
+end
+
+
+rule "enough fresh air"
+when
+    Time cron "0 * * * * ?"		// every min
+then
+	if (gWindowsOpen.state > 6) {
+		if (CO2_Avg.state < 500) {
+			if (Temp_Outside.state < gTemperature.state && Temp_Outside.state < 20 &&
+               (TempDay.state == NULL || TempDay.state == UNDEF || (TempDay.state as QuantityType<Number>) < 22)) {
+
+                if (RoofWindow_Sleep.state < 100 && !overrideCO2) {
+    				sendCommand(RoofWindow_Sleep, DOWN)
+                }
+				if (RoofWindow_Kitchen.state < 100 && !overrideCO2) {
+    				sendCommand(RoofWindow_Kitchen, DOWN)
+                }
+				if (RoofWindow_Bath.state < 100 && !bathWindowOpenDueToHumidity && !overrideCO2) {
+					sendCommand(RoofWindow_Bath, DOWN)
+				}
+
+                overrideCO2 = true          // if roof windows are opened within the next 30 mins,
+                                            // they should not close automatically
+                timerCO2Override?.cancel()
+                timerCO2Override = createTimer(now.plusMinutes(30)) [|
+                    overrideCO2 = false
+                ]
+
+				logAndWriteReason.apply( "genug durchgelüftet ;-)" )
+			}
+		}
+	}
+end

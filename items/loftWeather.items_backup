@@ -1,0 +1,101 @@
+//Number	Weather_Temperature_Wun	"Outside Temperature HTTP Wun [%.1f °C]"	<temperature>	(gOutsideTemp)	{http="<[http://api.wunderground.com/api/ef5cfb6ee4f02c3c/conditions/q/CA/Konstanz.xml:600000:XSLT(wu_weather_current_temp.xsl)]"}
+//Number	Weather_Forecast_Temp	"Outside Forecast Temperature [%.1f °C]"	<temperature>	{http="<[wuweatherforecastcache:1800000:XSLT(wu_weather_forecast_temphigh.xsl)]"}
+//Number	Weather_WindSpeed	"Wind speed [%.1f]"								<wind>			{http="<[wuweathercurrentcache:300000:XSLT(wu_weather_current_windspeed.xsl)]"}
+
+
+Number Warn_no_rain     "[%d] Tage ohne Regen"      <water>      (gRain)
+
+// atmosphere
+Number   Humidity         "Humidity [%d %%]"    	  {channel="weathercompany:weather:local:pwsObservations#currentHumidity"}
+
+Number   Humidity2         "Humidity 2 [%d %%]"    	  {weather="locationId=home-Wun2, type=atmosphere, property=humidity"}
+Number   Humidity_FIO         "Humidity [%d %%]"    	  {weather="locationId=home-FIO, type=atmosphere, property=humidity"}
+
+Number   UV_Index           "UV Index [%d]"             (gClouds)      {channel="weathercompany:weather:local:pwsObservations#currentUv"}
+Number   Solar_Radiation    "Sonneneinstrahlung [%.2f]" (gClouds)      {channel="weathercompany:weather:local:pwsObservations#currentSolarRadiation"}
+
+Number   UV_Index2         "UV Index 2 [%d]"              {weather="locationId=home-Wun2, type=atmosphere, property=uvIndex, scale=0"}
+
+// clouds
+Number   Clouds   "Bewölkung [%.0f %%]"	<sun_clouds>   {weather="locationId=home-Wun, type=clouds, property=percent"}
+Number   Clouds2   "Bewölkung 2 [%.0f %%]"	<sun_clouds>   {weather="locationId=home-Wun2, type=clouds, property=percent"}
+
+// condition
+String   Condition        "Condition [%s]"      {channel="weathercompany:weather:local:forecastDay0#narrative"}
+
+String   Condition_ID     "Condition id [%s]"   {weather="locationId=home-Wun, type=condition, property=id"}
+String   CommonId         "Common id [%s]"      {weather="locationId=home-Wun, type=condition, property=commonId"}
+Number	 Condition_disp		"Condition [%d]"	(gClouds)
+
+DateTime ObservationTime_FIO  "Observation time [%1$td.%1$tm.%1$tY %1$tH:%1$tM]"   {weather="locationId=home-FIO, type=condition, property=observationTime"}
+DateTime LastUpdate_FIO       "Last update [%1$td.%1$tm.%1$tY %1$tH:%1$tM]"        {weather="locationId=home-FIO, type=condition, property=lastUpdate"}
+DateTime ObservationTime_Wun  "Observation time [%1$td.%1$tm.%1$tY %1$tH:%1$tM]"   {weather="locationId=home-Wun, type=condition, property=observationTime"}
+DateTime LastUpdate_Wun       "Last update [%1$td.%1$tm.%1$tY %1$tH:%1$tM]"        {weather="locationId=home-Wun, type=condition, property=lastUpdate"}
+DateTime ObservationTime_Wun2  "Observation time [%1$td.%1$tm.%1$tY %1$tH:%1$tM]"   {weather="locationId=home-Wun2, type=condition, property=observationTime"}
+DateTime LastUpdate_Wun2       "Last update [%1$td.%1$tm.%1$tY %1$tH:%1$tM]"        {weather="locationId=home-Wun2, type=condition, property=lastUpdate"}
+DateTime ObservationTime_Yah  "Observation time [%1$td.%1$tm.%1$tY %1$tH:%1$tM]"   {weather="locationId=home-Yah, type=condition, property=observationTime"}
+DateTime LastUpdate_Yah       "Last update [%1$td.%1$tm.%1$tY %1$tH:%1$tM]"        {weather="locationId=home-Yah, type=condition, property=lastUpdate"}
+// precipitation
+Number   Rain_FIO          "Regen heute FIO [%.2f mm/h]" (gRain)   {weather="locationId=home-FIO, forecast=0, type=precipitation, property=rain"}
+
+Number   Rain_Wun          "Regen heute Wun [%.2f mm]" (gRain)   {channel="weathercompany:weather:local:forecastDay0#precipitationRain"}
+
+Number   Rain_Wun2          "Rain today Wun2 [%.2f mm]" (gRain)   {weather="locationId=home-Wun2, forecast=0, type=precipitation, property=rain"}
+Number   Rain_Yah          "Rain today Yah [%.2f mm/h]" (gRain)   {weather="locationId=home-Yah, forecast=0, type=precipitation, property=rain"}
+Number   Rain_cur_FIO          "Rain now FIO [%.2f mm/h]" (gRain)   {weather="locationId=home-FIO, type=precipitation, property=rain"}
+
+Number   Rain_cur_Wun          "Rain now Wun [%.2f mm/h]" (gRain)   {channel="weathercompany:weather:local:pwsObservations#currentPrecipitationRate"}
+
+Number   Rain_cur_Wun2          "Rain now Wun2 [%.2f mm/h]" (gRain)   {weather="locationId=home-Wun2, type=precipitation, property=rain"}
+Number   Rain_cur_Yah          "Rain now Yah [%.2f mm/h]" (gRain)   {weather="locationId=home-Yah, type=precipitation, property=rain"}
+Number   Precip_Probability_FIO   "Precip probability today [%d %%]"   {weather="locationId=home-FIO, forecast=0, type=precipitation, property=probability"}
+Number   Precip_Probability_Wun   "Precip probability today [%d %%]"   {weather="locationId=home-Wun, forecast=0, type=precipitation, property=probability"}
+Number   Precip_Probability_Wun2   "Precip probability today 2 [%d %%]"   {weather="locationId=home-Wun2, forecast=0, type=precipitation, property=probability"}
+Number   Precip_Probability_Yah   "Precip probability today [%d %%]"   {weather="locationId=home-Yah, forecast=0, type=precipitation, property=probability"}
+Number   Precip_Probability_cur_FIO   "Precip probability now [%d %%]"   {weather="locationId=home-FIO, type=precipitation, property=probability"}
+Number   Precip_Probability_cur_Wun   "Precip probability now [%d %%]"   {weather="locationId=home-Wun, type=precipitation, property=probability"}
+Number   Precip_Probability_cur_Wun2   "Precip probability now 2 [%d %%]"   {weather="locationId=home-Wun2, type=precipitation, property=probability"}
+Number   Precip_Probability_cur_Yah   "Precip probability now [%d %%]"   {weather="locationId=home-Yah, type=precipitation, property=probability"}
+// new total property in 1.8, only Wunderground
+Number   Precip_Total         "Precip total [%d mm]"   {channel="weathercompany:weather:local:pwsObservations#currentPrecipitationTotal"}
+
+Number   Precip_Total2         "Precip total 2 [%d mm]"   {weather="locationId=home-Wun2, type=precipitation, property=total"}
+
+// temperature
+Number   Temperature_FIO  "Temperature FIO [%.1f °C]"   (gOutsideTemp, gWeather)    {weather="locationId=home-FIO, type=temperature, property=current"}
+
+Number   Temperature_Wun  "Temperature Wun [%.1f °C]"   (gOutsideTemp)    {channel="weathercompany:weather:local:pwsObservations#currentTemperature"}
+
+Number   Temperature_Wun2  "Temperature Wun2 [%.1f °C]"   (gOutsideTemp)    {weather="locationId=home-Wun2, type=temperature, property=current"}
+Number   Temperature_Yah  "Temperature Yah [%.1f °C]"   (gOutsideTemp)    {weather="locationId=home-Yah, type=temperature, property=current"}
+Number   Temp_Dewpoint_FIO    "Taupunkt FIO [%.1f °C]"   (gWeather)	      {weather="locationId=home-FIO, type=temperature, property=dewpoint"}
+
+Number   Temp_Dewpoint_Wun    "Taupunkt Wun [%.1f °C]"   (gWeather)	      {channel="weathercompany:weather:local:pwsObservations#currentTemperatureDewPoint"}
+
+Number   Temp_Dewpoint_Wun2    "Taupunkt Wun2 [%.1f °C]"   (gWeather)	      {weather="locationId=home-Wun2, type=temperature, property=dewpoint"}
+// min and max values only available in forecasts
+Number   Temp_Min_0       "Temperature min [%.2f °C]"   		{channel="weathercompany:weather:local:forecastDay0#temperatureMin"}
+Number   Temp_Min_1       "Temperature min tomorrow [%.2f °C]"  {channel="weathercompany:weather:local:forecastDay1#temperatureMin"}
+Number   Temp_Min_2       "Temperature min in 2 days [%.2f °C]" {channel="weathercompany:weather:local:forecastDay2#temperatureMin"}
+Number   Temp_Max_0       "Temperature max [%.2f °C]"   		{channel="weathercompany:weather:local:forecastDay0#temperatureMax"}
+Number   Temp_Max_1       "Temperature max tomorrow [%.2f °C]"  {channel="weathercompany:weather:local:forecastDay1#temperatureMax"}
+Number   Temp_Max_2       "Temperature max in 2 days [%.2f °C]" {channel="weathercompany:weather:local:forecastDay2#temperatureMax"}
+
+Number   Temp_Max_FIO         "max. Temperatur [%.0f °C]"	(gWeather)   {weather="locationId=home-FIO, forecast=0, type=temperature, property=max"}
+Number   Temp_Max_Yah         "Temperature max [%.2f °C]"   {weather="locationId=home-Yah, forecast=0, type=temperature, property=max"}
+
+// wind
+Number   Wind_Speed           "Windspeed [%.1f km/h]"	<wind>	(gWind)	{channel="weathercompany:weather:local:pwsObservations#currentWindSpeed"}
+String   Wind_Direction       "Wind direction [%s]"		<wind>	(gWind)	{channel="weathercompany:weather:local:forecastDay0Day#windDirectionCardinal"}
+Number   Wind_Degree          "Wind degree [%.0f °]"    <wind>	(gWind)	{channel="weathercompany:weather:local:pwsObservations#currentWindDirection"}
+
+String   Station_Name_Wun         "Station Name [%s]"        {weather="locationId=home-Wun, type=station, property=name"}
+
+String   Station_Id_Wun           "Station Id [%s]"          {channel="weathercompany:weather:local:pwsObservations#stationId"}
+
+Number   Station_Latitude_Wun     "Station Latitude [%.6f]"  {weather="locationId=home-Wun, type=station, property=latitude, scale=6"}
+Number   Station_Longitude_Wun    "Station Longitude [%.6f]" {weather="locationId=home-Wun, type=station, property=longitude, scale=6"}
+String   Station_Name_Wun2         "Station Name [%s]"        {weather="locationId=home-Wun2, type=station, property=name"}
+String   Station_Id_Wun2           "Station Id [%s]"          {weather="locationId=home-Wun2, type=station, property=id"}
+Number   Station_Latitude_Wun2     "Station Latitude [%.6f]"  {weather="locationId=home-Wun2, type=station, property=latitude, scale=6"}
+Number   Station_Longitude_Wun2    "Station Longitude [%.6f]" {weather="locationId=home-Wun2, type=station, property=longitude, scale=6"}

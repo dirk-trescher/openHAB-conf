@@ -1,0 +1,244 @@
+rule "set heat alarm sleep to off when uninitialized"
+when
+	Item Smoke_Sleep_Temp changed
+then
+	if (Smoke_Sleep_Heat.state == NULL && Smoke_Sleep_Temp.state < 40.0) {
+		postUpdate(Smoke_Sleep_Heat, OFF)
+	}
+end
+
+rule "set heat alarm Niklas to off when uninitialized"
+when
+	Item Smoke_Niklas_Temp changed
+then
+	if (Smoke_Niklas_Heat.state == NULL && Smoke_Niklas_Temp.state < 40.0) {
+		postUpdate(Smoke_Niklas_Heat, OFF)
+	}
+end
+
+rule "set heat alarm Emilie to off when uninitialized"
+when
+	Item Smoke_Emilie_Temp changed
+then
+	if (Smoke_Emilie_Heat.state == NULL && Smoke_Emilie_Temp.state < 40.0) {
+		postUpdate(Smoke_Emilie_Heat, OFF)
+	}
+end
+
+rule "set heat alarm office to off when uninitialized"
+when
+	Item Smoke_Office_Temp changed
+then
+	if (Smoke_Office_Heat.state == NULL && Smoke_Office_Temp.state < 40.0) {
+		postUpdate(Smoke_Office_Heat, OFF)
+	}
+end
+
+
+rule "Smoke sensor detects smoke"
+when
+    Item Smoke_Sleep received update ON
+then
+    sendNotification("dirk.trescher@web.de", "Der Rauchmelder im Schlafzimmer schlägt Alarm (Rauch)!!!")
+	postUpdate(TriggerFireAlarmBlink, ON)
+end
+
+rule "Smoke sensor detects heat"
+when
+    Item Smoke_Sleep_Heat received update ON
+then
+    sendNotification("dirk.trescher@web.de", "Der Rauchmelder im Schlafzimmer schlägt Alarm (Hitze)!!!")
+	postUpdate(TriggerFireAlarmBlink, ON)
+end
+
+rule "Smoke sensor detects smoke"
+when
+    Item Smoke_Niklas received update ON
+then
+    sendNotification("dirk.trescher@web.de", "Der Rauchmelder in Niklas Zimmer schlägt Alarm (Rauch)!!!")
+	postUpdate(TriggerFireAlarmBlink, ON)
+end
+
+rule "Smoke sensor detects heat"
+when
+    Item Smoke_Niklas_Heat received update ON
+then
+    sendNotification("dirk.trescher@web.de", "Der Rauchmelder in Niklas Zimmer schlägt Alarm (Hitze)!!!")
+	postUpdate(TriggerFireAlarmBlink, ON)
+end
+
+rule "Smoke sensor detects smoke"
+when
+    Item Smoke_Emilie received update ON
+then
+    sendNotification("dirk.trescher@web.de", "Der Rauchmelder in Emilies Zimmer schlägt Alarm (Rauch)!!!")
+	postUpdate(TriggerFireAlarmBlink, ON)
+end
+
+rule "Smoke sensor detects heat"
+when
+    Item Smoke_Emilie_Heat received update ON
+then
+    sendNotification("dirk.trescher@web.de", "Der Rauchmelder in Emilies Zimmer schlägt Alarm (Hitze)!!!")
+	postUpdate(TriggerFireAlarmBlink, ON)
+end
+
+rule "Smoke sensor detects smoke"
+when
+    Item Smoke_Office received update ON
+then
+    sendNotification("dirk.trescher@web.de", "Der Rauchmelder im Arbeitszimmer schlägt Alarm (Rauch)!!!")
+	postUpdate(TriggerFireAlarmBlink, ON)
+end
+
+rule "Smoke sensor detects heat"
+when
+    Item Smoke_Office_Heat received update ON
+then
+    sendNotification("dirk.trescher@web.de", "Der Rauchmelder im Arbeitszimmer schlägt Alarm (Hitze)!!!")
+	postUpdate(TriggerFireAlarmBlink, ON)
+end
+
+
+rule "CO Sensor detects fire"
+when
+    Item CO  received update ON
+then
+    sendNotification("dirk.trescher@web.de", "Der CO Sensor schlägt Alarm!!!")
+	postUpdate(TriggerFireAlarmBlink, ON)
+end
+
+// -----------   Thermostats as Smoke Detectors -----------------------------
+
+rule "use bath thermostat as smoke detector"
+when
+	Item Temp_Bath changed
+then
+	if ((Temp_Bath.state as DecimalType) - (Temp_Bath.historicState(now.minusMinutes(10)).state as DecimalType) > 3) {
+		sendNotification("dirk.trescher@web.de", "FEUERALARM: Badezimmertemperatur steigt stark an: " + Temp_Bath.state + " !!!")
+		postUpdate(TempFire_Bath, ON)
+		postUpdate(TriggerFireAlarmBlink, ON)
+	}
+end
+
+rule "use Emilie thermostat as smoke detector"
+when
+	Item Temp_Emilie changed
+then
+	if ((Temp_Emilie.state as DecimalType) - (Temp_Emilie.historicState(now.minusMinutes(10)).state as DecimalType) > 3) {
+		sendNotification("dirk.trescher@web.de", "FEUERALARM: Temperatur Emilie steigt stark an: " + Temp_Emilie.state + " !!!")
+		postUpdate(TempFire_Emilie, ON)
+		postUpdate(TriggerFireAlarmBlink, ON)
+	}
+end
+
+rule "use hobby thermostat as smoke detector"
+when
+	Item Temp_Hobby changed
+then
+	if ((Temp_Hobby.state as DecimalType) - (Temp_Hobby.historicState(now.minusMinutes(10)).state as DecimalType) > 3) {
+		sendNotification("dirk.trescher@web.de", "FEUERALARM: Temperatur im Bastelzimmer steigt stark an: " + Temp_Hobby.state + " !!!")
+		postUpdate(TempFire_Hobby, ON)
+		postUpdate(TriggerFireAlarmBlink, ON)
+	}
+end
+
+rule "use kids bath thermostat as smoke detector"
+when
+	Item Temp_KidsBath changed
+then
+	if ((Temp_KidsBath.state as DecimalType) - (Temp_KidsBath.historicState(now.minusMinutes(10)).state as DecimalType) > 3) {
+		sendNotification("dirk.trescher@web.de", "FEUERALARM: Temperatur im Gästebad steigt stark an: " + Temp_KidsBath.state + " !!!")
+		postUpdate(TempFire_KidsBath, ON)
+		postUpdate(TriggerFireAlarmBlink, ON)
+	}
+end
+
+rule "use kitchen thermostat as smoke detector"
+when
+	Item Temp_Kitchen changed
+then
+	if ((Temp_Kitchen.state as DecimalType) - (Temp_Kitchen.historicState(now.minusMinutes(10)).state as DecimalType) > 3) {
+		sendNotification("dirk.trescher@web.de", "FEUERALARM: Küchentemperatur steigt stark an: " + Temp_Kitchen.state + " !!!")
+		postUpdate(TempFire_Kitchen, ON)
+		postUpdate(TriggerFireAlarmBlink, ON)
+	}
+end
+
+rule "use living thermostat as smoke detector"
+when
+	Item Temp_Living changed
+then
+	if ((Temp_Living.state as DecimalType) - (Temp_Living.historicState(now.minusMinutes(10)).state as DecimalType) > 3) {
+		sendNotification("dirk.trescher@web.de", "FEUERALARM: Wohnzimmertemperatur steigt stark an: " + Temp_Living.state + " !!!")
+		postUpdate(TempFire_Living, ON)
+		postUpdate(TriggerFireAlarmBlink, ON)
+	}
+end
+
+rule "use Niklas thermostat as smoke detector"
+when
+	Item Temp_Niklas changed
+then
+	if ((Temp_Niklas.state as DecimalType) - (Temp_Niklas.historicState(now.minusMinutes(10)).state as DecimalType) > 3) {
+		sendNotification("dirk.trescher@web.de", "FEUERALARM: Temperatur Niklas steigt stark an: " + Temp_Niklas.state + " !!!")
+		postUpdate(TempFire_Niklas, ON)
+		postUpdate(TriggerFireAlarmBlink, ON)
+	}
+end
+
+rule "use office thermostat as smoke detector"
+when
+	Item Temp_Office changed
+then
+	if ((Temp_Office.state as DecimalType) - (Temp_Office.historicState(now.minusMinutes(10)).state as DecimalType) > 3) {
+		sendNotification("dirk.trescher@web.de", "FEUERALARM: Arbeitszimmertemperatur steigt stark an: " + Temp_Office.state + " !!!")
+		postUpdate(TempFire_Office, ON)
+		postUpdate(TriggerFireAlarmBlink, ON)
+	}
+end
+
+rule "use sleep thermostat as smoke detector"
+when
+	Item Temp_Sleep changed
+then
+	if ((Temp_Sleep.state as DecimalType) - (Temp_Sleep.historicState(now.minusMinutes(10)).state as DecimalType) > 3) {
+		sendNotification("dirk.trescher@web.de", "FEUERALARM: Schlafzimmertemperatur steigt stark an: " + Temp_Sleep.state + " !!!")
+		postUpdate(TempFire_Sleep, ON)
+		postUpdate(TriggerFireAlarmBlink, ON)
+	}
+end
+
+
+rule "reset fire detectors"
+when
+	Time cron "0 0 0 * * ?"		// 00:00 each day
+then
+	if (TempFire_Bath.state != OFF) {
+		postUpdate(TempFire_Bath, OFF)
+	}
+	if (TempFire_Emilie.state != OFF) {
+		postUpdate(TempFire_Emilie, OFF)
+	}
+	if (TempFire_Hobby.state != OFF) {
+		postUpdate(TempFire_Hobby, OFF)
+	}
+	if (TempFire_KidsBath.state != OFF) {
+		postUpdate(TempFire_KidsBath, OFF)
+	}
+	if (TempFire_Kitchen.state != OFF) {
+		postUpdate(TempFire_Kitchen, OFF)
+	}
+	if (TempFire_Living.state != OFF) {
+		postUpdate(TempFire_Living, OFF)
+	}
+	if (TempFire_Niklas.state != OFF) {
+		postUpdate(TempFire_Niklas, OFF)
+	}
+	if (TempFire_Office.state != OFF) {
+		postUpdate(TempFire_Office, OFF)
+	}
+	if (TempFire_Sleep.state != OFF) {
+		postUpdate(TempFire_Sleep, OFF)
+	}
+end

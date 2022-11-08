@@ -1,0 +1,8 @@
+Number Sun_Elevation		"Elevation [%.2f]"		{channel="astro:sun:local:position#elevation"}
+Number Sun_Azimuth			"Azimuth [%.2f]"		{channel="astro:sun:local:position#azimuth"}
+
+DateTime Sunrise_Time  "Sonnenaufgang [%1$tH:%1$tM]" 	<sunrise>	{channel="astro:sun:local:rise#start"}
+DateTime Sunset_Time   "Sonnenuntergang [%1$tH:%1$tM]"	<sunset>	{channel="astro:sun:local:set#end"}
+
+DateTime NightStart_Time  "Anfang der Nacht [%1$tH:%1$tM]" 	<moon>	{channel="astro:sun:local:civilDusk#end"}
+DateTime NightEnd_Time   "Ende der Nacht [%1$tH:%1$tM]"		<moon>	{channel="astro:sun:local:civilDawn#start"}

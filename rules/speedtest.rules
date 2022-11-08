@@ -1,0 +1,52 @@
+
+rule "Speedtest init"
+when
+    System started
+then
+    createTimer(now.plusSeconds(195)) [|
+        if (SpeedtestRerun.state == NULL) SpeedtestRerun.postUpdate(OFF)
+        if (SpeedtestRunning.state == NULL) SpeedtestRunning.postUpdate("-")
+        if (SpeedtestSummary.state == NULL || SpeedtestSummary.state == "")
+            SpeedtestSummary.postUpdate("⁉ (unbekannt)")
+    ]
+end
+
+rule "execute Speedtest"
+when
+    Time cron "0 2 */4 * * ?" or          // every fourth hour
+    Item SpeedtestRerun received command ON
+then
+    logInfo("Speedtest", "--> speedtest executed...")
+    SpeedtestRunning.postUpdate("Messung läuft...")
+
+    SpeedtestResultDate.postUpdate(new DateTimeType())
+
+    var speedtestCliOutput = executeCommandLine(Duration.ofSeconds(600), "/usr/bin/speedtest", "--accept-license", "--accept-gdpr", "--format=json", "--server-id=7961")
+
+    SpeedtestRunning.postUpdate("Datenauswertung...")
+
+    if (speedtestCliOutput.startsWith("{\"type\":\"result\",") && speedtestCliOutput.contains("}}")) {
+        var ping = Float::parseFloat(transform("JSONPATH", "$.ping.latency", speedtestCliOutput))
+        var float down = Float::parseFloat(transform("JSONPATH", "$.download.bandwidth", speedtestCliOutput))
+        down = (down / 125000)
+        var float up = Float::parseFloat(transform("JSONPATH", "$.upload.bandwidth", speedtestCliOutput))
+        up = (up / 125000)
+        SpeedtestResultPing.postUpdate(ping)
+        SpeedtestResultDown.postUpdate(down)
+        if (down < 150) {
+            sendNotification("dirk.trescher@web.de", "Downstream zu gering: " + down + "MBit/s")
+        }
+        SpeedtestResultUp.postUpdate(up)
+        if (up < 5) {
+            sendNotification("dirk.trescher@web.de", "Upstream zu gering: " + up + "MBit/s")
+        }
+        SpeedtestSummary.postUpdate(String::format("ᐁ  %.1f Mbit/s  ᐃ %.1f Mbit/s (%.0f ms)", down, up, ping))
+        SpeedtestRunning.postUpdate("-")
+    } else {
+        SpeedtestSummary.postUpdate("(unbekannt)")
+        SpeedtestRunning.postUpdate("Fehler bei der Ausführung")
+
+        logError("Speedtest", "--> speedtest failed. Output:\n" + speedtestCliOutput + "\n\n")
+    }
+    SpeedtestRerun.postUpdate(OFF)
+end

@@ -1,0 +1,21 @@
+Number CO2_sleep
+Number CO2_kitchen
+Number CO2_hobby
+
+String RelTempSleep
+String RelTempLiving
+String RelTempBath
+String RelTempEmilie
+String RelTempNiklas
+String RelTempKidsBath
+String RelTempHobby
+String RelTempOffice
+
+String RelHumidSleep
+String RelHumidLiving
+String RelHumidBath
+String RelHumidEmilie
+String RelHumidNiklas
+String RelHumidKidsBath
+String RelHumidHobby
+String RelHumidOffice

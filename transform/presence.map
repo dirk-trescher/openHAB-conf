@@ -1,0 +1,7 @@
+OPEN=anwesend
+CLOSED=abwesend
+NULL=unbekannt
+-=unbekannt
+
+ON=anwesend
+OFF=abwesend

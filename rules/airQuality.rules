@@ -1,0 +1,106 @@
+var Boolean notifiedHumidityTooLow = false
+var Boolean notifiedHumidityTooHigh = false
+
+rule "CO2 Display cut above 2000 ppm"
+when
+	Item CO2_Display changed
+then
+	if (CO2_Display.state <= 2000) {
+		postUpdate(CO2_Display_disp, CO2_Display.state)
+	}
+end
+
+rule "CO2 average"
+when
+	Item CO2 changed or
+	Item CO2_Display_disp changed or
+    Item CO2level1 changed
+then
+    var Number average = 0
+    var Number cnt = 0
+    if (CO2.state != NULL) {
+        average = average + (CO2.state as DecimalType)
+        cnt = cnt + 1
+    }
+    if (CO2_Display_disp.state != NULL) {
+        average = average + (CO2_Display_disp.state as DecimalType)
+        cnt = cnt + 1
+    }
+    if (CO2level1.state != NULL) {
+        average = average + (CO2level1.state as DecimalType)
+        cnt = cnt + 1
+    }
+    if (cnt > 0) {
+    	postUpdate(CO2_Avg, average / cnt)
+    }
+end
+
+// -----------------------------------------------------------------
+
+rule "update CO2 - 1 Date"
+when
+    Item CO2Heartbeat1 changed
+then
+//    logInfo("CO2", "Heartbeat Date converted")
+    postUpdate(CO2HeartbeatDate1, now.toLocalDateTime().toString())
+end
+
+rule "CO2 -1 calibrate"
+when
+    Item CO2Calibrate1 received command ON
+then
+    logInfo("CO2", "calibrate triggered")
+    val mqttActions = getActions("mqtt","mqtt:broker:1fd8bb3ef8")
+    mqttActions.publishMQTT("CO2-1/calibrate", "0")
+
+    createTimer(now.plusSeconds(1)) [|
+        postUpdate(CO2Calibrate1, OFF)
+    ]
+end
+
+rule "CO2 -1 set auto-calibration mode"
+when
+    Item CO2AutoCal1 received command
+then
+    logInfo("CO2", "auto-calibrate changed to " + receivedCommand)
+    var switchState = "1"
+    if (receivedCommand == OFF) {
+        switchState = "0"
+    }
+    val mqttActions = getActions("mqtt","mqtt:broker:1fd8bb3ef8")
+    mqttActions.publishMQTT("CO2-1/auto-cal", switchState)
+end
+
+// -----------------------------------------------------------------
+
+rule "warn when Humidity is too low"
+when
+    Item gHumidity changed
+then
+    if (gHumidity.state < 40) {
+		if (notifiedHumidityTooLow == false) {
+			sendNotification("dirk.trescher@web.de", "Luftfeuchtigkeit is zu niedrig: " + gHumidity.state + "%")
+			notifiedHumidityTooLow = true
+		}
+	}
+end
+
+rule "warn when Humidity is too high"
+when
+    Item gHumidity changed
+then
+    if (gHumidity.state > 65) {
+		if (notifiedHumidityTooHigh == false) {
+			sendNotification("dirk.trescher@web.de", "Luftfeuchtigkeit is zu hoch: " + gHumidity.state + "%")
+			notifiedHumidityTooHigh = true
+		}
+	}
+end
+
+rule "reset warnings"
+when
+	Time cron "0 0 8 * * ?"
+then
+	notifiedHumidityTooLow = false
+	notifiedHumidityTooHigh = false
+end

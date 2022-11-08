@@ -1,0 +1,179 @@
+Group All
+
+Group gStatus		(All)
+Group gBatteries 	(All)
+Group gSignal		(All)
+Group gUnreach		(All)
+Group gHeartbeat	(ALL)
+Group gPower		(All)
+Group gPowerTech	(All)
+Group gPowerDaily   (All)
+Group gPowerUsage	(All)
+Group gEnergy       (All)
+Group gEnergyTech   (All)
+Group gEnergyToday  (All)
+Group gEnergyDaily  (All)
+Group gSolarPower   (All)
+Group gSolarEnergy  (All)
+Group gSolarEnergyToday  (All)
+Group gSolarEnergyDaily  (All)
+Group gWaterUsage	(All)
+Group gWaterFlow	(All)
+Group gWaterUsageChart	(All)
+Group gLights		(All)
+Group gLightScenes	(All)
+Group gAirQuality	(All)
+Group gWatering		(All)
+Group gCharts		(All)
+Group gWeather		(All)
+Group gClouds		(All)
+Group gRainSensor   (All)
+Group gWateringInternal (All)
+Group gSoil			(All)
+Group gSoilBatt     (All)
+Group gSoilSolar    (All)
+Group gOutsideTemp	(All)
+Group gRain			(All)
+Group gWind			(All)
+Group gWindSpeed    (All)
+Group gTempAdmin	(All)
+Group gMotionSensor (All)
+Group gSwitches		(All)
+Group gModes		(All)
+Group gPresence 	(All)
+Group gCoreAdmin	(All)
+Group gTempTargetValves (All)
+Group gSmokeSensor  (All)
+Group gFireSensor   (All)
+Group gFritzBoxDaily (All)
+Group gFritzBoxUp   (All)
+Group gFritzBoxDown (All)
+Group gFritzBoxPing (All)
+Group gFingerprint  (All)
+
+Group grLiving      "Wohnzimmer"	 	<sofa>      	(All)
+Group grEating      "Esszimmer"      	<eating>     	(All)
+Group grKitchen     "Küche"  	    	<kitchen>     	(All)
+Group grBath	    "Badezimmer"	    <bath>      	(All)
+Group grGuestLoo    "Gästetoilette"	    <toilet>      	(All)
+Group grSleep	    "Schlafzimmer"	   	<bed>	      	(All)
+Group grEmilie      "Emilie"      	   	<girl_2>     	(All)
+Group grNiklas      "Niklas"      	   	<boy_3>	     	(All)
+Group grHobby       "Hobbyraum"         <boy_1>        	(All)
+Group grOffice      "Arbeitszimmer"     <office>      	(All)
+Group grKidsBath	"Gästebad"			<bath>			(All)
+Group gRoofWindows	"Dachfenster"		<window>		(All)
+Group gContacts     "Kontaktschalter"   <door>          (All)
+
+/* active groups */
+Group:Switch:OR(ON, OFF) 		gLightsCount	"Lichter [%d]" 						<light>			(All)
+Group:Number:AVG		 		gHeating 		"Aktive Heizungen [%d %%]"	 		<heating> 		(All)
+Group:Number:AVG 				gTemperature	"Zimmer-Ist-Temperatur [%.1f °C]" 	<temperature>	(All)
+Group:Number:AVG 				gTempTarget		"Zimmer-Soll-Temperatur [%.1f °C]" 	<temperature>	(All)
+Group:Number:AVG 				gHumidity		"Zimmer-Feuchtigkeit [%.0f %%]" 	<humidity>		(All)
+Group:Number:SUM 				gWindowsOpen                                                        (All)
+Group:Contact:OR(OPEN, CLOSED) 	gWindows 		"Offene Fenster [%d]"				<contact>		(All)
+Group:Rollershutter:OR(UP, DOWN)	gRollershutters	"Rollläden [%d]"				<rollershutter>	(All)
+Group:Switch:OR(ON, OFF)		gWLAN			"WLAN [%d]"							<network>		(All)
+
+// Global Items
+
+Switch Durchlueften "Durchlüften"   <flow>                                          (All)
+
+/* Loft Mode */
+Number LoftMode		"Modus"		<present>											(gModes)
+Switch Daylight		"Tag"		<sun>												(gModes)
+Switch Night		"Nacht"		<moon>												(gModes)
+Switch Twilight		"Dämmerung"														(gModes)
+Switch Guests		"Gäste"															(gModes)
+Switch SleepOverride "Schlafen verhindern"  <cinema>                                (gModes)
+
+Switch SnowOnRoof				"Schnee auf Dach"					<climate-on>	(gStatus)
+Switch WateringPeriod			"Bewässerungsperiode"				<rain>			(gWatering)
+Switch WaterOnOnRoof			"Wasser auf Dach angestellt"		<rain>			(gWatering)
+
+/* Decision Reasons */
+
+String DecisionReasons	"Log [%s]"		<status>
+
+/* Charts */
+Number Temp_Chart_Period			"Zeitraum"								(gCharts)
+Number Humid_Chart_Period			"Zeitraum"								(gCharts)
+Number Heating_Chart_Period			"Zeitraum"								(gCharts)
+Number Power_Chart_Period			"Zeitraum"								(gCharts)
+Number Energy_daily_Chart_Period	"Zeitraum"								(gCharts)
+Number Watering_Chart_Period		"Zeitraum"								(gCharts)
+Number CO2_Chart_Period				"Zeitraum"								(gCharts)
+Number Soil_Chart_Period			"Zeitraum"								(gCharts)
+Number ShowerDuration_Chart_Period	"Zeitraum"								(gCharts)
+Number Modes_Chart_Period			"Zeitraum"								(gCharts)
+Number PiCpu_Chart_Period			"Zeitraum"								(gCharts)
+Number Speedtest_Chart_Period		"Zeitraum"								(gCharts)
+
+Switch WaspInABox				"Wasp in a box"								(gPresence)
+Number Office_present_disp		"Office present"							(gPresence)
+
+Switch FridgeOpenTooLong        "Kühlschranktür ist auf"
+
+// iCloud items
+Switch iPhoneDirk				"Presence Dirk (iCloud) [MAP(presence.map):%s]"			<present>
+Number iPhoneDirk_disp			"Presence Dirk (iCloud)"					(gPresence)
+Location iPhoneDirkLoc			"Location Dirk (iCloud) [%s]"									{channel="icloud:device:2198c6b087:75ce4ede:location"}
+Number iPhoneDirkLocAcc			"Dirk Genauigkeit [%.0f m]"						<movecontrol>	{channel="icloud:device:2198c6b087:75ce4ede:locationAccuracy"}
+DateTime iPhoneDirkLocUpdate	"Standort update [%1$td.%1$tm.%1$ty %1$tH:%1$tM]" 		<time>	{channel="icloud:device:2198c6b087:75ce4ede:locationLastUpdate"}
+Switch iPhoneDirkFindMyPhone	"Find my phone"													{channel="icloud:device:2198c6b087:75ce4ede:findMyPhone"}
+Number iPhoneDirkDistanceFromHome "Dirk von zu Hause weg [%.0f m]"				        <zoom>
+Switch iPhoneDirkAlmostHome
+Switch iPhoneDirkNoUpdate       "Update zu lange her"
+
+Switch iPhoneHeike				"Presence Heike (iCloud) [MAP(presence.map):%s]"		<present>
+Number iPhoneHeike_disp			"Presence Heike (iCloud)"					(gPresence)
+Location iPhoneHeikeLoc			"Standort Heike (iCloud) [%s]"									{channel="icloud:device:2198c6b087:9ae9130d:location"}
+Number iPhoneHeikeLocAcc		"Standort Genauigkeit [%.0f m]"					<movecontrol>	{channel="icloud:device:2198c6b087:9ae9130d:locationAccuracy"}
+DateTime iPhoneHeikeLocUpdate	"Standort update [%1$td.%1$tm.%1$ty %1$tH:%1$tM]" 		<time>	{channel="icloud:device:2198c6b087:9ae9130d:locationLastUpdate"}
+Switch iPhoneHeikeFindMyPhone	"Find my phone"													{channel="icloud:device:2198c6b087:9ae9130d:findMyPhone"}
+Number iPhoneHeikeDistanceFromHome "Heike von zu Hause weg [%.0f m]"					<zoom>
+Switch iPhoneHeikeAlmostHome
+Switch iPhoneHeikeNoUpdate      "Update zu lange her"
+
+Switch iPhoneNiklas				"Presence Niklas (iCloud) [MAP(presence.map):%s]"		<present>
+Number iPhoneNiklas_disp		"Presence Niklas (iCloud)"					(gPresence)
+Location iPhoneNiklasLoc		"Location Niklas (iCloud) [%s]"									{channel="icloud:device:2198c6b087:6d581886:location"}
+Number iPhoneNiklasLocAcc		"Niklas Genauigkeit [%.0f m]"					<movecontrol>	{channel="icloud:device:2198c6b087:6d581886:locationAccuracy"}
+DateTime iPhoneNiklasLocUpdate	"Standort update [%1$td.%1$tm.%1$ty %1$tH:%1$tM]" 		<time>	{channel="icloud:device:2198c6b087:6d581886:locationLastUpdate"}
+Switch iPhoneNiklasFindMyPhone	"Find my phone"													{channel="icloud:device:2198c6b087:6d581886:findMyPhone"}
+Number iPhoneNiklasDistanceFromHome "Niklas von zu Hause weg [%.0f m]"					<zoom>
+Switch iPhoneNiklasAlmostHome
+Switch iPhoneNiklasNoUpdate     "Update zu lange her"
+
+Switch iPhoneEmilie				"Presence Emilie (iCloud) [MAP(presence.map):%s]"		<present>
+Number iPhoneEmilie_disp		"Presence Emilie (iCloud)"					(gPresence)
+Location iPhoneEmilieLoc		"Location Emilie (iCloud) [%s]"									{channel="icloud:device:2198c6b087:c2f795c6:location"}
+Number iPhoneEmilieLocAcc		"Emilie Genauigkeit [%.0f m]"					<movecontrol>	{channel="icloud:device:2198c6b087:c2f795c6:locationAccuracy"}
+DateTime iPhoneEmilieLocUpdate	"Standort update [%1$td.%1$tm.%1$ty %1$tH:%1$tM]" 		<time>	{channel="icloud:device:2198c6b087:c2f795c6:locationLastUpdate"}
+Switch iPhoneEmilieFindMyPhone	"Find my phone"													{channel="icloud:device:2198c6b087:c2f795c6:findMyPhone"}
+Number iPhoneEmilieDistanceFromHome "Emilie von zu Hause weg [%.0f m]"					<zoom>
+Switch iPhoneEmilieAlmostHome
+Switch iPhoneEmilieNoUpdate     "Update zu lange her"
+
+/* Exec items */
+String	PiCpuTemp					"CPU Temperatur [%s]"										{channel="exec:command:f1319e2b:output"}
+Number	PiCpuTempN					"CPU Temperatur [%.2f °C]"	<temperature>	(gCoreAdmin)
+String	PiCpuLoad					"CPU Usage [%s]"											{channel="exec:command:be5399fa:output"}
+Number	PiCpuLoadN					"CPU Usage [%.2f %%]"		<settings>		(gCoreAdmin)
+String	PiMemory					"Used Memory [%s]"											{channel="exec:command:bb8324fd:output"}
+Number	PiMemoryN					"Used Memory [%.2f %%]"		<settings>		(gCoreAdmin)
+
+String	FritzBoxConnectionDown		"FritzBox Connection Down [%s]" 		<network>			{channel="exec:command:07612d51:output"}
+Switch 	FritzBoxRestartConnection	"Restart FritzBox Binding"									{channel="exec:command:68d469c3:run"}
+
+Switch  RestartICloud               "Restart iCloud"                                            {channel="exec:command:a42ef7ef05:run"}
+
+Switch	RestartOpenHab				"Restart OpenHAB"											{channel="exec:command:c2c0441b:run"}
+Switch	RestartHomematic			"Restart Homematic"											{channel="exec:command:13e011f2c8:run"}
+Switch	RestartHomeGear				"Restart HomeGear"											{channel="exec:command:404e2923:run"}
+Switch	RestartRasPi				"Restart RaspberryPi"										{channel="exec:command:37f1d1a1:run"}
+
+/* NTP binding items */
+DateTime		LocDateTime		"Datum [%1$tA, %1$td.%1$tm.%1$tY %1$tT]"	<calendar>			{channel="ntp:ntp:local:dateTime"}
+DateTime		LocTime			"[%1$tHH:%1$tMM]"							<time>				{channel="ntp:ntp:local:dateTime"}

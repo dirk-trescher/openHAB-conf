@@ -1,0 +1,73 @@
+Switch	Light_EatingOutSwitch	"Esszimmer außen"   		<dimmablelight>	(Switching, grEating, gLights, gLightsCount) 	{channel="hue:0210:0017881cc4e3:7:color"}
+Color	Light_EatingOutColor    "Esszimmer außen"   		<dimmablelight>	(Colorize, grEating)  			                {channel="hue:0210:0017881cc4e3:7:color"}
+Dimmer	Light_EatingOutTemp		"Esszimmer außen"   		<dimmablelight>	(CTDimmer, grEating)  			                {channel="hue:0210:0017881cc4e3:7:color_temperature"}
+Switch	Light_EatingInSwitch	"Esszimmer innen"   		<dimmablelight>	(Switching, grEating, gLights) 	                {channel="hue:0210:0017881cc4e3:9:color"}
+Color	Light_EatingInColor     "Esszimmer innen"   		<dimmablelight>	(Colorize, grEating)  			                {channel="hue:0210:0017881cc4e3:9:color"}
+Dimmer	Light_EatingInTemp		"Esszimmer innen"   		<dimmablelight>	(CTDimmer, grEating)  			                {channel="hue:0210:0017881cc4e3:9:color_temperature"}
+Number 	Light_EatingScenes		"Szenen"					<dimmablelight>	(gLightScenes)
+
+Switch	Light_BathLSwitch		"Bad Decke links"	   		<dimmablelight>	(Switching, grBath, gLights, gLightsCount) 	    {channel="hue:0210:0017881cc4e3:12:color"}
+Color	Light_BathLColor		"Bad Decke links"   		<dimmablelight>	(Colorize, grBath)  			                {channel="hue:0210:0017881cc4e3:12:color"}
+Dimmer	Light_BathLTemp			"Bad Decke links"   		<dimmablelight>	(CTDimmer, grBath)  			                {channel="hue:0210:0017881cc4e3:12:color_temperature"}
+Switch	Light_BathRSwitch		"Bad Decke rechts"	   		<dimmablelight>	(Switching, grBath, gLights) 	                {channel="hue:0210:0017881cc4e3:13:color"}
+Color	Light_BathRColor		"Bad Decke rechts"  		<dimmablelight>	(Colorize, grBath)  			                {channel="hue:0210:0017881cc4e3:13:color"}
+Dimmer	Light_BathRTemp			"Bad Decke rechts"  		<dimmablelight>	(CTDimmer, grBath)  			                {channel="hue:0210:0017881cc4e3:13:color_temperature"}
+Number 	Light_BathScenes		"Szenen"					<dimmablelight>	(gLightScenes)
+
+Switch	Light_WohnZiSwitch		"Wohnzimmer Decke"   		<dimmablelight>	(Switching, grLiving, gLights, gLightsCount) 	{channel="hue:0200:0017881cc4e3:10:color"}
+Dimmer  Light_WohnZiDimmer		"Wohnzimmer Decke"   		<dimmablelight>	(Dimm, grLiving)				                {channel="hue:0200:0017881cc4e3:10:color"}
+Color	Light_WohnZiColor		"Wohnzimmer Decke"   		<dimmablelight>	(Colorize, grLiving)  			                {channel="hue:0200:0017881cc4e3:10:color"}
+Switch	Light_WohnZiStudioSwitch	"Wohnzimmer Studio"   	<dimmablelight>	(Switching, grLiving, gLights) 	                {channel="hue:0210:0017881cc4e3:11:color"}
+Color	Light_WohnZiStudioColor		"Wohnzimmer Studio"   	<dimmablelight>	(Colorize, grLiving)  			                {channel="hue:0210:0017881cc4e3:11:color"}
+Dimmer	Light_WohnZiStudioTemp		"Wohnzimmer Studio"   	<dimmablelight>	(CTDimmer, grLiving)  			                {channel="hue:0210:0017881cc4e3:11:color_temperature"}
+Number 	Light_WohnZiScenes		"Szenen"					<dimmablelight>	(gLightScenes)
+
+Switch	Light_SleepSwitch		"Schlafzimmer"   			<dimmablelight>	(Switching, grSleep, gLights, gLightsCount) 	{channel="hue:0200:0017881cc4e3:14:color"}
+Dimmer  Light_SleepDimmer		"Schlafzimmer"   			<dimmablelight>	(Dimm, grSleep)					                {channel="hue:0200:0017881cc4e3:14:color"}
+Color	Light_SleepColor		"Schlafzimmer"   			<dimmablelight>	(Colorize, grSleep)  			                {channel="hue:0200:0017881cc4e3:14:color"}
+Number 	Light_SleepScenes		"Szenen"					<dimmablelight>	(gLightScenes)
+
+Switch	Light_EmilieSwitch		"Emilie"	   				<dimmablelight>	(Switching, grEmilie, gLights, gLightsCount) 	{channel="hue:0210:0017881cc4e3:15:color"}
+Color	Light_EmilieColor		"Emilie"  					<dimmablelight>	(Colorize, grEmilie)  		                	{channel="hue:0210:0017881cc4e3:15:color"}
+Dimmer	Light_EmilieTemp		"Emilie"  					<dimmablelight>	(CTDimmer, grEmilie)  		                	{channel="hue:0210:0017881cc4e3:15:color_temperature"}
+Number 	Light_EmilieScenes		"Szenen"					<dimmablelight>	(gLightScenes)
+
+Switch	Light_NiklasSwitch	    "Niklas"               		<dimmablelight>	(Switching, grNiklas, gLights) 	                {channel="hue:0210:0017881cc4e3:19:color"}
+Color	Light_NiklasColor       "Niklas"               		<dimmablelight>	(Colorize, grNiklas)  			                {channel="hue:0210:0017881cc4e3:19:color"}
+Dimmer	Light_NiklasTemp		"Niklas"               		<dimmablelight>	(CTDimmer, grNiklas)  			                {channel="hue:0210:0017881cc4e3:19:color_temperature"}
+Number 	Light_NiklasScenes		"Szenen"					<dimmablelight>	(gLightScenes)
+
+Switch	Light_NiklasDeckeSwitch	    "Niklas"               	<dimmablelight>	(Switching, grNiklas, gLights) 	                {channel="hue:0210:0017881cc4e3:24:color"}
+Color	Light_NiklasDeckeColor      "Niklas"               	<dimmablelight>	(Colorize, grNiklas)  			                {channel="hue:0210:0017881cc4e3:24:color"}
+Dimmer	Light_NiklasDeckeTemp		"Niklas"               	<dimmablelight>	(CTDimmer, grNiklas)  			                {channel="hue:0210:0017881cc4e3:24:color_temperature"}
+Number 	Light_NiklasDeckeScenes		"Szenen"				<dimmablelight>	(gLightScenes)
+
+Switch	Light_GuestLooSkySwitch	"Gästetoilette Himmel"		<dimmablelight>	(Switching, grGuestLoo, gLights, gLightsCount) 	{channel="hue:0210:0017881cc4e3:23:color"}
+Color	Light_GuestLooSkyColor	"Gästetoilette Himmel" 		<dimmablelight>	(Colorize, grGuestLoo)  		                {channel="hue:0210:0017881cc4e3:23:color"}
+Dimmer	Light_GuestLooSkyTemp	"Gästetoilette Himmel" 		<dimmablelight>	(CTDimmer, grGuestLoo)  		                {channel="hue:0210:0017881cc4e3:23:color_temperature"}
+Number 	Light_GuestLooSkyScenes	"Szenen"					<dimmablelight>	(gLightScenes)
+
+Switch	Light_OfficeYSwitch		"Arbeitszimmer Decke gelb"	<dimmablelight>	(Switching, grOffice, gLights, gLightsCount) 	{channel="hue:0210:0017881cc4e3:22:color"}
+Color	Light_OfficeYColor		"Arbeitszimmer Decke gelb"  <dimmablelight>	(Colorize, grOffice)  		                	{channel="hue:0210:0017881cc4e3:22:color"}
+Dimmer	Light_OfficeYTemp		"Arbeitszimmer Decke gelb"  <dimmablelight>	(CTDimmer, grOffice)  		                	{channel="hue:0210:0017881cc4e3:22:color_temperature"}
+Switch	Light_OfficeBSwitch		"Arbeitszimmer Decke blau"	<dimmablelight>	(Switching, grOffice, gLights, gLightsCount) 	{channel="hue:0210:0017881cc4e3:20:color"}
+Color	Light_OfficeBColor		"Arbeitszimmer Decke blau"  <dimmablelight>	(Colorize, grOffice)  		                	{channel="hue:0210:0017881cc4e3:20:color"}
+Dimmer	Light_OfficeBTemp		"Arbeitszimmer Decke blau"  <dimmablelight>	(CTDimmer, grOffice)  		                	{channel="hue:0210:0017881cc4e3:20:color_temperature"}
+Switch	Light_OfficeGSwitch		"Arbeitszimmer Decke grün"	<dimmablelight>	(Switching, grOffice, gLights, gLightsCount) 	{channel="hue:0210:0017881cc4e3:21:color"}
+Color	Light_OfficeGColor		"Arbeitszimmer Decke grün"  <dimmablelight>	(Colorize, grOffice)  		                	{channel="hue:0210:0017881cc4e3:21:color"}
+Dimmer	Light_OfficeGTemp		"Arbeitszimmer Decke grün"  <dimmablelight>	(CTDimmer, grOffice)  		                	{channel="hue:0210:0017881cc4e3:21:color_temperature"}
+Number 	Light_OfficeTopScenes	"Szenen"					<dimmablelight>	(gLightScenes)
+
+Switch	Light_OfficeEffSwitch	"Arbeitszimmer Regal"	    <dimmablelight>	(Switching, grOffice, gLights, gLightsCount) 	{channel="hue:0210:0017881cc4e3:18:color"}
+Color	Light_OfficeEffColor	"Arbeitszimmer Regal"       <dimmablelight>	(Colorize, grOffice)  		                	{channel="hue:0210:0017881cc4e3:18:color"}
+Dimmer	Light_OfficeEffTemp		"Arbeitszimmer Regal"       <dimmablelight>	(CTDimmer, grOffice)  		                	{channel="hue:0210:0017881cc4e3:18:color_temperature"}
+Number 	Light_OfficeEffScenes	"Szenen"					<dimmablelight>	(gLightScenes)
+
+Switch	Light_StairsSwitch		"Treppenhaus"	   			<dimmablelight>	(Switching, grStairs, gLights, gLightsCount) 	{channel="hue:0220:0017881cc4e3:16:brightness"}
+Color	Light_StairsBright		"Treppenhaus"  				<dimmablelight>	(Dimm, grStairs)  				                {channel="hue:0220:0017881cc4e3:16:brightness"}
+Dimmer	Light_StairsTemp		"Treppenhaus"  				<dimmablelight>	(CTDimmer, grStairs)  			                {channel="hue:0220:0017881cc4e3:16:color_temperature"}
+Number 	Light_StairsScenes		"Szenen"					<dimmablelight>	(gLightScenes)
+
+
+Switch	TriggerTooColdBlink
+Switch  TriggerFireAlarmBlink

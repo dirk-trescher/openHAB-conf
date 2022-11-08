@@ -1,0 +1,380 @@
+import org.eclipse.smarthome.core.library.types.DecimalType
+import org.eclipse.xtext.xbase.lib.Functions
+
+var boolean sentToday = false
+
+
+val	Functions.Function4<NumberItem, NumberItem, String, Boolean, Boolean> batteryThermoHeatingLogic = [
+    NumberItem Batt_Thermo,
+    NumberItem Batt_Thermo_disp,
+    String sName,
+    Boolean sentToday |
+
+		var Number percent = ((Batt_Thermo.state as DecimalType).doubleValue - 2.2) / (3.0 - 2.2) * 100
+		if (percent < 0)	percent = 0
+		if (percent > 100)	percent = 100
+		postUpdate(Batt_Thermo_disp, percent)
+
+		if (percent < 10 && !sentToday) {
+			sendNotification("dirk.trescher@web.de", "Die Batterie von " + sName + " ist schwach.")
+			return true
+		}
+		return false
+]
+
+
+val	Functions.Function4<SwitchItem, NumberItem, String, Boolean, Boolean> batteryWindowLogic = [
+    SwitchItem Batt_Window,
+    NumberItem Batt_Window_disp,
+    String sName,
+    Boolean sentToday |
+
+		if (Batt_Window.state == ON) {
+			postUpdate(Batt_Window_disp, 10)
+			if (!sentToday) {
+				sendNotification("dirk.trescher@web.de", "Die Batterie von " + sName + " ist schwach.")
+				return true
+			}
+		} else {
+			postUpdate(Batt_Window_disp, 100)
+		}
+
+		return false
+]
+
+
+rule "reset sentToday state of battery telegram"
+when
+	Time cron "0 0 8 * * ?"
+then
+	sentToday = false
+end
+
+
+/*rule "Compute Battery for Smoke Detector"
+when
+	Item Batt_Smoke changed
+then
+	var Number percent = ((Batt_Smoke.state as DecimalType))
+	postUpdate(Batt_Smoke_disp, percent)
+end
+*/
+
+rule "Compute Battery for HomeMatic Soil and Roof Temp"
+when Item Soil1_Batt changed then
+	if (batteryWindowLogic.apply(Soil1_Batt, Soil1_Batt_disp, "Feuchtigkeitsmesser Erde", sentToday)) {
+		sentToday = true
+	}
+end
+
+
+rule "Compute Battery for HomeMatic WindowContact Living left"
+when Item Window_LivingLeft_Batt changed then
+	if (batteryWindowLogic.apply(Window_LivingLeft_Batt, Window_LivingLeft_Batt_disp, "Fenster Wohnzimmer links", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute Battery for HomeMatic WindowContact Living middle"
+when Item Window_LivingMiddle_Batt changed then
+	if (batteryWindowLogic.apply(Window_LivingMiddle_Batt, Window_LivingMiddle_Batt_disp, "Fenster Wohnzimmer mitte", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute Battery for HomeMatic WindowContact Living right"
+when Item Window_LivingRight_Batt changed then
+	if (batteryWindowLogic.apply(Window_LivingRight_Batt, Window_LivingRight_Batt_disp, "Fenster Wohnzimmer rechts", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute Battery for HomeMatic WindowContact Sleep"
+when Item Window_Sleep_Batt changed then
+	if (batteryWindowLogic.apply(Window_Sleep_Batt, Window_Sleep_Batt_disp, "Fenster Schlafzimmer", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute Battery for HomeMatic WindowContact Emilie left"
+when Item Window_EmilieLeft_Batt changed then
+	if (batteryWindowLogic.apply(Window_EmilieLeft_Batt, Window_EmilieLeft_Batt_disp, "Fenster Emilie links", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute Battery for HomeMatic WindowContact Emilie middle"
+when Item Window_EmilieMiddle_Batt changed then
+	if (batteryWindowLogic.apply(Window_EmilieMiddle_Batt, Window_EmilieMiddle_Batt_disp, "Fenster Emilie mitte", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute Battery for HomeMatic WindowContact Emilie right"
+when Item Window_EmilieRight_Batt changed then
+	if (batteryWindowLogic.apply(Window_EmilieRight_Batt, Window_EmilieRight_Batt_disp, "Fenster Emilie rechts", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute Battery for HomeMatic WindowContact Niklas right"
+when Item Window_NiklasRight_Batt changed then
+	if (batteryWindowLogic.apply(Window_NiklasRight_Batt, Window_NiklasRight_Batt_disp, "Fenster Niklas rechts", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute Battery for HomeMatic WindowContact Niklas left"
+when Item Window_NiklasLeft_Batt changed then
+	if (batteryWindowLogic.apply(Window_NiklasLeft_Batt, Window_NiklasLeft_Batt_disp, "Fenster Niklas links", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic WindowContact Office door"
+when Item Window_OfficeDoor_Batt changed then
+	if (batteryWindowLogic.apply(Window_OfficeDoor_Batt, Window_OfficeDoor_Batt_disp, "Balkontür Arbeit", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic WindowContact Office left"
+when Item Window_OfficeLeft_Batt changed then
+	if (batteryWindowLogic.apply(Window_OfficeLeft_Batt, Window_OfficeLeft_Batt_disp, "Fenster Arbeit links", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic WindowContact Office right"
+when Item Window_OfficeRight_Batt changed then
+	if (batteryWindowLogic.apply(Window_OfficeRight_Batt, Window_OfficeRight_Batt_disp, "Fenster Arbeit rechts", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic WindowContact Hobby"
+when Item Window_Hobby_Batt changed then
+	if (batteryWindowLogic.apply(Window_Hobby_Batt, Window_Hobby_Batt_disp, "Fenster Hobby", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic WindowContact Terrace door"
+when Item Window_Terrace_Batt changed then
+	if (batteryWindowLogic.apply(Window_Terrace_Batt, Window_Terrace_Batt_disp, "Terrassentür", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic WindowContact App door"
+when Item Window_AppDoor_Batt changed then
+	if (batteryWindowLogic.apply(Window_AppDoor_Batt, Window_AppDoor_Batt_disp, "Wohnungstür", sentToday)) {
+		sentToday = true
+	}
+end
+
+
+rule "Compute battery for HomeMatic Wandtaster"
+when Item Switch_EssZi1_Batt changed then
+	if (batteryWindowLogic.apply(Switch_EssZi1_Batt, Switch_EssZi1_Batt_disp, "Taster Esszimmer 1", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic Wandtaster"
+when Item Switch_EssZi2_Batt changed then
+	if (batteryWindowLogic.apply(Switch_EssZi2_Batt, Switch_EssZi2_Batt_disp, "Taster Esszimmer 2", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic Wandtaster"
+when Item Switch_WohnZi_Batt changed then
+	if (batteryWindowLogic.apply(Switch_WohnZi_Batt, Switch_WohnZi_Batt_disp, "Taster Wohnzimmer", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic Wandtaster"
+when Item Switch_Bath_Batt changed then
+	if (batteryWindowLogic.apply(Switch_Bath_Batt, Switch_Bath_Batt_disp, "Taster Bad außen", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic Wandtaster"
+when Item Switch_BathInside_Batt changed then
+	if (batteryWindowLogic.apply(Switch_BathInside_Batt, Switch_BathInside_Batt_disp, "Taster Bad innen", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic Wandtaster"
+when Item Switch_EmilieDoor_Batt changed then
+	if (batteryWindowLogic.apply(Switch_EmilieDoor_Batt, Switch_EmilieDoor_Batt_disp, "Taster Emilie Tür", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic Wandtaster"
+when Item Switch_EmilieSleep_Batt changed then
+	if (batteryWindowLogic.apply(Switch_EmilieSleep_Batt, Switch_EmilieSleep_Batt_disp, "Taster Emilie Bett", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic Wandtaster"
+when Item Switch_Sleep1_Batt changed then
+	if (batteryWindowLogic.apply(Switch_Sleep1_Batt, Switch_Sleep1_Batt_disp, "Taster Schlafzimmer innen", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic Wandtaster"
+when Item Switch_Sleep2_Batt changed then
+	if (batteryWindowLogic.apply(Switch_Sleep2_Batt, Switch_Sleep2_Batt_disp, "Taster Schlafzimmer Tür", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic Wandtaster"
+when Item Switch_Sleep3_Batt changed then
+	if (batteryWindowLogic.apply(Switch_Sleep3_Batt, Switch_Sleep3_Batt_disp, "Taster Schlafzimmer geheim", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic Wandtaster"
+when Item Switch_GuestLoo_Batt changed then
+	if (batteryWindowLogic.apply(Switch_GuestLoo_Batt, Switch_GuestLoo_Batt_disp, "Taster Gästebad", sentToday)) {
+		sentToday = true
+	}
+end
+
+
+rule "Compute battery for HomeMatic Thermostat"
+when Item Batt_ThermoLiving changed then
+	if (batteryThermoHeatingLogic.apply(Batt_ThermoLiving, Batt_ThermoLiving_disp, "Thermostat Wohnzimmer", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic Thermostat"
+when Item Batt_ThermoBath changed then
+	if (batteryThermoHeatingLogic.apply(Batt_ThermoBath, Batt_ThermoBath_disp, "Thermostat Bad", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic Thermostat"
+when Item Batt_ThermoSleep changed then
+	if (batteryThermoHeatingLogic.apply(Batt_ThermoSleep, Batt_ThermoSleep_disp, "Thermostat Schlafzimmer", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic Thermostat"
+when Item Batt_ThermoEmilie changed then
+	if (batteryThermoHeatingLogic.apply(Batt_ThermoEmilie, Batt_ThermoEmilie_disp, "Thermostat Emilie", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic Thermostat"
+when Item Batt_ThermoNiklas changed then
+	if (batteryThermoHeatingLogic.apply(Batt_ThermoNiklas, Batt_ThermoNiklas_disp, "Thermostat Niklas", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic Thermostat"
+when Item Batt_ThermoOffice changed then
+	if (batteryThermoHeatingLogic.apply(Batt_ThermoOffice, Batt_ThermoOffice_disp, "Thermostat Arbeitszimmer", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic Thermostat"
+when Item Batt_ThermoHobby changed then
+	if (batteryThermoHeatingLogic.apply(Batt_ThermoHobby, Batt_ThermoHobby_disp, "Thermostat Bastelzimmer", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic Thermostat"
+when Item Batt_ThermoKidsBath changed then
+	if (batteryThermoHeatingLogic.apply(Batt_ThermoKidsBath, Batt_ThermoKidsBath_disp, "Thermostat Gästebad", sentToday)) {
+		sentToday = true
+	}
+end
+
+
+rule "Compute battery for HomeMatic Heating"
+when Item Batt_HeatingLiving changed then
+	if (batteryThermoHeatingLogic.apply(Batt_HeatingLiving, Batt_HeatingLiving_disp, "Heizung Wohnzimmer", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic Heating"
+when Item Batt_HeatingBath changed then
+	if (batteryThermoHeatingLogic.apply(Batt_HeatingBath, Batt_HeatingBath_disp, "Heizung Bad", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic Heating"
+when Item Batt_HeatingSleep changed then
+	if (batteryThermoHeatingLogic.apply(Batt_HeatingSleep, Batt_HeatingSleep_disp, "Heizung Schlafzimmer", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic Heating"
+when Item Batt_HeatingKitchen changed then
+	if (batteryThermoHeatingLogic.apply(Batt_HeatingKitchen, Batt_HeatingKitchen_disp, "Heizung Küche", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic Heating"
+when Item Batt_HeatingEmilieRe changed then
+	if (batteryThermoHeatingLogic.apply(Batt_HeatingEmilieRe, Batt_HeatingEmilieRe_disp, "Heizung Emilie rechts", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic Heating"
+when Item Batt_HeatingEmilieLi changed then
+	if (batteryThermoHeatingLogic.apply(Batt_HeatingEmilieLi, Batt_HeatingEmilieLi_disp, "Heizung Emilie links", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic Heating"
+when Item Batt_HeatingNiklas changed then
+	if (batteryThermoHeatingLogic.apply(Batt_HeatingNiklas, Batt_HeatingNiklas_disp, "Heizung Niklas", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic Heating"
+when Item Batt_HeatingOffice changed then
+	if (batteryThermoHeatingLogic.apply(Batt_HeatingOffice, Batt_HeatingOffice_disp, "Heizung Arbeitszimmer", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic Heating"
+when Item Batt_HeatingHobby changed then
+	if (batteryThermoHeatingLogic.apply(Batt_HeatingHobby, Batt_HeatingHobby_disp, "Heizung Bastelzimmer", sentToday)) {
+		sentToday = true
+	}
+end
+
+rule "Compute battery for HomeMatic Heating"
+when Item Batt_HeatingKidsBath changed then
+	if (batteryThermoHeatingLogic.apply(Batt_HeatingKidsBath, Batt_HeatingKidsBath_disp, "Heizung Gästebad", sentToday)) {
+		sentToday = true
+	}
+end

@@ -1,0 +1,282 @@
+var Timer vacationTimer = null
+var Timer WLAN_Loft_OFF_Timer = null
+var Timer WLAN_Loft_ON_Timer = null
+var Timer WLAN_LoftWork_OFF_Timer = null
+var Timer WLAN_LoftWork_ON_Timer = null
+var Timer WLAN_LoftRoof_OFF_Timer = null
+var Timer WLAN_LoftRoof_ON_Timer = null
+
+
+rule "Switch off WLAN at night"
+when
+	Item LoftMode changed to 2
+then
+    vacationTimer?.cancel()
+    vacationTimer = null
+
+	logInfo( "wifi", "wifi off due to Sleeping Mode between 23h and 6h" )
+
+	sendCommand(WLAN_Loft, OFF)
+	sendCommand(WLAN_Roof_DelayOff, OFF)
+	sendCommand(WLAN_Office_DelayOff, OFF)
+end
+
+/*
+rule "Switch off WLAN when away"
+when
+	Item LoftMode changed to 1
+then
+	if (vacationTimer != null) {
+		vacationTimer.cancel()
+		vacationTimer = null
+	}
+
+	logInfo( "wifi", "wifi off due to Away Mode" )
+
+	sendCommand(WLAN_Loft, OFF)
+	sendCommand(WLAN50_LoftRoof, OFF)
+	sendCommand(WLAN_Office_DelayOff, OFF)
+end
+*/
+
+rule "Switch on WLAN when in Party Mode"
+when
+	Item LoftMode changed to 3
+then
+    vacationTimer?.cancel
+    vacationTimer = null
+
+	logInfo( "wifi", "wifi on due to Party Mode" )
+
+	sendCommand(WLAN_Loft, ON)
+    sendCommand(WLAN_Roof_DelayOff, ON)
+	if (Guests.state == OFF) {
+		sendCommand(WLAN_Office_DelayOff, ON)
+	}
+end
+
+rule "Switch off WLAN when on vacation"
+when
+	Item LoftMode changed to 4
+then
+	vacationTimer = createTimer(now.plusMinutes(10)) [|
+		logInfo( "wifi", "wifi off due to Vacation Mode" )
+
+		sendCommand(WLAN_Loft, OFF)
+		sendCommand(WLAN50_LoftRoof, OFF)
+		sendCommand(WLAN_Office_DelayOff, OFF)
+	]
+end
+
+rule "Switch on WLAN when present"
+when
+	Item LoftMode changed to 0
+then
+    vacationTimer?.cancel
+    vacationTimer = null
+
+	if(now.getHour() >= 6) {
+		logInfo( "wifi", "wifi on due to Present Mode after 6 AM" )
+
+		sendCommand(WLAN_Loft, ON)
+		if (Guests.state == OFF || now.getHour() >= 9) {
+			sendCommand(WLAN_Office_DelayOff, ON)
+			sendCommand(WLAN_Roof_DelayOff, ON)
+		}
+	}
+end
+
+rule "Switch on office WiFi at 9:00 when guests are there"
+when
+    Time cron "0 40 7 ? * MON-FRI" or	// 7:40 weekdays
+    Time cron "0 0 9 ? * SAT,SUN"		// 9:00 weekend
+then
+    if (Guests.state == ON && WLAN_Office_DelayOff.state == OFF) {
+    	logInfo( "wifi", "office wifi on even with guests due to 7:40 / 9 AM" )
+
+        sendCommand(WLAN_Office_DelayOff, ON)
+    }
+end
+
+rule "Soft switch off Office WiFi"
+when
+    Item WLAN_Office_DelayOff received command OFF
+then
+    WLAN_LoftWork_ON_Timer?.cancel
+    WLAN_LoftWork_ON_Timer = null
+
+    sendCommand(WLAN24_LoftWork, OFF)
+    sendCommand(WLAN50_LoftWork, OFF)
+
+    WLAN_LoftWork_OFF_Timer = createTimer(now.plusSeconds(30)) [|
+        sendCommand(WLan_Office, OFF)
+    ]
+end
+
+rule "Soft switch on Office WiFi"
+when
+    Item WLAN_Office_DelayOff received command ON
+then
+    WLAN_LoftWork_OFF_Timer?.cancel
+    WLAN_LoftWork_OFF_Timer = null
+
+//    sendCommand(WLAN24_LoftWork, ON)
+//    sendCommand(WLAN50_LoftWork, ON)
+    sendCommand(WLan_Office, ON)
+end
+
+rule "switch on Office WiFi"
+when
+    Item WLan_Office changed to ON
+then
+    WLAN_LoftWork_ON_Timer = createTimer(now.plusSeconds(120)) [|
+        sendCommand(WLAN24_LoftWork, ON)
+        sendCommand(WLAN50_LoftWork, ON)
+    ]
+end
+
+rule "Soft switch off Roof WiFi"
+when
+    Item WLAN_Roof_DelayOff received command OFF
+then
+    WLAN_LoftRoof_ON_Timer?.cancel
+    WLAN_LoftRoof_ON_Timer = null
+
+//    sendCommand(WLAN24_LoftRoof, OFF)
+    sendCommand(WLAN50_LoftRoof, OFF)
+
+//    WLAN_LoftRoof_OFF_Timer = createTimer(now.plusSeconds(20)) [|
+//        sendCommand(WLan_Roof, OFF)
+//    ]
+end
+
+rule "Soft switch on Roof WiFi"
+when
+    Item WLAN_Roof_DelayOff received command ON
+then
+    WLAN_LoftRoof_OFF_Timer?.cancel
+    WLAN_LoftRoof_OFF_Timer = null
+
+    if (WLan_Roof.state == ON) {
+        sendCommand(WLAN24_LoftRoof, ON)
+        sendCommand(WLAN50_LoftRoof, ON)
+    }
+    else {
+        sendCommand(WLan_Roof, ON)
+        WLAN_LoftRoof_ON_Timer = createTimer(now.plusSeconds(120)) [|
+            sendCommand(WLAN24_LoftRoof, ON)
+            sendCommand(WLAN50_LoftRoof, ON)
+        ]
+    }
+end
+
+rule "Map 2,4GHz and 5GHz WLAN to WLAN Loft"
+when
+	Item WLAN24_Loft changed or
+	Item WLAN50_Loft changed
+then
+	logInfo("wifi", "WLAN24_Loft or WLAN50_Loft changed: WLAN24_Loft " + WLAN24_Loft.state + ", WLAN50_Loft " + WLAN50_Loft.state )
+	if (WLAN24_Loft.state == OFF && WLAN50_Loft.state == OFF && WLAN_Loft.state != OFF) {
+		logInfo( "wifi", "set WLAN_Loft off" )
+		postUpdate(WLAN_Loft, OFF)
+	} else if ((WLAN24_Loft.state == ON || WLAN50_Loft.state == ON) && WLAN_Loft.state != ON) {
+		logInfo( "wifi", "set WLAN_Loft on" )
+		postUpdate(WLAN_Loft, ON)
+	}
+end
+
+rule "Map WLAN Loft ON to 2,4GHz and 5GHz WLAN"
+when
+	Item WLAN_Loft received command ON
+then
+	logInfo("wifi", "WLAN_Loft received command ON")
+
+    WLAN_Loft_OFF_Timer?.cancel
+    WLAN_Loft_OFF_Timer = null
+
+	if (WLAN24_Loft.state != ON) {
+		logInfo( "wifi", "switch WLAN24_Loft on" )
+		sendCommand(WLAN24_Loft, ON)
+	}
+	if (WLAN50_Loft.state != ON) {
+		logInfo( "wifi", "switch WLAN50_Loft on" )
+		sendCommand(WLAN50_Loft, ON)
+	}
+
+	WLAN_Loft_ON_Timer = createTimer(now.plusMinutes(10)) [|
+		if (LoftMode.state == 0 || LoftMode.state == 3) {
+			if (WLAN24_Loft.state != ON) {
+				logInfo( "wifi", "timer: switch WLAN24_Loft on" )
+				sendCommand(WLAN24_Loft, ON)
+			}
+			if (WLAN50_Loft.state != ON) {
+				logInfo( "wifi", "timer: switch WLAN50_Loft on" )
+				sendCommand(WLAN50_Loft, ON)
+			}
+		}
+	]
+end
+
+rule "Map WLAN Loft to 2,4GHz and 5GHz WLAN"
+when
+	Item WLAN_Loft received command OFF
+then
+	logInfo("wifi", "WLAN_Loft received command OFF")
+
+    WLAN_Loft_ON_Timer?.cancel
+    WLAN_Loft_ON_Timer = null
+
+	if (WLAN24_Loft.state != OFF) {
+		logInfo( "wifi", "switch WLAN24_Loft off" )
+		sendCommand(WLAN24_Loft, OFF)
+	}
+	if (WLAN50_Loft.state != OFF) {
+		logInfo( "wifi", "switch WLAN50_Loft off" )
+		sendCommand(WLAN50_Loft, OFF)
+	}
+
+	WLAN_Loft_OFF_Timer = createTimer(now.plusMinutes(20)) [|
+		if (LoftMode.state == 2 || LoftMode.state == 4) {
+			if (WLAN24_Loft.state != OFF) {
+				logInfo( "wifi", "timer: switch WLAN24_Loft off" )
+				sendCommand(WLAN24_Loft, OFF)
+			}
+			if (WLAN50_Loft.state != OFF) {
+				logInfo( "wifi", "timer: switch WLAN50_Loft off" )
+				sendCommand(WLAN50_Loft, OFF)
+			}
+		}
+	]
+end
+
+rule "Number of WLAN on"
+when
+	Item WLAN_Loft changed or
+	Item WLAN24_Loft changed or
+	Item WLAN50_Loft changed or
+	Item WLan_Office changed or
+	Item WLan_Roof changed or
+    Item WLAN24_LoftRoof changed or
+    Item WLAN50_LoftRoof changed
+then
+	var int currNrWLAN = 0
+	if (WLAN24_LoftRoof.state == ON) {
+		currNrWLAN = currNrWLAN + 1
+	}
+    if (WLAN50_LoftRoof.state == ON) {
+		currNrWLAN = currNrWLAN + 1
+	}
+	if (WLAN24_Loft.state == ON) {
+		currNrWLAN = currNrWLAN + 1
+	}
+    if (WLAN50_Loft.state == ON) {
+		currNrWLAN = currNrWLAN + 1
+	}
+	if (WLAN24_LoftWork.state == ON) {
+		currNrWLAN = currNrWLAN + 1
+	}
+	if (WLAN50_LoftWork.state == ON) {
+		currNrWLAN = currNrWLAN + 1
+	}
+	postUpdate(NrWLAN, currNrWLAN)
+end

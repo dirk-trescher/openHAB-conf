@@ -1,0 +1,1677 @@
+import org.eclipse.smarthome.core.library.types.DecimalType
+import org.eclipse.smarthome.core.library.types.HSBType
+import org.eclipse.smarthome.core.library.types.PercentType
+import org.eclipse.smarthome.model.script.actions.Timer
+import org.eclipse.xtext.xbase.lib.Functions
+import org.joda.time.LocalTime
+
+val java.util.Random rand = new java.util.Random
+
+var Timer TimerEssZiDimmer = null
+var boolean EssZiDimmerOn = false
+var Timer TimerLivingDimmer = null
+var Timer TimerBathDimmer = null
+
+var boolean EmilieLight = false
+var Number EmilieScene = 0
+var Number EmilieNrScenes = 4
+var Timer TimerEmilieDimmer = null
+var Timer TimerEmilieUpOff = null
+
+var Timer TimerNiklasDimmer = null
+
+var Timer TimerGuestLooDimmer = null
+var Timer TimerGuestOnLoo = null
+var boolean GuestOnLoo = false
+var Number GuestLooFanManOnOff = 0
+var Timer TimerGuestLooFanManOnOff = null
+var Timer TimerGuestLooNoDoubles = null
+var Timer TimerGuestLooUpOff = null
+var Timer TimerGuestLooAutoOff = null
+var Timer TimerGuestLooFanTrigger = null
+var Timer TimerGuestLooFanHigh = null
+var Timer TimerGuestLooFanLow = null
+var Timer TimerGuestLooStopWatch = null
+
+var Timer TimerOfficeTopDimmer = null
+var Timer TimerOfficeTopUpOff = null
+
+var Timer TimerOfficeEffectDimmer = null
+var Timer TimerOfficeEffectUpOff = null
+
+var Timer TimerSleepDimmer = null
+var Timer TimerSleepUpOff = null
+
+var Float EssZiHue = 0.0
+var Float EssZiSaturation = 0.0
+
+
+val Functions.Function1<OnOffType, Void> SetEatingLightsOnOff = [ stateOnOff |
+
+	sendCommand(Light_EatingInSwitch, stateOnOff)
+    Thread.sleep(10)
+	sendCommand(Light_EatingOutSwitch, stateOnOff)
+	return null
+]
+
+val	Functions.Function3<Float, Integer, Integer, Void> SetEatingLights = [ locHue, locSat, locBright |
+
+	var DecimalType hue = new DecimalType(locHue)
+	var PercentType sat = new PercentType(locSat)
+	var PercentType bright = new PercentType(locBright)
+	var HSBType light = new HSBType(hue, sat, bright)
+
+	sendCommand(Light_EatingOutColor, light)
+    Thread.sleep(10)
+	sendCommand(Light_EatingInColor, light)
+	return null
+]
+
+val	Functions.Function1<Integer, Void> SetEatingLightsBright = [ bright |
+
+	Light_EatingOutColor.sendCommand(new PercentType(bright))
+    Thread.sleep(10)
+	Light_EatingInColor.sendCommand(new PercentType(bright))
+	return null
+]
+
+val	Functions.Function1<Integer, Void> SetEatingLightsTemp = [ lightTemp |
+
+    Light_EatingInTemp.sendCommand(lightTemp)
+    Thread.sleep(10)
+    Light_EatingOutTemp.sendCommand(lightTemp)
+	return null
+]
+
+val Functions.Function1<OnOffType, Void> SetLivingLightsOnOff = [ stateOnOff |
+
+	sendCommand(Light_WohnZiSwitch, stateOnOff)
+    Thread.sleep(10)
+	sendCommand(Light_WohnZiStudioSwitch, stateOnOff)
+	return null
+]
+
+val	Functions.Function3<Float, Integer, Integer, Void> SetLivingLights = [ locHue, locSat, locBright |
+
+	var DecimalType hue = new DecimalType(locHue)
+	var PercentType sat = new PercentType(locSat)
+	var PercentType bright = new PercentType(locBright)
+	var HSBType light = new HSBType(hue, sat, bright)
+
+	sendCommand(Light_WohnZiColor, light)
+
+	if (locHue <= 95) hue = new DecimalType(locHue + 5.0)
+	if (locSat <= 85) sat = new PercentType(locSat + 15)
+	light = new HSBType(hue, sat, bright)
+
+	sendCommand(Light_WohnZiStudioColor, light)
+	return null
+]
+
+val	Functions.Function1<Integer, Void> SetLivingLightsBright = [ bright |
+
+	Light_WohnZiColor.sendCommand(new PercentType(bright))
+    Thread.sleep(10)
+	Light_WohnZiStudioColor.sendCommand(new PercentType(bright))
+	return null
+]
+
+val	Functions.Function1<Integer, Void> SetLivingLightsTemp = [ lightTemp |
+
+    Light_WohnZiStudioTemp.sendCommand(lightTemp)
+	return null
+]
+
+val Functions.Function1<OnOffType, Void> SetBathLightsOnOff = [ stateOnOff |
+
+	sendCommand(Light_BathLSwitch, stateOnOff)
+    Thread.sleep(10)
+	sendCommand(Light_BathRSwitch, stateOnOff)
+	return null
+]
+
+val	Functions.Function3<Float, Integer, Integer, Void> SetBathLights = [locHue, locSat, locBright |
+
+	var DecimalType hue = new DecimalType(locHue)
+	var PercentType sat = new PercentType(locSat)
+	var PercentType bright = new PercentType(locBright)
+	var HSBType light = new HSBType(hue,sat,bright)
+
+	sendCommand(Light_BathLColor, light)
+    Thread.sleep(10)
+	sendCommand(Light_BathRColor, light)
+	return null
+]
+
+val	Functions.Function1<Integer, Void> SetBathLightsBright = [ bright |
+
+	Light_BathLColor.sendCommand(new PercentType(bright))
+    Thread.sleep(10)
+	Light_BathRColor.sendCommand(new PercentType(bright))
+	return null
+]
+
+val	Functions.Function1<Integer, Void> SetBathLightsTemp = [ lightTemp |
+
+    Light_BathLTemp.sendCommand(lightTemp)
+    Thread.sleep(10)
+    Light_BathRTemp.sendCommand(lightTemp)
+	return null
+]
+
+val Functions.Function1<OnOffType, Void> SetEmilieLightsOnOff = [ stateOnOff |
+
+	sendCommand(Light_EmilieSwitch, stateOnOff)
+	return null
+]
+
+val	Functions.Function3<Float, Integer, Integer, Void> SetEmilieLights = [locHue, locSat, locBright |
+
+	var DecimalType hue = new DecimalType(locHue)
+	var PercentType sat = new PercentType(locSat)
+	var PercentType bright = new PercentType(locBright)
+	var HSBType light = new HSBType(hue,sat,bright)
+
+	sendCommand(Light_EmilieColor, light)
+	return null
+]
+
+val	Functions.Function1<Integer, Void> SetEmilieLightsBright = [ bright |
+
+	Light_EmilieColor.sendCommand(new PercentType(bright))
+	return null
+]
+
+val	Functions.Function1<Integer, Void> SetEmilieLightsTemp = [ lightTemp |
+
+    Light_EmilieTemp.sendCommand(lightTemp)
+	return null
+]
+val Functions.Function1<OnOffType, Void> SetNiklasLightsOnOff = [ stateOnOff |
+
+	sendCommand(Light_NiklasSwitch, stateOnOff)
+	return null
+]
+
+val	Functions.Function3<Float, Integer, Integer, Void> SetNiklasLights = [locHue, locSat, locBright |
+
+	var DecimalType hue = new DecimalType(locHue)
+	var PercentType sat = new PercentType(locSat)
+	var PercentType bright = new PercentType(locBright)
+	var HSBType light = new HSBType(hue,sat,bright)
+
+	sendCommand(Light_NiklasColor, light)
+	return null
+]
+
+val	Functions.Function1<Integer, Void> SetNiklasLightsBright = [ bright |
+
+	Light_NiklasColor.sendCommand(new PercentType(bright))
+	return null
+]
+
+val	Functions.Function1<Integer, Void> SetNiklasLightsTemp = [ lightTemp |
+
+    Light_NiklasTemp.sendCommand(lightTemp)
+	return null
+]
+
+val Functions.Function1<OnOffType, Void> SetNiklasDeckeLightsOnOff = [ stateOnOff |
+
+	sendCommand(Light_NiklasDeckeSwitch, stateOnOff)
+	return null
+]
+
+val	Functions.Function3<Float, Integer, Integer, Void> SetNiklasDeckeLights = [locHue, locSat, locBright |
+
+	var DecimalType hue = new DecimalType(locHue)
+	var PercentType sat = new PercentType(locSat)
+	var PercentType bright = new PercentType(locBright)
+	var HSBType light = new HSBType(hue,sat,bright)
+
+	sendCommand(Light_NiklasDeckeColor, light)
+	return null
+]
+
+val	Functions.Function1<Integer, Void> SetNiklasDeckeLightsBright = [ bright |
+
+	Light_NiklasDeckeColor.sendCommand(new PercentType(bright))
+	return null
+]
+
+val	Functions.Function1<Integer, Void> SetNiklasDeckeLightsTemp = [ lightTemp |
+
+    Light_NiklasDeckeTemp.sendCommand(lightTemp)
+	return null
+]
+
+val Functions.Function1<OnOffType, Void> SetSleepLightsOnOff = [ stateOnOff |
+
+	sendCommand(Light_SleepSwitch, stateOnOff)
+	return null
+]
+
+val	Functions.Function3<Float, Integer, Integer, Void> SetSleepLights = [locHue, locSat, locBright |
+
+	var DecimalType hue = new DecimalType(locHue)
+	var PercentType sat = new PercentType(locSat)
+	var PercentType bright = new PercentType(locBright)
+	var HSBType light = new HSBType(hue,sat,bright)
+
+	sendCommand(Light_SleepColor, light)
+	return null
+]
+
+val Functions.Function1<OnOffType, Void> SetGuestLooOnOff = [ stateOnOff |
+
+	sendCommand(Leuchter_Gaestetoilette, stateOnOff)
+	return null
+]
+
+val	Functions.Function3<Float, Integer, Integer, Void> SetGuestLooSky = [locHue, locSat, locBright |
+
+	var DecimalType hue = new DecimalType(locHue)
+	var PercentType sat = new PercentType(locSat)
+	var PercentType bright = new PercentType(locBright)
+	var HSBType light = new HSBType(hue,sat,bright)
+
+	sendCommand(Light_GuestLooSkyColor, light)
+	return null
+]
+
+val	Functions.Function1<Integer, Void> SetGuestLooSkyBright = [ bright |
+
+	Light_GuestLooSkyColor.sendCommand(new PercentType(bright))
+	return null
+]
+
+val	Functions.Function1<Integer, Void> SetGuestLooSkyTemp = [ lightTemp |
+
+    Light_GuestLooSkyTemp.sendCommand(lightTemp)
+	return null
+]
+
+val Functions.Function1<OnOffType, Void> SetOfficeTopLightsOnOff = [ stateOnOff |
+
+	sendCommand(Light_OfficeYSwitch, stateOnOff)
+    Thread.sleep(10)
+	sendCommand(Light_OfficeBSwitch, stateOnOff)
+    Thread.sleep(10)
+	sendCommand(Light_OfficeGSwitch, stateOnOff)
+	return null
+]
+
+val	Functions.Function3<Float, Integer, Integer, Void> SetOfficeTopLights = [locHue, locSat, locBright |
+
+	var DecimalType hue = new DecimalType(locHue)
+	var PercentType sat = new PercentType(locSat)
+	var PercentType bright = new PercentType(locBright)
+	var HSBType light = new HSBType(hue,sat,bright)
+
+	sendCommand(Light_OfficeYColor, light)
+    Thread.sleep(10)
+	sendCommand(Light_OfficeBColor, light)
+    Thread.sleep(10)
+	sendCommand(Light_OfficeGColor, light)
+	return null
+]
+
+val	Functions.Function1<Integer, Void> SetOfficeTopLightsBright = [ bright |
+
+	Light_OfficeYColor.sendCommand(new PercentType(bright))
+    Thread.sleep(10)
+	Light_OfficeBColor.sendCommand(new PercentType(bright))
+    Thread.sleep(10)
+	Light_OfficeGColor.sendCommand(new PercentType(bright))
+	return null
+]
+
+val	Functions.Function1<Integer, Void> SetOfficeTopLightsTemp = [ lightTemp |
+
+    Light_OfficeYTemp.sendCommand(lightTemp)
+    Thread.sleep(10)
+    Light_OfficeBTemp.sendCommand(lightTemp)
+    Thread.sleep(10)
+    Light_OfficeGTemp.sendCommand(lightTemp)
+	return null
+]
+
+val Functions.Function1<OnOffType, Void> SetOfficeEffLightsOnOff = [ stateOnOff |
+
+	sendCommand(Light_OfficeEffSwitch, stateOnOff)
+	return null
+]
+
+val	Functions.Function3<Float, Integer, Integer, Void> SetOfficeEffLights = [locHue, locSat, locBright |
+
+	var DecimalType hue = new DecimalType(locHue)
+	var PercentType sat = new PercentType(locSat)
+	var PercentType bright = new PercentType(locBright)
+	var HSBType light = new HSBType(hue,sat,bright)
+
+	sendCommand(Light_OfficeEffColor, light)
+	return null
+]
+
+val	Functions.Function1<Integer, Void> SetOfficeEffLightsBright = [ bright |
+
+	Light_OfficeEffColor.sendCommand(new PercentType(bright))
+	return null
+]
+
+val	Functions.Function1<Integer, Void> SetOfficeEffLightsTemp = [ lightTemp |
+
+    Light_OfficeEffTemp.sendCommand(lightTemp)
+	return null
+]
+
+val	Functions.Function4<NumberItem, Functions.Function1<Integer, Void>, Functions.Function1<Integer, Void>, Functions.Function1<Integer, Void>, Void> setLightScenesTemp = [
+	LightScenes, SetLightsOnOff, SetLightsColor, SetLightsTemp |
+
+	if (LightScenes.state == 0) {
+		SetLightsOnOff.apply(OFF)
+	} else {
+		if (LightScenes.state == 1) {
+			SetLightsColor.apply(100)		// Daylight
+            SetLightsTemp.apply(14)
+		} else if (LightScenes.state == 2) {
+			SetLightsColor.apply(100)			// Standard
+            SetLightsTemp.apply(62)
+		} else if (LightScenes.state == 3) {
+			SetLightsColor.apply(96)			// Ambient
+            SetLightsTemp.apply(100)
+		} else if (LightScenes.state == 4) {
+			SetLightsColor.apply(5)			// Nightlight
+            SetLightsTemp.apply(86)
+		} else if (LightScenes.state == 5) {
+			SetLightsColor.apply(20)			// Ambient dimm
+            SetLightsTemp.apply(100)
+		} else if (LightScenes.state == 6) {
+			SetLightsColor.apply(20)			// Color cycle
+            SetLightsColor.apply(25)
+		} else if (LightScenes.state == 7) {
+			SetLightsColor.apply(1)			// Nightlight dark
+            SetLightsTemp.apply(86)
+		} else if (LightScenes.state == 9) {
+			SetLightsColor.apply(70)			// Ambient Niklas
+            SetLightsTemp.apply(100)
+		} else if (LightScenes.state == 10) {
+			SetLightsColor.apply(100)			    // Daylight old strip
+            SetLightsTemp.apply(14)
+		} else if (LightScenes.state == 11) {
+			SetLightsColor.apply(96)			    // Ambient old strip
+            SetLightsTemp.apply(100)
+		} else if (LightScenes.state == 12) {
+			SetLightsColor.apply(5)			        // Nightlight old strip
+            SetLightsTemp.apply(86)
+		}
+	}
+
+	return null
+]
+
+val	Functions.Function3<NumberItem, Functions.Function1<Integer, Void>, Functions.Function3<Float, Integer, Integer, Void>, Void> setLightScenes = [
+	LightScenes, SetLightsOnOff, SetLightsColor |
+
+	if (LightScenes.state == 0) {
+		SetLightsOnOff.apply(OFF)
+	} else {
+		if (LightScenes.state == 1) {
+			SetLightsColor.apply(223f, 15, 100)		// Daylight
+		} else if (LightScenes.state == 2) {
+			SetLightsColor.apply(192f, 13, 100)			// Standard
+		} else if (LightScenes.state == 3) {
+			SetLightsColor.apply(39f, 89, 96)			// Ambient
+		} else if (LightScenes.state == 4) {
+			SetLightsColor.apply(44f, 70, 5)			// Nightlight
+		} else if (LightScenes.state == 5) {
+			SetLightsColor.apply(39f, 89, 20)			// Ambient dimm
+		} else if (LightScenes.state == 6) {
+			SetLightsColor.apply(0f, 100, 25)				// Color cycle
+		} else if (LightScenes.state == 7) {
+			SetLightsColor.apply(39f, 89, 1)			// Nightlight dark
+		} else if (LightScenes.state == 9) {
+			SetLightsColor.apply(39f, 89, 70)			// Ambient Niklas
+		} else if (LightScenes.state == 10) {
+			SetLightsColor.apply(12f, 13, 100)			    // Daylight old strip
+		} else if (LightScenes.state == 11) {
+			SetLightsColor.apply(18f, 76, 96)			    // Ambient old strip
+		} else if (LightScenes.state == 12) {
+			SetLightsColor.apply(18, 76, 5)			        // Nightlight old strip
+		}
+	}
+
+	return null
+]
+
+// ---------------------------------------------------------------
+
+rule "Blink blue when temperature too cold"
+when
+	Item TriggerTooColdBlink changed to ON
+then
+	var Number EatingSceneBuffer = Light_EatingScenes.state
+
+	sendCommand(Light_EatingOutSwitch, ON)
+	sendCommand(Light_EatingInSwitch, ON)
+
+	SetEatingLights.apply(215f, 100, 100)
+
+	createTimer(now.plusSeconds(2)) [|
+		sendCommand(Light_EatingOutSwitch, OFF)
+		sendCommand(Light_EatingInSwitch, OFF)
+
+		createTimer(now.plusSeconds(2)) [|
+			sendCommand(Light_EatingOutSwitch, ON)
+			sendCommand(Light_EatingInSwitch, ON)
+
+			createTimer(now.plusSeconds(2)) [|
+				sendCommand(Light_EatingOutSwitch, OFF)
+				sendCommand(Light_EatingInSwitch, OFF)
+
+				createTimer(now.plusSeconds(2)) [|
+					sendCommand(Light_EatingOutSwitch, ON)
+					sendCommand(Light_EatingInSwitch, ON)
+
+					createTimer(now.plusSeconds(2)) [|
+						if (Light_EatingScenes.state > 0) {
+							postUpdate(Light_EatingScenes, EatingSceneBuffer)
+						} else {
+							postUpdate(Light_EatingScenes, 0)
+						}
+
+						postUpdate(TriggerTooColdBlink, OFF)
+					]
+				]
+			]
+		]
+	]
+
+end
+
+rule "Blink red when fire alarm is on"
+when
+	Item TriggerFireAlarmBlink changed to ON
+then
+	var Number EatingSceneBuffer = Light_EatingScenes.state
+
+	sendCommand(Light_EatingOutSwitch, ON)
+	sendCommand(Light_EatingInSwitch, ON)
+
+	SetEatingLights.apply(0, 100, 100)
+
+	createTimer(now.plusSeconds(2)) [|
+		sendCommand(Light_EatingOutSwitch, OFF)
+		sendCommand(Light_EatingInSwitch, OFF)
+
+		createTimer(now.plusSeconds(2)) [|
+			sendCommand(Light_EatingOutSwitch, ON)
+			sendCommand(Light_EatingInSwitch, ON)
+
+			createTimer(now.plusSeconds(2)) [|
+				sendCommand(Light_EatingOutSwitch, OFF)
+				sendCommand(Light_EatingInSwitch, OFF)
+
+				createTimer(now.plusSeconds(2)) [|
+					sendCommand(Light_EatingOutSwitch, ON)
+					sendCommand(Light_EatingInSwitch, ON)
+
+					createTimer(now.plusSeconds(2)) [|
+						if (Light_EatingScenes.state > 0) {
+							postUpdate(Light_EatingScenes, EatingSceneBuffer)
+						} else {
+							postUpdate(Light_EatingScenes, 0)
+						}
+
+						postUpdate(TriggerFireAlarmBlink, OFF)
+					]
+				]
+			]
+		]
+	]
+
+end
+
+rule "Switch off night-light in the morning"
+when
+    Item Daylight changed to ON
+then
+	if (Light_EatingScenes.state == 4) {		// Nachtlicht
+		postUpdate(Light_EatingScenes, 0)
+	}
+	if (Light_WohnZiScenes == 3 && WohnZiLight == true) {
+		Light_WohnZiScenes == 0
+		SetLivingLights.apply(227.6978f, 15, 100)
+
+		sendCommand(Light_WohnZiSwitch, OFF)
+		postUpdate(Light_WohnZiScenes, 0)
+		WohnZiLight = false
+	}
+	if (Light_BathScenes == 3 && BathLight == true) {
+		sendCommand(Light_BathLSwitch, OFF)
+		sendCommand(Light_BathRSwitch, OFF)
+		postUpdate(Light_BathScenes, 0)
+		BathLight = false
+	}
+	if (Light_EmilieScenes.state == 3) {
+		sendCommand(Light_EmilieScenes, 0)
+	}
+	if (Light_SleepScenes.state == 12) {
+		postUpdate(Light_SleepScenes, 0)
+	}
+end
+
+// -----------------------------------------------------------------------------------
+
+rule "Switch Lights OFF when absent or on vacation"
+when
+    Item LoftMode changed to 1 or			// absent
+    Item LoftMode changed to 4				// vacation
+then
+	postUpdate(Light_EatingScenes, 0)
+	postUpdate(Light_WohnZiScenes, 0)
+	postUpdate(Light_BathScenes, 0)
+	sendCommand(Light_EmilieScenes, 0)
+	sendCommand(Light_GuestLooScenes, 0)
+	sendCommand(Light_SleepScenes, 0)
+end
+
+rule "Switch WebCam OFF when sleeping"
+when
+    Item LoftMode changed to 2				// sleep
+then
+	sendCommand(CameraRoof, OFF)
+end
+
+/* -------------------- Esszimmer ----------------------------------- */
+
+rule "Scenenauswahl für Esszimmerlicht"
+when
+	Item Light_EatingScenes changed
+then
+	setLightScenesTemp.apply(Light_EatingScenes, SetEatingLightsOnOff, SetEatingLightsBright, SetEatingLightsTemp)
+end
+
+rule "Switch EssZi1ShortUp"
+when
+    Item Switch_EssZi1ShortUp received update ON or
+    Item Switch_EssZi2ShortUp received update ON
+then
+	if (Light_EatingScenes.state == 0) {
+		if (Daylight.state == ON) {
+			postUpdate(Light_EatingScenes, 1)
+		} else if (LoftMode.state != 2) {			// not sleeping
+			postUpdate(Light_EatingScenes, 2)
+		} else {
+			postUpdate(Light_EatingScenes, 4)
+		}
+	} else {
+		if (Daylight.state == ON) {
+			if (Light_EatingScenes.state == 1) {
+				postUpdate(Light_EatingScenes, 2)
+			} else if (Light_EatingScenes.state == 2) {
+				postUpdate(Light_EatingScenes, 3)
+			} else if (Light_EatingScenes.state == 3) {
+				postUpdate(Light_EatingScenes, 1)
+			} else if (Light_EatingScenes.state == 4) {
+				postUpdate(Light_EatingScenes, 1)
+			}
+		} else if (LoftMode.state != 2) {			// not sleeping
+			if (Light_EatingScenes.state == 1) {
+				postUpdate(Light_EatingScenes, 2)
+			} else if (Light_EatingScenes.state == 2) {
+				postUpdate(Light_EatingScenes, 3)
+			} else if (Light_EatingScenes.state == 3) {
+				postUpdate(Light_EatingScenes, 4)
+			} else if (Light_EatingScenes.state == 4) {
+				postUpdate(Light_EatingScenes, 1)
+			}
+		} else {
+			if (Light_EatingScenes.state == 1) {
+				postUpdate(Light_EatingScenes, 4)
+			} else if (Light_EatingScenes.state == 2) {
+				postUpdate(Light_EatingScenes, 1)
+			} else if (Light_EatingScenes.state == 3) {
+				postUpdate(Light_EatingScenes, 2)
+			} else if (Light_EatingScenes.state == 4) {
+				postUpdate(Light_EatingScenes, 3)
+			}
+		}
+	}
+end
+
+rule "Switch EssZi1ShortDown"
+when
+    Item Switch_EssZi1ShortDown received update ON or
+    Item Switch_EssZi2ShortDown received update ON
+then
+	if (Light_EatingScenes.state > 0) {
+		postUpdate(Light_EatingScenes, 0)
+	} else {
+		if (Daylight.state == ON) {
+			postUpdate(Light_EatingScenes, 1)
+		} else if (LoftMode.state != 2) {			// not sleeping
+			postUpdate(Light_EatingScenes, 2)
+		} else {
+			postUpdate(Light_EatingScenes, 4)
+		}
+	}
+end
+
+rule "Switch EssZi1LongUp ON"
+when
+    Item Switch_EssZi1LongUp received update ON or
+    Item Switch_EssZi2LongUp received update ON
+then
+    EssZiDimmerOn = true
+    EssZiDimmerUp.postUpdate(ON)
+end
+
+rule "EssZi Dimmer up"
+when
+    Item EssZiDimmerUp changed to ON
+then
+    EssZiDimmerUp.postUpdate(OFF)
+
+    if (EssZiDimmerOn) {
+	  	var HSBType light = Light_EatingOutColor.state as HSBType
+	  	var int DimmValue = (light.getBrightness()).intValue
+
+	  	if (Light_EatingScenes.state == 0 || DimmValue <= 0) {
+			if (Daylight.state == ON) {
+				postUpdate(Light_EatingScenes, 1)
+			} else if (LoftMode.state != 2) {			// not sleeping
+				postUpdate(Light_EatingScenes, 2)
+			} else {
+				postUpdate(Light_EatingScenes, 4)
+			}
+            DimmValue = 0
+
+            Thread.sleep(50)
+	  	}
+        if (DimmValue < 100) {
+            if (DimmValue < 95) {
+                DimmValue = DimmValue + 5
+            } else {
+                DimmValue = 100
+            }
+
+            SetEatingLightsBright.apply(DimmValue)
+
+	    	TimerEssZiDimmer?.cancel()
+		    TimerEssZiDimmer = createTimer(now.plusSeconds(0.5)) [|
+			    EssZiDimmerUp.postUpdate(ON)
+    		]
+        }
+	}
+end
+
+rule "Switch EssZi1LongDown ON"
+when
+    Item Switch_EssZi1LongDown received update ON or
+    Item Switch_EssZi2LongDown received update ON
+then
+    EssZiDimmerOn = true
+    EssZiDimmerDown.postUpdate(ON)
+end
+
+rule "EssZi Dimmer down"
+when
+    Item EssZiDimmerDown changed to ON
+then
+    EssZiDimmerDown.postUpdate(OFF)
+
+    if (EssZiDimmerOn) {
+	  	var HSBType light = Light_EatingOutColor.state as HSBType
+	  	var int DimmValue = (light.getBrightness()).intValue
+
+        if (DimmValue > 5) {
+            if (DimmValue >= 100)	DimmValue = 100
+            if (DimmValue < 10) 	DimmValue = 5
+
+            if (DimmValue >= 10) {
+                DimmValue = DimmValue - 5
+            }
+
+            SetEatingLightsBright.apply(DimmValue)
+
+            TimerEssZiDimmer?.cancel()
+            TimerEssZiDimmer = createTimer(now.plusSeconds(0.5)) [|
+                EssZiDimmerDown.postUpdate(ON)
+            ]
+        }
+	}
+end
+
+rule "Switch EssZiLongDown OFF"
+when
+    Item Switch_EssZi1LongDownEnd received update ON or
+    Item Switch_EssZi2LongDownEnd received update ON or
+    Item Switch_EssZi1LongUpEnd received update ON or
+    Item Switch_EssZi2LongUpEnd received update ON or
+    Item Switch_EssZi1ShortDown received update ON or
+    Item Switch_EssZi2ShortDown received update ON or
+    Item Switch_EssZi1ShortUp received update ON or
+    Item Switch_EssZi2ShortUp received update ON
+then
+	EssZiDimmerOn = false
+    EssZiDimmerDown.postUpdate(OFF)
+    EssZiDimmerUp.postUpdate(OFF)
+end
+
+// -----------------------------------------------
+
+rule "Trigger EssZiLight warmer at night"
+when
+	Item Daylight changed to OFF
+then
+    if (Light_EatingScenes.state == 1) {
+        postUpdate(EssZiLightTempWarmerTrigger, ON)
+    }
+end
+
+rule "EssZiLight warmer at night"
+when
+	Item EssZiLightTempWarmerTrigger changed to ON
+then
+	if (Light_EatingScenes.state == 1) {
+
+        var Float LightTemp = 8.0f			// Fallback value
+		if (Light_EatingOutTemp.state != NULL) {
+			LightTemp = (Light_EatingOutTemp.state as DecimalType).floatValue
+			LightTemp = LightTemp + 1.0f
+		}
+
+		sendCommand(Light_EatingOutTemp, LightTemp)
+		sendCommand(Light_EatingInTemp, LightTemp)
+
+		if (LightTemp < 45.0f) {
+			createTimer(now.plusSeconds(30)) [|
+				postUpdate(EssZiLightTempWarmerTrigger, ON)
+			]
+		} else {
+			postUpdate(Light_EatingScenes, 2)
+		}
+	}
+	postUpdate(EssZiLightTempWarmerTrigger, OFF)
+end
+
+
+rule "Trigger EssZiLight colder in the morning"
+when
+	Item Daylight changed to ON
+then
+    if (Light_EatingScenes.state == 2) {
+        postUpdate(EssZiLightTempColderTrigger, ON)
+	}
+end
+
+rule "EssZiLight colder in the morning"
+when
+	Item EssZiLightTempColderTrigger changed to ON
+then
+	if (Light_EatingScenes.state == 2) {
+
+		var Float LightTemp = 45.0f			// Fallback value
+		if (Light_EatingOutTemp.state != NULL) {
+			LightTemp = (Light_EatingOutTemp.state as DecimalType).floatValue
+			LightTemp = LightTemp - 1.0f
+		}
+
+		sendCommand(Light_EatingOutTemp, LightTemp)
+		sendCommand(Light_EatingInTemp, LightTemp)
+
+		if (LightTemp > 8.0f) {
+			createTimer(now.plusSeconds(30)) [|
+				postUpdate(EssZiLightTempColderTrigger, ON)
+			]
+		} else {
+			postUpdate(Light_EatingScenes, 1)
+		}
+	}
+	postUpdate(EssZiLightTempColderTrigger, OFF)
+end
+
+/* -------------------- Wohnzimmer Indirekt ----------------------------------- */
+
+rule "Scenenauswahl für Wohnzimmerlicht"
+when
+	Item Light_WohnZiScenes changed
+then
+	setLightScenes.apply(Light_WohnZiScenes, SetLivingLightsOnOff, SetLivingLights)
+end
+
+rule "Switch WohnZiShortUp"
+when
+    Item Switch_WohnZiShortUp received update ON
+then
+	if (Light_WohnZiScenes.state == 0) {
+		if (Daylight.state == ON) {
+			postUpdate(Light_WohnZiScenes, 10)
+		} else {
+			postUpdate(Light_WohnZiScenes, 11)
+		}
+	} else {
+		if (Light_WohnZiScenes.state == 10) {
+			postUpdate(Light_WohnZiScenes, 11)
+		} else {
+			postUpdate(Light_WohnZiScenes, 10)
+		}
+	}
+end
+
+rule "Switch WohnZiShortDown"
+when
+    Item Switch_WohnZiShortDown received update ON
+then
+	if (Light_WohnZiScenes.state > 0) {
+		postUpdate(Light_WohnZiScenes, 0)
+	} else {
+		if (Daylight.state == ON) {
+			postUpdate(Light_WohnZiScenes, 10)
+		} else {
+			postUpdate(Light_WohnZiScenes, 11)
+		}
+	}
+end
+
+/* -------------------- Bad ----------------------------------- */
+
+rule "Scenenauswahl für Badezimmerlicht"
+when
+	Item Light_BathScenes changed
+then
+	setLightScenesTemp.apply(Light_BathScenes, SetBathLightsOnOff, SetBathLightsBright, SetBathLightsTemp)
+
+	if (Light_BathScenes.state == 6) {
+    	postUpdate(BathAmbientTrigger, ON)
+    } else if (BathAmbientTrigger.state == ON) {
+    	postUpdate(BathAmbientTrigger, OFF)
+    }
+end
+
+rule "Switch BathShortUp"
+when
+    Item Switch_BathShortUp received update ON or
+    Item Switch_BathInsideShortUp received update ON
+then
+	if (Light_BathScenes.state == 0) {
+		if (Daylight.state == ON) {
+			postUpdate(Light_BathScenes, 1)
+		} else if (LoftMode.state == 2 ||						// sleeping
+			       (now.getHour() < 6 || now.getHour() >= 23 )) {
+			postUpdate(Light_BathScenes, 5)
+		} else {
+			postUpdate(Light_BathScenes, 3)
+		}
+	} else {
+		if (Daylight.state == ON) {
+			if (Light_BathScenes.state == 1) {
+				postUpdate(Light_BathScenes, 3)
+			} else if (Light_BathScenes.state == 3) {
+				postUpdate(Light_BathScenes, 1)
+			} else if (Light_BathScenes.state == 5) {
+				postUpdate(Light_BathScenes, 3)
+			} else if (Light_BathScenes.state == 6) {
+				postUpdate(Light_BathScenes, 3)
+			}
+		} else if (LoftMode.state == 2 ||						// sleeping
+			       (now.getHour() < 6 || now.getHour() >= 23 )) {
+			if (Light_BathScenes.state == 1) {
+				postUpdate(Light_BathScenes, 5)
+			} else if (Light_BathScenes.state == 3) {
+				postUpdate(Light_BathScenes, 1)
+			} else if (Light_BathScenes.state == 5) {
+				postUpdate(Light_BathScenes, 3)
+			} else if (Light_BathScenes.state == 6) {
+				postUpdate(Light_BathScenes, 5)
+			}
+		} else {
+			if (Light_BathScenes.state == 1) {
+				postUpdate(Light_BathScenes, 3)
+			} else if (Light_BathScenes.state == 3) {
+				postUpdate(Light_BathScenes, 5)
+			} else if (Light_BathScenes.state == 5) {
+				postUpdate(Light_BathScenes, 1)
+			} else if (Light_BathScenes.state == 6) {
+				postUpdate(Light_BathScenes, 5)
+			}
+		}
+	}
+end
+
+rule "Switch BathShortDown"
+when
+    Item Switch_BathShortDown received update ON or
+    Item Switch_BathInsideShortDown received update ON
+then
+	if (Light_BathScenes.state > 0) {
+		postUpdate(Light_BathScenes, 0)
+	} else {
+		if (Daylight.state == ON) {
+			postUpdate(Light_BathScenes, 1)
+		} else if (LoftMode.state == 2 ||						// sleeping
+			       (now.getHour() < 6 || now.getHour() >= 23 )) {
+			postUpdate(Light_BathScenes, 5)
+		} else {
+			postUpdate(Light_BathScenes, 3)
+		}
+	}
+end
+
+rule "Switch BathLongUp ON"
+when
+    Item Switch_BathLongUp received update ON or
+    Item Switch_BathInsideLongUp received update ON
+then
+    postUpdate(Switch_BathLongUp, OFF)
+
+	if (Switch_BathLongUpEnd.state == OFF && Switch_BathInsideLongUpEnd.state == OFF) {
+	  	var HSBType light = Light_BathLColor.state as HSBType
+	  	var int DimmValue = (light.getBrightness()).intValue
+
+	  	if (Light_BathScenes.state == 0 || DimmValue <= 0) {
+			if (Daylight.state == ON) {
+				postUpdate(Light_BathScenes, 1)
+			} else if (LoftMode.state == 2 ||						// sleeping
+				       (now.getHour() > 6 && now.getHour() < 23 )) {
+				postUpdate(Light_BathScenes, 5)
+			} else {
+				postUpdate(Light_BathScenes, 3)
+			}
+	  	} else {
+		  	if (DimmValue < 95) {
+		  		DimmValue = DimmValue + 5
+		  	} else {
+		  		DimmValue = 100
+		  	}
+
+			sendCommand(Light_BathLColor, new HSBType(light.getHue(), light.getSaturation(), new PercentType(DimmValue)))
+			sendCommand(Light_BathRColor, new HSBType(light.getHue(), light.getSaturation(), new PercentType(DimmValue)))
+	  	}
+
+		TimerBathDimmer?.cancel()
+		TimerBathDimmer = createTimer(now.plusSeconds(1)) [|
+			postUpdate(Switch_BathLongUp, ON)
+		]
+	}
+end
+
+rule "Switch BathLongDown ON"
+when
+    Item Switch_BathLongDown received update ON or
+    Item Switch_BathInsideLongDown received update ON
+then
+    postUpdate(Switch_BathLongDown, OFF)
+
+    if (Switch_BathLongDownEnd.state == OFF && Switch_BathInsideLongDownEnd.state == OFF) {
+	  	var HSBType light = Light_BathLColor.state as HSBType
+	  	var int DimmValue = (light.getBrightness()).intValue
+
+      	if (DimmValue >= 10) {
+      		DimmValue = DimmValue - 5
+      	} else if (DimmValue >= 2) {
+      		DimmValue = DimmValue - 1
+      	} else {
+			DimmValue = 1
+		}
+
+		sendCommand(Light_BathLColor, new HSBType(light.getHue(), light.getSaturation(), new PercentType(DimmValue)))
+		sendCommand(Light_BathRColor, new HSBType(light.getHue(), light.getSaturation(), new PercentType(DimmValue)))
+
+		TimerBathDimmer?.cancel()
+		TimerBathDimmer = createTimer(now.plusSeconds(1)) [|
+			postUpdate(Switch_BathLongDown, ON)
+		]
+	}
+end
+
+rule "Switch BathLong OFF"
+when
+    Item Switch_BathLongUpEnd received update ON or
+    Item Switch_BathInsideLongUpEnd received update ON or
+    Item Switch_BathLongDownEnd received update ON or
+    Item Switch_BathInsideLongDownEnd received update ON or
+    Item Switch_BathShortUp received update ON or
+    Item Switch_BathInsideShortUp received update ON or
+    Item Switch_BathShortDown received update ON or
+    Item Switch_BathInsideShortDown received update ON
+then
+	TimerBathDimmer?.cancel()
+	TimerBathDimmer = null
+    postUpdate(Switch_BathLongDown, OFF)
+    postUpdate(Switch_BathLongUp, OFF)
+end
+
+rule "Ambient Bath"
+when
+	Item BathAmbientTrigger changed to ON
+then
+	postUpdate(BathAmbientTrigger, OFF)
+
+	if (Light_BathScenes.state == 6) {
+
+  		var Float HueValue = 0f
+		if (Light_BathLColor.state != NULL) {
+			HueValue = ((Light_BathLColor.state as HSBType).hue).floatValue
+		}
+		HueValue = HueValue + 1f
+		if (HueValue >= 360) {
+			HueValue = HueValue - 360f
+		}
+		var int DimmValue = 25
+		if (Light_BathLColor.state != NULL) {
+	      	DimmValue = ((Light_BathLColor.state as HSBType).brightness).intValue
+		}
+      	if (DimmValue > 100)	DimmValue = 100
+		if (DimmValue < 2)		DimmValue = 1
+
+		SetBathLights.apply(HueValue, 100, DimmValue)
+
+		createTimer(now.plusSeconds(3)) [|
+			postUpdate(BathAmbientTrigger, ON)
+		]
+	}
+end
+
+
+/* -------------------- Emilie ------------------------------------------ */
+
+rule "Scenenauswahl für Emilies Licht"
+when
+	Item Light_EmilieScenes changed
+then
+	setLightScenesTemp.apply(Light_EmilieScenes, SetEmilieLightsOnOff, SetEmilieLightsBright, SetEmilieLightsTemp)
+end
+
+rule "Switch Emilie Short Up"
+when
+    Item Switch_EmilieDoorShortUp received update ON or
+    Item Switch_EmilieSleepShortUp received update ON
+then
+	if (Light_EmilieScenes.state == 0) {
+		if (Daylight.state == ON && now.getHour() < 20) {
+			postUpdate(Light_EmilieScenes, 1)
+		} else if (now.getHour() > 6 && now.getHour() < 20) {
+			postUpdate(Light_EmilieScenes, 2)
+		} else {
+			postUpdate(Light_EmilieScenes, 7)
+		}
+	} else {
+		if (Daylight.state == ON && now.getHour() < 20) {
+			if (Light_EmilieScenes.state == 1) {
+				postUpdate(Light_EmilieScenes, 2)
+			} else if (Light_EmilieScenes.state == 2) {
+				postUpdate(Light_EmilieScenes, 1)
+			} else if (Light_EmilieScenes.state == 7) {
+				postUpdate(Light_EmilieScenes, 1)
+			}
+		} else if (now.getHour() > 6 && now.getHour() < 20 ) {
+			if (Light_EmilieScenes.state == 1) {
+				postUpdate(Light_EmilieScenes, 2)
+			} else if (Light_EmilieScenes.state == 2) {
+				postUpdate(Light_EmilieScenes, 7)
+			} else if (Light_EmilieScenes.state == 7) {
+				postUpdate(Light_EmilieScenes, 1)
+			}
+		} else {
+			if (Light_EmilieScenes.state == 1) {
+				postUpdate(Light_EmilieScenes, 7)
+			} else if (Light_EmilieScenes.state == 2) {
+				postUpdate(Light_EmilieScenes, 1)
+			} else if (Light_EmilieScenes.state == 7) {
+				postUpdate(Light_EmilieScenes, 2)
+			}
+		}
+	}
+end
+
+rule "Switch Emilie Short Down"
+when
+    Item Switch_EmilieDoorShortDown received update ON or
+    Item Switch_EmilieSleepShortDown received update ON
+then
+	if (Light_EmilieScenes.state > 0) {
+		postUpdate(Light_EmilieScenes, 0)
+	} else {
+		if (Daylight.state == ON && now.getHour() < 20) {
+			postUpdate(Light_EmilieScenes, 1)
+		} else if (now.getHour() > 6 && now.getHour() < 20) {
+			postUpdate(Light_EmilieScenes, 2)
+		} else {
+			postUpdate(Light_EmilieScenes, 7)
+		}
+	}
+end
+
+/* -------------------- Niklas ------------------------------------------ */
+
+rule "Scenenauswahl für Niklass Licht"
+when
+	Item Light_NiklasScenes changed
+then
+	setLightScenesTemp.apply(Light_NiklasScenes, SetNiklasLightsOnOff, SetNiklasLightsBright, SetNiklasLightsTemp)
+end
+
+rule "Switch Niklas Short Up"
+when
+    Item Switch_NiklasShortUp received update ON
+then
+	if (Light_NiklasScenes.state == 0) {
+		if (Daylight.state == ON && now.getHour() < 21) {
+			postUpdate(Light_NiklasScenes, 1)
+		} else if (Daylight.state == OFF && now.getHour() < 21 && now.getHour() > 6) {
+			postUpdate(Light_NiklasScenes, 2)
+		} else if (Daylight.state == OFF && now.getHour() < 23 && now.getHour() > 6) {
+			postUpdate(Light_NiklasScenes, 3)
+		} else {
+			postUpdate(Light_NiklasScenes, 4)
+		}
+	} else {
+		if (Daylight.state == ON && now.getHour() < 21) {
+			if (Light_NiklasScenes.state == 1) {
+				postUpdate(Light_NiklasScenes, 2)
+			} else if (Light_NiklasScenes.state == 2) {
+				postUpdate(Light_NiklasScenes, 3)
+			} else if (Light_NiklasScenes.state == 3) {
+				postUpdate(Light_NiklasScenes, 1)
+			} else if (Light_NiklasScenes.state == 4) {
+				postUpdate(Light_NiklasScenes, 1)
+			}
+		} else {
+			if (Light_NiklasScenes.state == 1) {
+				postUpdate(Light_NiklasScenes, 2)
+			} else if (Light_NiklasScenes.state == 2) {
+				postUpdate(Light_NiklasScenes, 3)
+			} else if (Light_NiklasScenes.state == 3) {
+				postUpdate(Light_NiklasScenes, 4)
+			} else if (Light_NiklasScenes.state == 4) {
+				postUpdate(Light_NiklasScenes, 1)
+			}
+		}
+	}
+end
+
+rule "Switch Niklas Short Down"
+when
+    Item Switch_NiklasShortDown received update ON
+then
+	if (Light_NiklasScenes.state > 0) {
+		postUpdate(Light_NiklasScenes, 0)
+	} else {
+		if (Daylight.state == ON && now.getHour() < 21) {
+			postUpdate(Light_NiklasScenes, 1)
+		} else if (Daylight.state == OFF && now.getHour() < 21 && now.getHour() > 6) {
+			postUpdate(Light_NiklasScenes, 2)
+		} else if (Daylight.state == OFF && now.getHour() < 23 && now.getHour() > 6) {
+			postUpdate(Light_NiklasScenes, 3)
+		} else {
+			postUpdate(Light_NiklasScenes, 4)
+		}
+	}
+end
+
+/* -------------------- Niklas Decke ------------------------------------ */
+
+rule "Scenenauswahl für Niklass Decke Licht"
+when
+	Item Light_NiklasDeckeScenes changed
+then
+	setLightScenesTemp.apply(Light_NiklasDeckeScenes, SetNiklasDeckeLightsOnOff, SetNiklasDeckeLightsBright, SetNiklasDeckeLightsTemp)
+end
+
+rule "Switch NiklasLongUp ON"
+when
+    Item Switch_NiklasDeskBotShortUp received update ON or
+    Item Switch_NiklasBedShortUp received update ON
+then
+	if (Light_NiklasDeckeScenes.state == 0) {
+		if (Daylight.state == ON && now.getHour() < 21) {
+			postUpdate(Light_NiklasDeckeScenes, 1)
+		} else if (Daylight.state == OFF && now.getHour() < 21 && now.getHour() > 6) {
+			postUpdate(Light_NiklasDeckeScenes, 2)
+		} else if (Daylight.state == OFF && now.getHour() < 23 && now.getHour() > 6) {
+			postUpdate(Light_NiklasDeckeScenes, 3)
+		} else {
+			postUpdate(Light_NiklasDeckeScenes, 4)
+		}
+	} else {
+		if (Daylight.state == ON && now.getHour() < 21) {
+			if (Light_NiklasDeckeScenes.state == 1) {
+				postUpdate(Light_NiklasDeckeScenes, 2)
+			} else if (Light_NiklasDeckeScenes.state == 2) {
+				postUpdate(Light_NiklasDeckeScenes, 3)
+			} else if (Light_NiklasDeckeScenes.state == 3) {
+				postUpdate(Light_NiklasDeckeScenes, 1)
+			} else if (Light_NiklasDeckeScenes.state == 4) {
+				postUpdate(Light_NiklasDeckeScenes, 1)
+			}
+		} else {
+			if (Light_NiklasDeckeScenes.state == 1) {
+				postUpdate(Light_NiklasDeckeScenes, 2)
+			} else if (Light_NiklasDeckeScenes.state == 2) {
+				postUpdate(Light_NiklasDeckeScenes, 3)
+			} else if (Light_NiklasDeckeScenes.state == 3) {
+				postUpdate(Light_NiklasDeckeScenes, 4)
+			} else if (Light_NiklasDeckeScenes.state == 4) {
+				postUpdate(Light_NiklasDeckeScenes, 1)
+			}
+		}
+	}
+end
+
+rule "Switch NiklasLongDown ON"
+when
+    Item Switch_NiklasDeskBotShortDown received update ON or
+    Item Switch_NiklasBedShortDown received update ON
+then
+	if (Light_NiklasDeckeScenes.state > 0) {
+		postUpdate(Light_NiklasDeckeScenes, 0)
+	} else {
+		if (Daylight.state == ON && now.getHour() < 21) {
+			postUpdate(Light_NiklasDeckeScenes, 1)
+		} else if (Daylight.state == OFF && now.getHour() < 21 && now.getHour() > 6) {
+			postUpdate(Light_NiklasDeckeScenes, 2)
+		} else if (Daylight.state == OFF && now.getHour() < 23 && now.getHour() > 6) {
+			postUpdate(Light_NiklasDeckeScenes, 3)
+		} else {
+			postUpdate(Light_NiklasDeckeScenes, 4)
+		}
+	}
+end
+
+// rule "Switch NiklasLong OFF"
+// when
+//     Item Switch_NiklasLongUpEnd received update ON or
+//     Item Switch_NiklasLongDownEnd received update ON or
+//     Item Switch_NiklasShortUp received update ON or
+//     Item Switch_NiklasShortDown received update ON
+// then
+// 	Switch_NiklasLongDown.postUpdate(OFF)
+// 	Switch_NiklasLongUp.postUpdate(OFF)
+// end
+
+/* -------------------- Gästetoilette ----------------------------------- */
+
+rule "Scenenauswahl für Gästetoiletten-Licht"
+when
+	Item Light_GuestLooScenes changed
+then
+logInfo("Switches", "Scenes: Light_GuestLooScenes: " + Light_GuestLooScenes.state)
+	if (Light_GuestLooScenes.state == 0) {
+		sendCommand(Leuchter_Gaestetoilette, OFF)
+
+		TimerGuestOnLoo?.cancel()
+		TimerGuestOnLoo = null
+
+		if (GuestOnLoo) {
+			sendCommand(Lueftung_Gaestetoilette, ON)
+			GuestOnLoo = false
+		}
+
+		GuestLooFanManOnOff = 1
+		TimerGuestLooFanManOnOff?.cancel()
+		TimerGuestLooFanManOnOff = createTimer(now.plusSeconds(5)) [|
+			GuestLooFanManOnOff = 0
+		]
+
+		TimerGuestLooAutoOff?.cancel()
+		TimerGuestLooAutoOff = null
+	} else {
+		TimerGuestLooUpOff?.cancel()
+		TimerGuestLooUpOff = createTimer(now.plusSeconds(20)) [|
+		]
+
+		TimerGuestOnLoo?.cancel()
+		TimerGuestOnLoo = createTimer(now.plusSeconds(150)) [|
+			GuestOnLoo = true
+		]
+
+		TimerGuestLooAutoOff?.cancel()
+		TimerGuestLooAutoOff = createTimer(now.plusMinutes(20)) [|
+			postUpdate(Light_GuestLooScenes, 0)
+
+			sendCommand(Lueftung_Gaestetoilette, ON)
+			GuestOnLoo = false
+		]
+
+		if (Light_GuestLooScenes.state == 1) {
+			sendCommand(Leuchter_Gaestetoilette, 10)
+		} else if (Light_GuestLooScenes.state == 2) {
+			sendCommand(Leuchter_Gaestetoilette, 100)
+		} else {
+			sendCommand(Leuchter_Gaestetoilette, 30)
+		}
+	}
+end
+
+rule "Switch GuestLooUp"
+when
+    Item Switch_GuestLooShortUp received update ON or
+    Item Switch_GuestLooLongUp received update ON
+then
+	if (Switch_GuestLooShortUp.state == ON ||
+			(TimerGuestLooNoDoubles === null || TimerGuestLooNoDoubles.hasTerminated())) {
+		TimerGuestLooNoDoubles = createTimer(now.plusSeconds(0.2)) [|
+		]
+
+		if (GuestLooFanManOnOff > 0) {
+			if (LueftungLow_Gaestetoilette.state == OFF) {
+				sendCommand(LueftungLow_Gaestetoilette, ON)
+			} else if (LueftungHigh_Gaestetoilette.state == OFF) {
+				sendCommand(LueftungHigh_Gaestetoilette, ON)
+			} else {
+				sendCommand(Lueftung_Gaestetoilette, OFF)
+			}
+		} else {
+			if (Light_GuestLooScenes.state == 0) {
+				if (LoftMode.state == 2 || 		// sleeping
+						now.getHour() >= 23 || now.getHour() < 3 ) {	// or between 11pm and 3am
+					postUpdate(Light_GuestLooScenes, 1)
+				} else if (Daylight.state == OFF) {
+					postUpdate(Light_GuestLooScenes, 3)
+				} else {
+					postUpdate(Light_GuestLooScenes, 2)
+				}
+			} else {
+				if (TimerGuestLooUpOff !== null && TimerGuestLooUpOff.hasTerminated()) {
+					postUpdate(Light_GuestLooScenes, 0)
+				} else {
+					if (Light_GuestLooScenes.state == 1) {
+						postUpdate(Light_GuestLooScenes, 2)
+					} else if (Light_GuestLooScenes.state == 2) {
+						postUpdate(Light_GuestLooScenes, 3)
+					} else {
+						postUpdate(Light_GuestLooScenes, 1)
+					}
+				}
+			}
+		}
+	}
+end
+
+rule "Switch GuestLooDown"
+when
+    Item Switch_GuestLooShortDown received update ON or
+    Item Switch_GuestLooLongDown received update ON
+then
+	if (Switch_GuestLooShortDown.state == ON ||
+		(TimerGuestLooNoDoubles === null || TimerGuestLooNoDoubles.hasTerminated())) {
+		    TimerGuestLooNoDoubles = createTimer(now.plusSeconds(0.2)) [|
+		]
+
+		if (Light_GuestLooScenes.state == 0) {
+			if (LoftMode.state == 2 || 		// sleeping
+			      now.getHour() >= 23 || now.getHour() < 3) {	// or between 11pm and 3am
+				postUpdate(Light_GuestLooScenes, 1)
+			} else if (Daylight.state == OFF) {
+				postUpdate(Light_GuestLooScenes, 3)
+			} else {
+				postUpdate(Light_GuestLooScenes, 2)
+			}
+		} else {
+			postUpdate(Light_GuestLooScenes, 0)
+		}
+	}
+end
+
+rule "Fan GuestLoo on"
+when
+	Item Lueftung_Gaestetoilette received command ON
+then
+    sendCommand(LueftungLow_Gaestetoilette, ON)
+
+    if (HeatingPeriod.state == OFF || gWindowsOpen.state > 0) {     // falls Ofen aus oder mind. ein Fenster offen
+        sendCommand(LueftungHigh_Gaestetoilette, ON)                //  => Lüftung auf hohe Stufe
+    }
+end
+
+rule "Fan GuestLoo off"
+when
+	Item Lueftung_Gaestetoilette received command OFF
+then
+    sendCommand(LueftungLow_Gaestetoilette, OFF)
+    sendCommand(LueftungHigh_Gaestetoilette, OFF)
+end
+
+rule "Fan GuestLooLow off"
+when
+	Item LueftungLow_Gaestetoilette received command ON
+then
+	TimerGuestLooFanLow?.cancel()
+	TimerGuestLooFanLow = createTimer(now.plusMinutes(15)) [|
+		sendCommand(LueftungLow_Gaestetoilette, OFF)
+	]
+end
+
+rule "Fan GuestLooHigh off"
+when
+	Item LueftungHigh_Gaestetoilette received command ON
+then
+	TimerGuestLooFanHigh?.cancel()
+	TimerGuestLooFanHigh = createTimer(now.plusMinutes(5)) [|
+		sendCommand(LueftungHigh_Gaestetoilette, OFF)
+	]
+end
+
+rule "Guestloo Sky"
+when
+	Item Light_GuestLooScenes changed
+then
+	if (Light_GuestLooScenes.state > 0) {
+		if (Light_GuestLooScenes.state == 1) {
+			SetGuestLooSky.apply(25.0f, 89, 1)
+		} else if (LoftMode.state == 3) {
+			var hue = rand.nextInt(360)
+			SetGuestLooSky.apply(hue, 100, 100)
+		} else if (Daylight.state == ON) {
+			SetGuestLooSky.apply(210.0f, 15, 100)
+		} else if (Twilight.state == ON) {
+			SetGuestLooSky.apply(30.0f, 80, 100)
+		} else {
+			SetGuestLooSky.apply(25.0f, 89, 8)
+		}
+
+		TimerGuestLooStopWatch?.cancel()
+		TimerGuestLooStopWatch = createTimer(now.plusMinutes(10)) [|
+			var HSBType light = Light_GuestLooSkyColor.state as HSBType
+
+			SetGuestLooSky.apply(255, 100, 100)
+			Thread.sleep(500)
+			sendCommand(Light_GuestLooSkyColor, light)
+		]
+	} else {
+		sendCommand(Light_GuestLooSkySwitch, OFF)
+		TimerGuestLooStopWatch?.cancel()
+	}
+end
+
+/* -------------------- Schlafzimmer ----------------------------------- */
+
+rule "Scenenauswahl für Schlafzimmerlicht"
+when
+	Item Light_SleepScenes changed
+then
+	setLightScenes.apply(Light_SleepScenes, SetSleepLightsOnOff, SetSleepLights)
+end
+
+rule "Switch SleepShortUp"
+when
+    Item Switch_Sleep1ShortUp received update ON or
+    Item Switch_Sleep2ShortUp received update ON
+then
+	if (Light_SleepScenes.state == 0) {
+		if (Daylight.state == ON) {
+			postUpdate(Light_SleepScenes, 10)
+		} else if (LoftMode.state != 2) {			// not sleeping
+			postUpdate(Light_SleepScenes, 11)
+		} else {
+			postUpdate(Light_SleepScenes, 12)
+		}
+	} else {
+		if (Daylight.state == ON) {
+			if (Light_SleepScenes.state == 10) {
+				postUpdate(Light_SleepScenes, 11)
+			} else if (Light_SleepScenes.state == 11) {
+				postUpdate(Light_SleepScenes, 10)
+			} else if (Light_SleepScenes.state == 12) {
+				postUpdate(Light_SleepScenes, 10)
+			}
+		} else if (LoftMode.state != 2) {			// not sleeping
+			if (Light_SleepScenes.state == 10) {
+				postUpdate(Light_SleepScenes, 11)
+			} else if (Light_SleepScenes.state == 11) {
+				postUpdate(Light_SleepScenes, 12)
+			} else if (Light_SleepScenes.state == 12) {
+				postUpdate(Light_SleepScenes, 10)
+			}
+		} else {
+			if (Light_SleepScenes.state == 10) {
+				postUpdate(Light_SleepScenes, 11)
+			} else if (Light_SleepScenes.state == 11) {
+				postUpdate(Light_SleepScenes, 12)
+			} else if (Light_SleepScenes.state == 12) {
+				postUpdate(Light_SleepScenes, 10)
+			}
+		}
+	}
+end
+
+rule "Switch SleepShortDown"
+when
+    Item Switch_Sleep1ShortDown received update ON or
+    Item Switch_Sleep2ShortDown received update ON
+then
+	if (Light_SleepScenes.state > 0) {
+		postUpdate(Light_SleepScenes, 0)
+	} else {
+		if (Daylight.state == ON) {
+			postUpdate(Light_SleepScenes, 10)
+		} else if (LoftMode.state != 2) {			// not sleeping
+			postUpdate(Light_SleepScenes, 11)
+		} else {
+			postUpdate(Light_SleepScenes, 12)
+		}
+	}
+end
+
+rule "Switch off sleep light during daylight"
+when
+	Item Light_SleepScenes changed
+then
+	if (Daylight.state == ON && Rollershutter_Sleep.state < 50) {
+		createTimer(now.plusSeconds(2)) [|
+			sendCommand(Light_SleepScenes, 0)
+		]
+	}
+end
+
+/* -------------------- Office Top ------------------------------------------ */
+
+rule "Scenenauswahl für OfficeTop Licht"
+when
+	Item Light_OfficeTopScenes changed
+then
+	setLightScenesTemp.apply(Light_OfficeTopScenes, SetOfficeTopLightsOnOff, SetOfficeTopLightsBright, SetOfficeTopLightsTemp)
+end
+
+rule "Switch OfficeTop Short Up"
+when
+    Item Switch_OfficeTopShortUp received update ON
+then
+	if (Light_OfficeTopScenes.state == 0) {
+		if (Guests.state != ON || Daylight.state == ON) {
+			postUpdate(Light_OfficeTopScenes, 1)
+		} else {
+			postUpdate(Light_OfficeTopScenes, 2)
+		}
+	} else {
+		if (Daylight.state == ON && now.getHour() < 21 && now.getHour() > 6) {
+			if (Light_OfficeTopScenes.state == 1) {
+				postUpdate(Light_OfficeTopScenes, 2)
+			} else if (Light_OfficeTopScenes.state == 2) {
+				postUpdate(Light_OfficeTopScenes, 1)
+			} else if (Light_OfficeTopScenes.state == 4) {
+				postUpdate(Light_OfficeTopScenes, 1)
+			}
+		} else {
+			if (Light_OfficeTopScenes.state == 1) {
+				postUpdate(Light_OfficeTopScenes, 2)
+			} else if (Light_OfficeTopScenes.state == 2) {
+				postUpdate(Light_OfficeTopScenes, 4)
+			} else if (Light_OfficeTopScenes.state == 4) {
+				postUpdate(Light_OfficeTopScenes, 1)
+			}
+		}
+	}
+end
+
+rule "Switch OfficeTop Short Down"
+when
+    Item Switch_OfficeTopShortDown received update ON
+then
+	if (Light_OfficeTopScenes.state > 0) {
+		postUpdate(Light_OfficeTopScenes, 0)
+	} else {
+		if (Guests.state != ON || Daylight.state == ON) {
+			postUpdate(Light_OfficeTopScenes, 1)
+		} else {
+			postUpdate(Light_OfficeTopScenes, 2)
+		}
+	}
+end
+
+/* -------------------- Office Effect ------------------------------------------ */
+
+rule "Scenenauswahl für OfficeEffect Licht"
+when
+	Item Light_OfficeEffScenes changed
+then
+	setLightScenesTemp.apply(Light_OfficeEffScenes, SetOfficeEffLightsOnOff, SetOfficeEffLightsBright, SetOfficeEffLightsTemp)
+end
+
+rule "Switch OfficeEffect Short Up"
+when
+    Item Switch_OfficeBottomShortUp received update ON
+then
+	if (Light_OfficeEffScenes.state == 0) {
+		if (Guests.state != ON || Daylight.state == ON) {
+			postUpdate(Light_OfficeEffScenes, 1)
+		} else {
+			postUpdate(Light_OfficeEffScenes, 2)
+		}
+	} else {
+		if (Daylight.state == ON && now.getHour() < 21) {
+			if (Light_OfficeEffScenes.state == 1) {
+				postUpdate(Light_OfficeEffScenes, 2)
+			} else if (Light_OfficeEffScenes.state == 2) {
+				postUpdate(Light_OfficeEffScenes, 1)
+			} else if (Light_OfficeEffScenes.state == 4) {
+				postUpdate(Light_OfficeEffScenes, 1)
+			}
+		} else {
+			if (Light_OfficeEffScenes.state == 1) {
+				postUpdate(Light_OfficeEffScenes, 2)
+			} else if (Light_OfficeEffScenes.state == 2) {
+				postUpdate(Light_OfficeEffScenes, 4)
+			} else if (Light_OfficeEffScenes.state == 4) {
+				postUpdate(Light_OfficeEffScenes, 1)
+			}
+		}
+	}
+end
+
+rule "Switch OfficeBottom Short Down"
+when
+    Item Switch_OfficeBottomShortDown received update ON
+then
+	if (Light_OfficeEffScenes.state > 0) {
+		postUpdate(Light_OfficeEffScenes, 0)
+	} else {
+		if (Guests.state != ON || Daylight.state == ON) {
+			postUpdate(Light_OfficeEffScenes, 1)
+		} else {
+			postUpdate(Light_OfficeEffScenes, 2)
+		}
+	}
+end

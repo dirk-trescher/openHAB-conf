@@ -1,0 +1,518 @@
+import org.eclipse.xtext.xbase.lib.Functions
+import java.util.Map
+import java.util.concurrent.locks.ReentrantLock
+
+val Map<String, Timer> timers = newHashMap // Timers to tell when a device has been silent for too long
+val Map<String, Boolean> notified = newHashMap // Flag to detect whether we have alerted on a state or not and filter out duplicate events
+val Map<String, ReentrantLock> locks = newHashMap // Because multiple update events get generated for each single update of a Group's member, use a lock to prevent these duplicate updates from being processed
+
+
+// Lambda to process an update from a Device, create/reschedule the Timer and set the Switch to ON
+val Functions$Function5<SwitchItem, Map<String, Boolean>, Integer,
+                        Map<String, Timer>, Map<String, ReentrantLock>, Void> processON = [
+    SwitchItem sw,
+	Map<String, Boolean> notified,
+    Integer timeoutMinutes,
+	Map<String, Timer> timers,
+    Map<String, ReentrantLock> locks |
+
+    if(locks.get(sw.name) === null) {
+        locks.put(sw.name, new ReentrantLock)
+    }
+
+    val lock = locks.get(sw.name)
+    if(!lock.isLocked) {
+        try {
+            lock.lock
+
+            // logInfo("processOn", "Device " + sw.name + " ist aktiv")
+
+            if (sw.state != ON) {
+                sw.sendCommand(ON)          // update the switch
+            }
+
+            // Set or reschedule the Timer
+            if(timers.get(sw.name) === null) {
+                timers.put(sw.name, createTimer(now.plusMinutes(timeoutMinutes), [ |
+                    // logInfo("processOn", "Timer für Device " + sw.name)
+
+                    timers.put(sw.name, null)
+                    sw.sendCommand(OFF)
+                ]))
+            }
+            else {
+                timers.get(sw.name).reschedule(now.plusMinutes(timeoutMinutes))
+            }
+        }
+        catch(Throwable t){
+            logError("processOn", "Error in locked segment in processON")
+        }
+        finally {
+            lock.unlock
+        }
+        true
+    }
+]
+
+rule "System started, create initial timers"
+when
+    System started
+then
+    gDeviceStatus.members.forEach[SwitchItem sw |
+        processON.apply(sw, notified, 2880, timers, locks)
+        Thread::sleep(10) // if more than one device is down, this keeps the alerts from stomping on top of each other when the timer expires
+    ]
+end
+
+rule "Send status mail"
+when
+    Time cron "0 0 21 * * ?"		// 21:00 each day
+then
+    var body = ""
+    gDeviceStatus.members.forEach[SwitchItem sw |
+        if (sw.state != ON) {
+            body += "Device " + sw.name + " ist nicht mehr aktiv.\n"
+        }
+    ]
+    if (body != "") {
+//        sendMail("dirk.trescher@gmx.de", "OpenHAB - Devices inaktiv", body)
+        sendNotification("dirk.trescher@web.de", body)
+    }
+end
+
+// ----------------------------------------------------------
+
+rule "WindowContct Living Left received update"
+when
+    Item Window_LivingLeft_Signal received update
+then
+    processON.apply(WinLLStatus, notified, 600, timers, locks)
+end
+
+rule "WindowContct Living Middle received update"
+when
+    Item Window_LivingMiddle_Signal received update
+then
+    processON.apply(WinLMStatus, notified, 600, timers, locks)
+end
+
+rule "WindowContct Living Right received update"
+when
+    Item Window_LivingRight_Signal received update
+then
+    processON.apply(WinLRStatus, notified, 600, timers, locks)
+end
+
+rule "WindowContct Sleep received update"
+when
+    Item Window_Sleep_Signal received update
+then
+    processON.apply(WinSlStatus, notified, 600, timers, locks)
+end
+
+rule "WindowContct Emilie left received update"
+when
+    Item Window_EmilieLeft_Signal received update
+then
+    processON.apply(WinELStatus, notified, 600, timers, locks)
+end
+
+rule "WindowContct Emilie middle received update"
+when
+    Item Window_EmilieMiddle_Signal received update
+then
+    processON.apply(WinEMStatus, notified, 600, timers, locks)
+end
+
+rule "WindowContct Emilie right received update"
+when
+    Item Window_EmilieRight_Signal received update
+then
+    processON.apply(WinERStatus, notified, 600, timers, locks)
+end
+
+rule "WindowContct Niklas left received update"
+when
+    Item Window_NiklasLeft_Signal received update
+then
+    processON.apply(WinNLStatus, notified, 600, timers, locks)
+end
+
+rule "WindowContct Niklas right received update"
+when
+    Item Window_NiklasRight_Signal received update
+then
+    processON.apply(WinNRStatus, notified, 600, timers, locks)
+end
+
+rule "WindowContct Office Door received update"
+when
+    Item Window_OfficeDoor_Signal received update
+then
+    processON.apply(WinODStatus, notified, 600, timers, locks)
+end
+
+rule "WindowContct Office left received update"
+when
+    Item Window_OfficeLeft_Signal received update
+then
+    processON.apply(WinOLStatus, notified, 600, timers, locks)
+end
+
+rule "WindowContct Office right received update"
+when
+    Item Window_OfficeRight_Signal received update
+then
+    processON.apply(WinORStatus, notified, 600, timers, locks)
+end
+
+rule "WindowContct Hobby received update"
+when
+    Item Window_Hobby_Signal received update
+then
+    processON.apply(WinHStatus, notified, 600, timers, locks)
+end
+
+rule "WindowContct Terrace Door received update"
+when
+    Item Window_Terrace_Signal received update
+then
+    processON.apply(WinTStatus, notified, 600, timers, locks)
+end
+
+rule "WindowContct Guest received update"
+when
+    Item Window_Guests_Signal received update
+then
+    processON.apply(WinGuStatus, notified, 600, timers, locks)
+end
+
+rule "WindowContct Appartment Door received update"
+when
+    Item Window_AppDoor_Signal received update
+then
+    processON.apply(WinADStatus, notified, 600, timers, locks)
+end
+
+rule "WindowContct Garage received update"
+when
+    Item Window_Garage_Signal received update
+then
+    processON.apply(WinGaStatus, notified, 600, timers, locks)
+end
+
+// ----------------------------------------------------------
+
+rule "Thermostat Living received update"
+when
+    Item ThermoSignal_Living received update
+then
+    processON.apply(ThermLivingStatus, notified, 300, timers, locks)
+end
+
+rule "Thermostat Bath received update"
+when
+    Item ThermoSignal_Bath received update
+then
+    processON.apply(ThermBathStatus, notified, 300, timers, locks)
+end
+
+rule "Thermostat Sleep received update"
+when
+    Item ThermoSignal_Sleep received update
+then
+    processON.apply(ThermSleepStatus, notified, 300, timers, locks)
+end
+
+rule "Thermostat Emilie received update"
+when
+    Item ThermoSignal_Emilie received update
+then
+    processON.apply(ThermEmilieStatus, notified, 300, timers, locks)
+end
+
+rule "Thermostat Niklas received update"
+when
+    Item ThermoSignal_Niklas received update
+then
+    processON.apply(ThermNiklasStatus, notified, 300, timers, locks)
+end
+
+rule "Thermostat Office received update"
+when
+    Item ThermoSignal_Office received update
+then
+    processON.apply(ThermOfficeStatus, notified, 300, timers, locks)
+end
+
+rule "Thermostat Hobby received update"
+when
+    Item ThermoSignal_Hobby received update
+then
+    processON.apply(ThermHobbyStatus, notified, 300, timers, locks)
+end
+
+rule "Thermostat Kids Bath received update"
+when
+    Item ThermoSignal_KidsBath received update
+then
+    processON.apply(ThermKidsBathStatus, notified, 300, timers, locks)
+end
+
+// ----------------------------------------------------------
+
+rule "Heating Living received update"
+when
+    Item HeatingLiving_Signal received update
+then
+    processON.apply(HeatLivingStatus, notified, 500, timers, locks)
+end
+
+rule "Heating Bath received update"
+when
+    Item HeatingBath_Signal received update
+then
+    processON.apply(HeatBathStatus, notified, 500, timers, locks)
+end
+
+rule "Heating Sleep received update"
+when
+    Item HeatingSleep_Signal received update
+then
+    processON.apply(HeatSleepStatus, notified, 500, timers, locks)
+end
+
+rule "Heating Kitchen received update"
+when
+    Item HeatingKitchen_Signal received update
+then
+    processON.apply(HeatKitchenStatus, notified, 500, timers, locks)
+end
+
+rule "Heating Emilie right received update"
+when
+    Item HeatingEmilieRe_Signal received update
+then
+    processON.apply(HeatEmReStatus, notified, 500, timers, locks)
+end
+
+rule "Heating Emilie left received update"
+when
+    Item HeatingEmilieLi_Signal received update
+then
+    processON.apply(HeatEmLiStatus, notified, 500, timers, locks)
+end
+
+rule "Heating Niklas received update"
+when
+    Item HeatingNiklas_Signal received update
+then
+    processON.apply(HeatNiklasStatus, notified, 500, timers, locks)
+end
+
+rule "Heating Office received update"
+when
+    Item HeatingOffice_Signal received update
+then
+    processON.apply(HeatOfficeStatus, notified, 500, timers, locks)
+end
+
+rule "Heating Hobby received update"
+when
+    Item HeatingHobby_Signal received update
+then
+    processON.apply(HeatHobbyStatus, notified, 500, timers, locks)
+end
+
+rule "Heating Kids Bath received update"
+when
+    Item HeatingKidsBath_Signal received update
+then
+    processON.apply(HeatKidsBathStatus, notified, 500, timers, locks)
+end
+
+// -------------------------------------------------------
+
+rule "Switch eating 1 received update"
+when
+    Item Switch_EssZi1_Signal received update
+then
+    processON.apply(SwitchEssZi1Status, notified, 40320, timers, locks)
+end
+
+rule "Switch eating 2 received update"
+when
+    Item Switch_EssZi2_Signal received update
+then
+    processON.apply(SwitchEssZi2Status, notified, 40320, timers, locks)
+end
+
+rule "Switch living received update"
+when
+    Item Switch_WohnZi_Signal received update
+then
+    processON.apply(SwitchWohnZiStatus, notified, 40320, timers, locks)
+end
+
+rule "Switch Bath received update"
+when
+    Item Switch_Bath_Signal received update
+then
+    processON.apply(SwitchBathStatus, notified, 40320, timers, locks)
+end
+
+rule "Switch Bath inside received update"
+when
+    Item Switch_BathInside_Signal received update
+then
+    processON.apply(SwitchBathInsStatus, notified, 40320, timers, locks)
+end
+
+rule "Switch Emilie door received update"
+when
+    Item Switch_EmilieDoor_Signal received update
+then
+    processON.apply(SwitchEmDoorStatus, notified, 40320, timers, locks)
+end
+
+rule "Switch Emilie sleep received update"
+when
+    Item Switch_EmilieSleep_Signal received update
+then
+    processON.apply(SwitchEmSleepStatus, notified, 40320, timers, locks)
+end
+
+rule "Switch Niklas received update"
+when
+    Item Switch_Niklas_Signal received update
+then
+    processON.apply(SwitchNiStatus, notified, 40320, timers, locks)
+end
+
+rule "Switch sleep 1 received update"
+when
+    Item Switch_Sleep1_Signal received update
+then
+    processON.apply(SwitchSleep1Status, notified, 40320, timers, locks)
+end
+
+rule "Switch sleep 2 received update"
+when
+    Item Switch_Sleep2_Signal received update
+then
+    processON.apply(SwitchSleep2Status, notified, 40320, timers, locks)
+end
+
+rule "Switch sleep 3 received update"
+when
+    Item Switch_Sleep3_Signal received update
+then
+    processON.apply(SwitchSleep3Status, notified, 40320, timers, locks)
+end
+
+rule "Switch guest loo received update"
+when
+    Item Switch_GuestLoo_Signal received update
+then
+    processON.apply(SwitchGueLooStatus, notified, 40320, timers, locks)
+end
+
+// ------------------------------------------------------------
+
+rule "Soil humidity received update"
+when
+    Item Soil1_Signal received update
+then
+    processON.apply(Soil1Status, notified, 540, timers, locks)
+end
+
+// ------------------------------------------------------------
+
+rule "Button appartment door terrace received update"
+when
+    Item BuzzerSwitch received update or
+    Item BuzzerButton received update or
+    Item Batt_SummerTaster_disp received update
+then
+    processON.apply(ButtonAppDoorTerrStatus, notified, 40320, timers, locks)
+end
+
+rule "CO sensor received update"
+when
+    Item CO_Temp received update or
+    Item CO_Alarm received update or
+    Item CO_Level received update or
+    Item Batt_CO_disp received update
+then
+    processON.apply(COStatus, notified, 1440, timers, locks)
+end
+
+rule "Smoke detector sleep received update"
+when
+    Item Smoke_Sleep_Temp received update or
+    Item Smoke_Sleep_Heat received update or
+    Item Smoke_Sleep received update or
+    Item Batt_Smoke_Sleep_disp received update
+then
+    processON.apply(SmokeSleepStatus, notified, 1440, timers, locks)
+end
+
+rule "Smoke detector Niklas received update"
+when
+    Item Smoke_Niklas_Temp received update or
+    Item Smoke_Niklas_Heat received update or
+    Item Smoke_Niklas received update or
+    Item Batt_Smoke_Niklas_disp received update
+then
+    processON.apply(SmokeNiklasStatus, notified, 1440, timers, locks)
+end
+
+rule "Smoke detector Emilie received update"
+when
+    Item Smoke_Emilie_Temp received update or
+    Item Smoke_Emilie_Heat received update or
+    Item Smoke_Emilie received update or
+    Item Batt_Smoke_Emilie_disp received update
+then
+    processON.apply(SmokeEmilieStatus, notified, 1440, timers, locks)
+end
+
+rule "Smoke detector office received update"
+when
+    Item Smoke_Office_Temp received update or
+    Item Smoke_Office_Heat received update or
+    Item Smoke_Office received update or
+    Item Batt_Smoke_Office_disp received update
+then
+    processON.apply(SmokeOfficeStatus, notified, 1440, timers, locks)
+end
+
+rule "Motion stairway received update"
+when
+    Item StairwayMotion received update or
+    Item Stairway_Temperature received update or
+    Item Stairway_Luminance received update or
+    Item Batt_StairwayMotion_disp received update
+then
+    processON.apply(MotionStairwayStatus, notified, 1440, timers, locks)
+end
+
+rule "Motion hall received update"
+when
+    Item HallMotion received update or
+    Item Hall_Temperature received update or
+    Item Hall_Luminance received update or
+    Item Batt_HallMotion_disp received update
+then
+    processON.apply(MotionHallStatus, notified, 1440, timers, locks)
+end
+
+rule "Motion office received update"
+when
+    Item OfficeMotion received update or
+    Item Office_Temperature received update or
+    Item Office_Luminance received update or
+    Item Batt_OfficeMotion_disp received update
+then
+    processON.apply(MotionOfficeStatus, notified, 1440, timers, locks)
+end

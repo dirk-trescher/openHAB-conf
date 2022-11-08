@@ -1,0 +1,62 @@
+Number SoilMoisture1        "Bodenfeuchtigkeit Palme [%d %%]"   <water>   (gSoil)	{channel="mqtt:topic:1fd8bb3ef8:4a1c228310:soilMoisture"}
+Number SoilBattery1         "Batterie Palme [JS(divideByHundred.js):%s]"   <battery>   (gSoilBatt)	{channel="mqtt:topic:1fd8bb3ef8:4a1c228310:batteryVoltage"}
+Number SoilSolar1           "Solar Palme [JS(divideByHundred.js):%s]"   <solarplant>   (gSoilSolar)	{channel="mqtt:topic:1fd8bb3ef8:4a1c228310:solarVoltage"}
+Number SoilTemperature1     "Temperatur Palme [%d °C]"   <temperature>   (gOutsideTemp)	{channel="mqtt:topic:1fd8bb3ef8:4a1c228310:Temperature"}
+Number SoilRSSI1            "Signalstärke Palme [-%d]"   <network>   (gSignal)	{channel="mqtt:topic:1fd8bb3ef8:4a1c228310:moistureRssi"}
+
+Number WaterFlowRoof1                                                      (gWaterUsage)    {channel="mqtt:topic:1fd8bb3ef8:cf183728:waterflow_1"}
+Number WaterFlowRoof2                                                      (gWaterUsage)    {channel="mqtt:topic:1fd8bb3ef8:cf183728:waterflow_2"}
+Number WaterFlowRoof3                                                      (gWaterUsage)    {channel="mqtt:topic:1fd8bb3ef8:cf183728:waterflow_3"}
+Number WaterFlowRoof4                                                      (gWaterUsage)    {channel="mqtt:topic:1fd8bb3ef8:cf183728:waterflow_4"}
+Number WaterFlowRoof5                                                      (gWaterUsage)    {channel="mqtt:topic:1fd8bb3ef8:cf183728:waterflow_5"}
+Number WaterFlowRoof6                                                      (gWaterUsage)    {channel="mqtt:topic:1fd8bb3ef8:cf183728:waterflow_6"}
+Number WaterFlowRoofTransformed1    "Wasserverbrauch Fensterbänke [%.3f l]" <water>   (gWaterUsage)
+Number WaterFlowRoofTransformed2    "Wasserverbrauch Wiese Süd [%.3f l]"    <water>   (gWaterUsage)
+Number WaterFlowRoofTransformed3    "Wasserverbrauch Wiese Nord [%.3f l]"   <water>   (gWaterUsage)
+Number WaterFlowRoofTransformed4    "Wasserverbrauch Tröge [%.3f l]"        <water>   (gWaterUsage)
+Number WaterFlowRoofTransformed5    "Wasserverbrauch Erdbeeren [%.3f l]"    <water>   (gWaterUsage)
+Number WaterFlowRoofTransformed6    "Wasserverbrauch Obstbäume [%.3f l]"    <water>   (gWaterUsage)
+Number WaterFlowRoofPerH1           "Wasserdurchfluss Fensterbänke [%.3f l/h]" <water> (gWaterFlow)
+Number WaterFlowRoofPerH2           "Wasserdurchfluss Wiese Süd [%.3f l/h]" <water>   (gWaterFlow)
+Number WaterFlowRoofPerH3           "Wasserdurchfluss Wiese Nord [%.3f l/h]" <water>  (gWaterFlow)
+Number WaterFlowRoofPerH4           "Wasserdurchfluss Tröge [%.3f l/h]"     <water>   (gWaterFlow)
+Number WaterFlowRoofPerH5           "Wasserdurchfluss Erdbeeren [%.3f l/h]" <water>   (gWaterFlow)
+Number WaterFlowRoofPerH6           "Wasserdurchfluss Obstbäume [%.3f l/h]" <water>   (gWaterFlow)
+Number WaterFlowRoofPerHAkt1        "Wasserdurchfluss aktuell Fensterbänke [%.3f l/h]" <water> (gWaterFlow)
+Number WaterFlowRoofPerHAkt2        "Wasserdurchfluss aktuell Wiese Süd [%.3f l/h]" <water>   (gWaterFlow)
+Number WaterFlowRoofPerHAkt3        "Wasserdurchfluss aktuell Wiese Nord [%.3f l/h]" <water>  (gWaterFlow)
+Number WaterFlowRoofPerHAkt4        "Wasserdurchfluss aktuell Tröge [%.3f l/h]"     <water>   (gWaterFlow)
+Number WaterFlowRoofPerHAkt5        "Wasserdurchfluss aktuell Erdbeeren [%.3f l/h]" <water>   (gWaterFlow)
+Number WaterFlowRoofPerHAkt6        "Wasserdurchfluss aktuell Obstbäume [%.3f l/h]" <water>   (gWaterFlow)
+Switch WaterValveRoof1              "Fensterbänke"                          <faucet>  (gWatering)
+Switch WaterValveRoof2              "Wiese Süd"                             <faucet>  (gWatering)
+Switch WaterValveRoof3              "Wiese Nord"                            <faucet>  (gWatering)
+Switch WaterValveRoof4              "Tröge"                                 <faucet>  (gWatering)
+Switch WaterValveRoof5              "Erdbeeren"                             <faucet>  (gWatering)
+Switch WaterValveRoof6              "Obstbäume"                             <faucet>  (gWatering)
+Number WaterRoofHeartbeat           "Wasser Dach Uptime [JS(duration.js):%s]"     <network>  (gWatering) {channel="mqtt:topic:1fd8bb3ef8:cf183728:heartbeat"}
+DateTime WaterRoofHeartbeatDate     "Wasser Dach Heartbeat [%1$td.%1$tm.%1$ty %1$tH:%1$tM]"     <network>
+Number WaterRoofRssi                "Wasser Dach Signalstärke [%d]"      <network>    (gSignal) {channel="mqtt:topic:1fd8bb3ef8:cf183728:signal_strength"}
+
+Number ManWateringTime              "Bewässerungszeit [%d min]"           <time>  (gWatering)
+
+Number FingerUser                "Fingerabdruck Benutzer [%d]"          <parents_1_1>      (gFingerprint) {channel="mqtt:topic:aad8e2f9:FingerNummer"}
+Number FingerHeartbeat           "Fingerabdruck Uptime [JS(duration.js):%s]"     <network> (gFingerprint) {channel="mqtt:topic:aad8e2f9:heartbeat"}
+DateTime FingerHeartbeatDate     "Fingerabdruck Heartbeat [%1$td.%1$tm.%1$ty %1$tH:%1$tM]" <network>
+Number FingerRssi                "Fingerabdruck Signalstärke [%d]"      <network>          (gSignal)      {channel="mqtt:topic:aad8e2f9:signal_strength"}
+Switch LearnNewFinger            "Neuen Finger anlernen"
+String FingerState               "Sensor Status [%s]"                   <switch>           (gFingerprint) {channel="mqtt:topic:aad8e2f9:state"}
+Switch FingerOnOff               "Sensor"
+Number FingerSetSensitivity      "Empfindlichkeit setzen [%d]"
+Number FingerSensitivity         "Empfindlichkeit [%d]"                                    (gFingerprint) {channel="mqtt:topic:aad8e2f9:sensitivity"}
+Switch FingerGetNrOfFingers      "Anfrage Anzahl Fingerabdrücke"
+Number FingerNrOfFingers         "Registrierte Fingerabdrücke [%d]"                        (gFingerprint) {channel="mqtt:topic:aad8e2f9:nr_fingers"}
+String FingerTamperAlarm         "Manipulations-Alarm [%s]"             <alarm>            (gFingerprint) {channel="mqtt:topic:aad8e2f9:tamper_alarm"}
+
+Number CO2level1                 "CO2 Level [%d ppm]"                    <carbondioxide>    (gAirQuality) {channel="mqtt:topic:0dee8c13:co2level"}
+Number CO2temp1                  "CO2 Temperatur [%.2f °C]"              <temperature>                    {channel="mqtt:topic:0dee8c13:co2temp"}
+Number CO2Heartbeat1             "CO2 Uptime [JS(duration.js):%s]"       <network>                        {channel="mqtt:topic:0dee8c13:CO2Heartbeat"}
+DateTime CO2HeartbeatDate1       "CO2 Heartbeat [%1$td.%1$tm.%1$ty %1$tH:%1$tM]" <network>
+Number CO2Rssi1                  "CO2 Signalstärke [%d]"                 <network>          (gSignal)     {channel="mqtt:topic:0dee8c13:CO2Rssi"}
+Switch CO2Calibrate1             "Calibrieren"
+Switch CO2AutoCal1               "Auto-Calibrierung"

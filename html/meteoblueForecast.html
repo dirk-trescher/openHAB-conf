@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-type" CONTENT="text/html; charset=utf-8">
+</head>
+<body style='margin:0;padding:0;'>
+  <style>
+    #wrap {  
+      width: 100%;
+      height: 95vh;
+      padding: 0;
+      overflow: hidden;
+    }
+    #scaled-frame { width: 8000px; height: 4000px; border: 0px; overflow: hidden}
+    #scaled-frame {
+      zoom: 0.4;
+      -moz-transform: scale(0.4);
+      -moz-transform-origin: 0 0;
+      -o-transform: scale(0.4);
+      -o-transform-origin: 0 0;
+      -webkit-transform: scale(0.4);
+      -webkit-transform-origin: 0 0;
+    }
+  </style>
+  <div id="wrap">
+    <iframe id="scaled-frame"
+      src="https://www.meteoblue.com/api/visimage/meteogram_web_hd?look=KILOMETER_PER_HOUR%2CCELSIUS%2CMILLIMETER&city=Konstanz&iso2=DE&lat=47.660301&lon=9.17582&asl=402&tz=Europe/Berlin&lang=de">
+    </iframe> 
+  </div>
+</body>

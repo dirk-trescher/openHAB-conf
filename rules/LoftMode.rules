@@ -1,0 +1,853 @@
+import org.eclipse.smarthome.model.script.actions.Timer
+import org.joda.time.LocalTime
+
+var Timer nightTimer = null
+var Timer presentTimer = null
+var Timer officeMotionTimer = null
+var Timer appartmentDoorOpenLast10Min = null
+var Timer officePresentTimer = null
+var Timer timerDoorClosedForVacation = null
+var Timer iPhoneUpdateDirkTimer = null
+var Timer iPhoneUpdateHeikeTimer = null
+var Timer iPhoneUpdateNiklasTimer = null
+var Timer iPhoneUpdateEmilieTimer = null
+var Timer waspInABoxTimer = null
+
+/* ---------------------------------- */
+
+val	Functions.Function1<String, Void> logAndWriteReason = [
+    String reason |
+
+	logInfo("loftMode", reason)
+	postUpdate(DecisionReasons, now.getHour() + "h" + now.getMinute() + ": " + reason)
+	return null
+]
+
+
+// Function called to calculate location distance
+val Functions$Function4<GenericItem, PointType, String, Number, String> locationDistance= [ Coordinates, place, placeName, distance2 |
+    val PointType location = Coordinates.state as PointType
+    var int distance
+    var String message
+    // my home location
+    distance = location.distanceFrom(place).intValue()
+    if (distance < distance2) {
+        message = (String::format("%s (%dm)", placeName, distance))
+    } else {
+        message = "(unknown location)"
+        }
+    return message
+]
+
+/* ---------------------------------- */
+
+rule "chart iPhone Dirk"
+when
+	Item iPhoneDirk changed
+then
+	if(iPhoneDirk.state == ON) {
+		postUpdate(iPhoneDirk_disp, 1.05)
+	} else {
+		postUpdate(iPhoneDirk_disp, 0.2)
+	}
+end
+
+rule "chart iPhone Heike"
+when
+	Item iPhoneHeike changed
+then
+	if(iPhoneHeike.state == ON) {
+		postUpdate(iPhoneHeike_disp, 1.08)
+	} else {
+		postUpdate(iPhoneHeike_disp, 0.23)
+	}
+end
+
+rule "chart wifi Dirk"
+when
+	Item FritzBoxMacOnlineDirk changed
+then
+	if(FritzBoxMacOnlineDirk.state == ON) {
+		postUpdate(WifiDirk_disp, 0.87)
+	} else {
+		postUpdate(WifiDirk_disp, 0.13)
+	}
+end
+
+rule "chart wifi Heike"
+when
+	Item FritzBoxMacOnlineHeike changed
+then
+	if(FritzBoxMacOnlineHeike.state == ON) {
+		postUpdate(WifiHeike_disp, 0.83)
+	} else {
+		postUpdate(WifiHeike_disp, 0.16)
+	}
+end
+
+rule "chart wifi Laptop"
+when
+	Item FritzBoxMacOnlineLaptop changed
+then
+	if(FritzBoxMacOnlineLaptop.state == ON) {
+		postUpdate(WifiLaptop_disp, 0.9)
+	} else {
+		postUpdate(WifiLaptop_disp, 0.1)
+	}
+end
+
+rule "chart wifi Mac Book"
+when
+	Item FritzBoxMacOnlineMacBook changed
+then
+	if(FritzBoxMacOnlineMacBook.state == ON) {
+		postUpdate(WifiLaptop_disp, 1.0)
+	} else {
+		postUpdate(WifiLaptop_disp, 0.2)
+	}
+end
+
+rule "chart office present"
+when
+	Item Office_present changed
+then
+	if(Office_present.state == ON) {
+		postUpdate(Office_present_disp, 1.12)
+	} else {
+		postUpdate(Office_present_disp, 0.26)
+	}
+end
+
+/* ---------------------------------- */
+
+
+rule "iPhone Dirk near home"
+when
+	Item iPhoneDirkLoc changed
+then
+	var PointType home = new PointType("47.666284,9.172371")
+
+	val PointType location = iPhoneDirkLoc.state as PointType
+    var int distance = location.distanceFrom(home).intValue()
+
+	postUpdate(iPhoneDirkDistanceFromHome, distance)
+
+	if (distance > 100) {
+		postUpdate(iPhoneDirk, OFF)
+	} else {
+		postUpdate(iPhoneDirk, ON)
+	}
+	if (distance > 50000) {
+		postUpdate(iPhoneDirkAlmostHome, OFF)
+	} else {
+		postUpdate(iPhoneDirkAlmostHome, ON)
+	}
+end
+
+rule "iPhone Heike near home"
+when
+	Item iPhoneHeikeLoc changed
+then
+	var PointType home = new PointType("47.666284,9.172371")
+
+	val PointType location = iPhoneHeikeLoc.state as PointType
+    var int distance = location.distanceFrom(home).intValue()
+
+	postUpdate(iPhoneHeikeDistanceFromHome, distance)
+
+	if (distance > 100) {
+		postUpdate(iPhoneHeike, OFF)
+	} else {
+		postUpdate(iPhoneHeike, ON)
+	}
+	if (distance > 50000) {
+		postUpdate(iPhoneHeikeAlmostHome, OFF)
+	} else {
+		postUpdate(iPhoneHeikeAlmostHome, ON)
+	}
+end
+
+rule "iPhone Niklas near home"
+when
+	Item iPhoneNiklasLoc changed
+then
+	var PointType home = new PointType("47.666284,9.172371")
+
+	val PointType location = iPhoneNiklasLoc.state as PointType
+    var int distance = location.distanceFrom(home).intValue()
+
+	postUpdate(iPhoneNiklasDistanceFromHome, distance)
+
+	if (distance > 100) {
+		postUpdate(iPhoneNiklas, OFF)
+	} else {
+		postUpdate(iPhoneNiklas, ON)
+	}
+	if (distance > 50000) {
+		postUpdate(iPhoneNiklasAlmostHome, OFF)
+	} else {
+		postUpdate(iPhoneNiklasAlmostHome, ON)
+	}
+end
+
+rule "iPhone Emilie near home"
+when
+	Item iPhoneEmilieLoc changed
+then
+	var PointType home = new PointType("47.666284,9.172371")
+
+	val PointType location = iPhoneEmilieLoc.state as PointType
+    var int distance = location.distanceFrom(home).intValue()
+
+	postUpdate(iPhoneEmilieDistanceFromHome, distance)
+
+	if (distance > 100) {
+		postUpdate(iPhoneEmilie, OFF)
+	} else {
+		postUpdate(iPhoneEmilie, ON)
+	}
+	if (distance > 50000) {
+		postUpdate(iPhoneEmilieAlmostHome, OFF)
+	} else {
+		postUpdate(iPhoneEmilieAlmostHome, ON)
+	}
+end
+
+rule "iPhone Dirk update too long ago"
+when
+	Item iPhoneDirkLoc changed
+then
+	if (iPhoneUpdateDirkTimer !== null) {
+		iPhoneUpdateDirkTimer.cancel()
+		iPhoneUpdateDirkTimer = null
+	}
+
+	postUpdate(iPhoneDirkNoUpdate, OFF)
+
+	iPhoneUpdateDirkTimer = createTimer(now.plusMinutes(120)) [|
+		postUpdate(iPhoneDirkNoUpdate, ON)
+	]
+end
+
+rule "iPhone Heike update too long ago"
+when
+	Item iPhoneHeikeLoc changed
+then
+	if (iPhoneUpdateHeikeTimer !== null) {
+		iPhoneUpdateHeikeTimer.cancel()
+		iPhoneUpdateHeikeTimer = null
+	}
+
+	postUpdate(iPhoneHeikeNoUpdate, OFF)
+
+	iPhoneUpdateHeikeTimer = createTimer(now.plusMinutes(120)) [|
+		postUpdate(iPhoneHeikeNoUpdate, ON)
+	]
+end
+
+rule "iPhone Niklas update too long ago"
+when
+	Item iPhoneNiklasLoc changed
+then
+	if (iPhoneUpdateNiklasTimer !== null) {
+		iPhoneUpdateNiklasTimer.cancel()
+		iPhoneUpdateNiklasTimer = null
+	}
+
+	postUpdate(iPhoneNiklasNoUpdate, OFF)
+
+	iPhoneUpdateNiklasTimer = createTimer(now.plusMinutes(120)) [|
+		postUpdate(iPhoneNiklasNoUpdate, ON)
+	]
+end
+
+rule "iPhone Emilie update too long ago"
+when
+	Item iPhoneEmilieLoc changed
+then
+	if (iPhoneUpdateEmilieTimer !== null) {
+		iPhoneUpdateEmilieTimer.cancel()
+		iPhoneUpdateEmilieTimer = null
+	}
+
+	postUpdate(iPhoneEmilieNoUpdate, OFF)
+
+	iPhoneUpdateEmilieTimer = createTimer(now.plusMinutes(120)) [|
+		postUpdate(iPhoneEmilieNoUpdate, ON)
+	]
+end
+
+/* ---------------------------------- */
+
+rule "Beginning of daylight"
+when
+    Channel 'astro:sun:local:rise#event' triggered START
+then
+	logAndWriteReason.apply( "Beginning of daylight" )
+	postUpdate(Daylight, ON)
+end
+
+rule "End of daylight"
+when
+    Channel 'astro:sun:local:set#event' triggered END
+then
+	logAndWriteReason.apply( "End of daylight" )
+	postUpdate(Daylight, OFF)
+end
+
+
+rule "Beginning of dawn"
+when
+    Channel 'astro:sun:local:civilDawn#event' triggered START
+then
+	logAndWriteReason.apply( "Beginning of morning twilight" )
+	postUpdate(Twilight, ON)
+	logAndWriteReason.apply( "End of pitchblack" )
+	postUpdate(Night, OFF)
+end
+
+rule "End of dawn"
+when
+    Channel 'astro:sun:local:rise#event' triggered END
+then
+	logAndWriteReason.apply( "End of morning twilight" )
+	postUpdate(Twilight, OFF)
+end
+
+
+rule "Beginning of dusk"
+when
+    Channel 'astro:sun:local:set#event' triggered START
+then
+	logAndWriteReason.apply( "Beginning of evening twilight" )
+	postUpdate(Twilight, ON)
+end
+
+rule "End of dusk"
+when
+    Channel 'astro:sun:local:civilDusk#event' triggered END
+then
+	logAndWriteReason.apply( "End of evening twilight" )
+	postUpdate(Twilight, OFF)
+	logAndWriteReason.apply( "Beginning of pitchblack" )
+	postUpdate(Night, ON)
+end
+
+// ------------------------------------------------------------
+
+rule "Someone in Office"
+when
+	Item Light_OfficeTopScenes changed or
+	Item Light_OfficeEffScenes changed
+then
+	if (Guests.state != ON) {
+		if (Light_OfficeTopScenes.state > 0 || Light_OfficeEffScenes.state > 0) {
+			if (Office_present.state != ON) {
+				if (officePresentTimer === null) {
+					officePresentTimer = createTimer(now.plusMinutes(5)) [|
+						logAndWriteReason.apply( "Office present due to light" )
+						postUpdate(Office_present, ON)
+						officePresentTimer = null
+					]
+				}
+			}
+		} else {
+			officePresentTimer?.cancel // the ? will skip this line if Timer is null
+			officePresentTimer = null
+
+			if (Office_present.state != OFF) {
+				logAndWriteReason.apply( "Office present OFF due to light" )
+				postUpdate(Office_present, OFF)
+			}
+		}
+	}
+end
+
+/*
+rule "Someone in Office - Motion"
+when
+	Item OfficeMotion changed to ON
+then
+	postUpdate(Office_present, ON)
+
+	officeMotionTimer = createTimer(now.plusMinutes(10)) [|
+		if(Office_Luminance.state <= 5) {
+			postUpdate(Office_present, OFF)
+		}
+	]
+end
+*/
+
+rule "Someone in Office - heating manually set"
+when
+	Item HeatingTarget_Office changed
+then
+	if (Guests.state != ON) {
+		if (HeatingTarget_Office.state > 20) {
+			logAndWriteReason.apply( "Office present due to heating" )
+			postUpdate(Office_present, ON)
+		} else if (HeatingTarget_Office.state < 19) {
+				logAndWriteReason.apply( "Office present OFF due to heating" )
+				postUpdate(Office_present, OFF)
+		}
+	}
+end
+
+rule "Guests coming - switch off Office"
+when
+	Item Guests changed to ON
+then
+	logAndWriteReason.apply( "Office present OFF due to guests" )
+	postUpdate(Office_present, OFF)
+end
+
+rule "Guests wake up - Luminance"
+when
+	Item Office_Luminance changed
+then
+	if (Guests.state == ON) {
+		if (now.getHour() >= 6 || now.getHour() < 10) {
+			if(Office_Luminance.state > 5) {
+				if (Guests_awake.state != ON) {
+					logAndWriteReason.apply( "Guests woke up" )
+					postUpdate(Guests_awake, ON)
+				}
+			}
+		}
+	}
+end
+
+rule "Guests not wake up - time"
+when
+	Time cron "0 0 21 * * ?"		// 21:00 each day
+then
+	if (Guests.state == ON) {
+		logAndWriteReason.apply( "cool down Office - 9pm" )
+		postUpdate(Guests_awake, OFF)
+	}
+end
+
+// ----------------------------------------------------------
+
+rule "Start Night due to time"
+when
+	Time cron "0 0 23 * * ?"		// 23:00 each day
+then
+	if (LoftMode.state == 0) {				// da
+	  	if (Light_EatingScenes.state == 0 || Light_EatingScenes.state == 4) {
+		  	if (Light_WohnZiScenes.state == 0) {
+			  	if (Light_BathScenes.state == 0) {
+				  	if (Light_SleepScenes.state == 0) {
+    				  	if (Light_OfficeTopScenes.state == 0 && Light_OfficeEffScenes.state == 0) {
+	    					if ((FritzBoxMacOnlineLaptop.state == OFF || FritzBoxMacOnlineLaptop.state == NULL)/* &&
+		    				    (FritzBoxMacOnlineMacBook.state == OFF || FritzBoxMacOnlineMacBook.state == NULL)*/) {
+			    		  		if (Office_present.state == OFF	|| Guests.state == ON) {
+				    				logAndWriteReason.apply( "Sleeping Mode at 11 PM (all lights are off)" )
+					    			postUpdate(LoftMode, 2)
+						    	}
+						    }
+                        }
+					}
+			  	}
+		  	}
+	  	}
+	}
+end
+
+rule "Start Night at 2:00 even if lights are on"
+when
+	Time cron "0 0 2 * * ?"		// 2:00 each day
+then
+	if (LoftMode.state == 0 && SleepOverride.state != ON) {				// da
+	  	logAndWriteReason.apply( "Sleeping Mode at 2 AM" )
+		postUpdate(LoftMode, 2)
+	}
+end
+
+//rule "Appartment door closed for at least 10 min"
+//when
+//	Item Window_AppDoor changed to OPEN
+//then
+//	if (appartmentDoorOpenLast10Min != null) {
+//		appartmentDoorOpenLast10Min.cancel()
+//	}
+//	appartmentDoorOpenLast10Min = createTimer(now.plusMinutes(10)) [|]
+//end
+//
+//rule "Present due to CO2 Kitchen (Wasp in a box)"
+//when
+//	Item CO2 changed
+//then
+//	if ((CO2.state as DecimalType) - (CO2.historicState(now.minusMinutes(10)).state as DecimalType) > 10) {
+//		if (Window_AppDoor.state == CLOSED &&
+//			(appartmentDoorOpenLast10Min == null || !appartmentDoorOpenLast10Min.running)) {
+//			logAndWriteReason.apply( "Wasp in a box due to CO2 rise in kitchen" )
+//			postUpdate(WaspInABox, ON)
+//		}
+//	}
+//end
+//
+//rule "Present due to CO2 Sleep (Wasp in a box)"
+//when
+//	Item CO2_Display_disp changed
+//then
+//	if ((CO2_Display_disp.state as DecimalType) - (CO2_Display_disp.historicState(now.minusMinutes(10)).state as DecimalType) > 10) {
+//		if (Window_AppDoor.state == CLOSED &&
+//			(appartmentDoorOpenLast10Min == null || !appartmentDoorOpenLast10Min.running)) {
+//			logAndWriteReason.apply( "Wasp in a box due to CO2 rise in sleep" )
+//			postUpdate(WaspInABox, ON)
+//		}
+//	}
+//end
+
+rule "Wasp in the box"
+when
+	Item WaspInABox changed to ON
+then
+	if (LoftMode.state == 1 || LoftMode.state == 4) {		// weg oder vacation
+		logAndWriteReason.apply( "End away Mode due to wasp in" )
+		postUpdate(LoftMode, 0)								// da
+	}
+end
+
+rule "Door open -> Wasp out"
+when
+	Item Window_AppDoor changed to CLOSED
+then
+	postUpdate(WaspInABox, NULL)
+
+	waspInABoxTimer?.cancel // the ? will skip this line if Timer is null
+	waspInABoxTimer = createTimer(now.plusMinutes(10)) [|
+		if (WaspInABox.state != ON) {
+			logAndWriteReason.apply( "Wasp in a box OFF (no event after 10 min.)" )
+			postUpdate(WaspInABox, OFF)
+		}
+		waspInABoxTimer = null
+	]
+end
+
+rule "Present until Door open"
+when
+	Item Window_AppDoor changed to OPEN
+then
+	if (LoftMode.state == 1) {								// weg
+		logAndWriteReason.apply( "End away Mode due to appartment door" )
+		postUpdate(LoftMode, 0)								// da
+	}
+end
+
+rule "Absent or vacation Mode due to iPhone & MAC"
+when
+	Item iPhoneDirk changed to OFF or
+	Item iPhoneHeike changed to OFF or
+	Item FritzBoxMacOnlineDirk changed to OFF or
+	Item FritzBoxMacOnlineHeike changed to OFF or
+	Item WaspInABox changed to OFF
+then
+	if (iPhoneDirk.state == OFF && iPhoneHeike.state == OFF &&
+		FritzBoxMacOnlineDirk.state == OFF && FritzBoxMacOnlineHeike.state == OFF &&
+		WaspInABox.state == OFF &&
+        Guests.state == OFF &&
+		(LoftMode.state == 0 || LoftMode.state == 2)) {		// da oder schlafen
+		if (iPhoneDirkAlmostHome.state == OFF && iPhoneHeikeAlmostHome.state == OFF) {
+			logAndWriteReason.apply( "Vacation Mode due to H&D far away and Wasp out" )
+			postUpdate(LoftMode, 4)
+			sendNotification("dirk.trescher@web.de", "Die Wohnungstür wurde geöffnet (Urlaubsmodus wieder ein)!")
+		} else {
+			logAndWriteReason.apply( "Absent Mode due to iPhone location and iPhone MAC and Wasp out" )
+			postUpdate(LoftMode, 1)								// weg
+		}
+	}
+end
+
+rule "Present Mode due to iPhone location"
+when
+	Item iPhoneDirk changed to ON or
+	Item iPhoneHeike changed to ON
+then
+	if (LoftMode.state == 1 || LoftMode.state == 4) {		// weg oder vacation
+		logAndWriteReason.apply( "Present Mode due to iPhone location" )
+		postUpdate(LoftMode, 0)								// da
+	}
+end
+
+rule "Present Mode due to MAC in WLAN"
+when
+	Item FritzBoxMacOnlineHeike changed to ON or
+	Item FritzBoxMacOnlineDirk changed to ON or
+	Item FritzBoxMacOnlineLaptop changed to ON or
+	Item FritzBoxMacOnlineMacBook changed to ON
+then
+	if (LoftMode.state == 1 || LoftMode.state == 4) {		// weg oder vacation
+		logAndWriteReason.apply( "Present Mode due to MAC in WLAN" )
+		postUpdate(LoftMode, 0)								// da
+	}
+end
+
+rule "Wasp in a box due to Windows or Motion"
+when
+	Item HallMotion changed to ON or
+	Item OfficeMotion changed to ON or
+	Item HotWaterOn changed or
+	Item Window_LivingLeft changed or
+	Item Window_LivingMiddle changed or
+	Item Window_LivingRight changed or
+	Item Window_Sleep changed or
+	Item Window_EmilieLeft changed or
+	Item Window_EmilieMiddle changed or
+	Item Window_EmilieRight changed or
+	Item Window_NiklasRight changed or
+	Item Window_NiklasLeft changed or
+	Item Window_OfficeDoor changed or
+	Item Window_OfficeLeft changed or
+	Item Window_OfficeRight changed or
+	Item Window_Hobby changed or
+	Item Window_Terrace changed
+then
+	if (Window_AppDoor.state == CLOSED) {
+		if (WaspInABox.state != ON) {
+			logAndWriteReason.apply( "Wasp in a box due to Windows or Motion" )
+			postUpdate(WaspInABox, ON)
+		}
+	}
+end
+
+rule "Wasp in a Box due to light switches"
+when
+    Item Switch_EssZi1ShortUp changed to ON or
+    Item Switch_EssZi1ShortDown changed to ON or
+    Item Switch_EssZi1LongUp changed to ON or
+    Item Switch_EssZi1LongDown changed to ON or
+    Item Switch_EssZi2ShortUp changed to ON or
+    Item Switch_EssZi2ShortDown changed to ON or
+    Item Switch_EssZi2LongUp changed to ON or
+    Item Switch_EssZi2LongDown changed to ON or
+    Item Switch_WohnZiShortUp changed to ON or
+    Item Switch_WohnZiShortDown changed to ON or
+    Item Switch_WohnZiLongUp changed to ON or
+    Item Switch_WohnZiLongDown changed to ON or
+    Item Switch_BathShortUp changed to ON or
+    Item Switch_BathShortDown changed to ON or
+    Item Switch_BathLongUp changed to ON or
+    Item Switch_BathLongDown changed to ON or
+    Item Switch_BathInsideShortUp changed to ON or
+    Item Switch_BathInsideShortDown changed to ON or
+    Item Switch_BathInsideLongUp changed to ON or
+    Item Switch_BathInsideLongDown changed to ON or
+    Item Switch_EmilieDoorShortUp changed to ON or
+    Item Switch_EmilieDoorShortDown changed to ON or
+    Item Switch_EmilieDoorLongUp changed to ON or
+    Item Switch_EmilieDoorLongDown changed to ON or
+    Item Switch_EmilieSleepShortUp changed to ON or
+    Item Switch_EmilieSleepShortDown changed to ON or
+    Item Switch_EmilieSleepLongUp changed to ON or
+    Item Switch_EmilieSleepLongDown changed to ON or
+    Item Switch_GuestLooShortUp changed to ON or
+    Item Switch_GuestLooShortDown changed to ON or
+    Item Switch_GuestLooLongUp changed to ON or
+    Item Switch_GuestLooLongDown changed to ON or
+    Item Switch_Sleep1ShortUp changed to ON or
+    Item Switch_Sleep1ShortDown changed to ON or
+    Item Switch_Sleep1LongUp changed to ON or
+    Item Switch_Sleep1LongDown changed to ON or
+    Item Switch_Sleep2ShortUp changed to ON or
+    Item Switch_Sleep2ShortDown changed to ON or
+    Item Switch_Sleep2LongUp changed to ON or
+    Item Switch_Sleep2LongDown changed to ON
+then
+	if (Window_AppDoor.state == CLOSED) {
+		if (WaspInABox.state != ON) {
+			logAndWriteReason.apply( "Wasp in a Box due to light switches" )
+			postUpdate(WaspInABox, ON)
+		}
+	}
+end
+
+rule "Start/End Sleeping Mode due to lights"
+when
+	Item Light_EatingScenes changed or
+	Item Light_WohnZiScenes changed or
+	Item Light_SleepScenes changed or
+	Item Light_BathScenes changed or
+    Item Light_OfficeEffScenes changed or
+    Item Light_OfficeTopScenes changed or
+	Item FritzBoxMacOnlineLaptop changed or
+//	Item FritzBoxMacOnlineMacBook changed or
+	Item Office_present changed or
+	Item StreamingMovie changed
+then
+	var boolean allSleepingConditionsMet = false
+
+	if (LoftMode.state != 3 && LoftMode.state != 4) {		// nicht Party und nicht Vacation
+		if (Daylight.state == OFF) {
+			if (now.getHour() < 6 || now.getHour() >= 23) {
+			  	if (Light_EatingScenes.state == 0 || Light_EatingScenes.state == 4) {
+				  	if (Light_WohnZiScenes.state == 0) {
+					  	if (Light_BathScenes.state == 0) {
+						  	if (Light_SleepScenes.state == 0) {
+            				  	if (Light_OfficeTopScenes.state == 0 && Light_OfficeEffScenes.state == 0) {
+						  		    if ( (FritzBoxMacOnlineLaptop.state == OFF || FritzBoxMacOnlineLaptop.state == NULL)/* &&
+								         (FritzBoxMacOnlineMacBook.state == OFF || FritzBoxMacOnlineMacBook.state == NULL)*/ ) {
+							  		    if (Office_present.state == OFF	|| Guests.state == ON) {
+										    if (StreamingMovie.state == OFF) {
+
+											    presentTimer?.cancel()
+    											presentTimer = null
+
+	    										allSleepingConditionsMet = true
+
+		    									if (LoftMode.state != 2) {			// nicht Sleep
+
+			    									logAndWriteReason.apply( "20 minutes to Sleeping Mode" )
+
+				    								nightTimer = createTimer(now.plusMinutes(20)) [|
+					    								logAndWriteReason.apply( "Sleeping Mode due to all lights + Laptop off" )
+						    							postUpdate(LoftMode, 2)
+							    					]
+								    			} else {
+									    			logAndWriteReason.apply( "stop wakeup countdown, bath light went out")
+										    	}
+                                            }
+										}
+									}
+								}
+						  	}
+					  	}
+				  	}
+			  	}
+			}
+		}
+		if (! allSleepingConditionsMet) {
+
+			if (nightTimer !== null) {
+				logAndWriteReason.apply( "stop Sleeping Mode countdown due to living/eating/sleeping/bath/office lights/Laptop on")
+				nightTimer.cancel()
+				nightTimer = null
+			}
+			if (LoftMode.state == 2) {
+			  	if ((Light_EatingScenes.state == 0 || Light_EatingScenes.state == 4) &&
+				     Light_WohnZiScenes.state == 0 &&
+				     (FritzBoxMacOnlineLaptop.state == OFF || FritzBoxMacOnlineLaptop.state == NULL) &&
+//					 (FritzBoxMacOnlineMacBook.state == OFF || FritzBoxMacOnlineMacBook.state == NULL) &&
+				     (Office_present.state == OFF || Guests.state == ON) &&
+				     (Light_BathScenes.state != 0 || Light_SleepScenes.state != 0)) {					// nur Badezimmer oder Schlafzimmer licht an
+					if (presentTimer === null) {
+						logAndWriteReason.apply( "10 minutes to Present Mode due to bath or sleep light on")
+
+						presentTimer = createTimer(now.plusMinutes(10)) [|
+							logAndWriteReason.apply( "Present Mode due to bath or sleep light on")
+							postUpdate(LoftMode, 0)
+						]
+					}
+				} else if (now.getHour() > 5) {
+					logAndWriteReason.apply( "Present Mode due to lights/laptop on")
+					if (presentTimer !== null) {
+						presentTimer.cancel()
+						presentTimer = null
+					}
+					postUpdate(LoftMode, 0)
+				} else {
+					logAndWriteReason.apply( "no Present Mode due to time (between 0h and 5h)")
+				}
+			}
+		}
+	}
+end
+
+rule "End Sleeping Mode due to Daylight, but only if after 6am"
+when
+	Item Daylight changed to ON
+then
+	if (LoftMode.state == 2) {
+		if (now.getHour() >= 6 && now.getHour() < 23) {
+			if (iPhoneDirk.state == OFF && iPhoneHeike.state == OFF &&
+				FritzBoxMacOnlineDirk.state == OFF && FritzBoxMacOnlineHeike.state == OFF &&
+				WaspInABox.state == OFF) {
+				logAndWriteReason.apply( "End Sleep due to daylight -> Absent Mode due to iPhone and MAC" )
+				postUpdate(LoftMode, 1)			// weg
+			} else {
+				logAndWriteReason.apply( "End Sleep due to daylight -> Present Mode due to iPhone and MAC" )
+				postUpdate(LoftMode, 0)			// da
+			}
+		}
+	}
+end
+
+rule "End Sleeping Mode due to after 6am"
+when
+	Time cron "0 0 6 * * ?"			// 6:00 each day
+then
+	if (LoftMode.state == 2) {
+		if (iPhoneDirk.state == OFF && iPhoneHeike.state == OFF &&
+			FritzBoxMacOnlineDirk.state == OFF && FritzBoxMacOnlineHeike.state == OFF &&
+			WaspInABox.state == OFF) {
+			logAndWriteReason.apply( "End Sleep due to 6am -> Absent Mode due to iPhone and MAC" )
+			postUpdate(LoftMode, 1)			// weg
+		} else {
+			logAndWriteReason.apply( "End Sleep due to 6am -> Present Mode due to iPhone and MAC" )
+			postUpdate(LoftMode, 0)			// da
+		}
+	}
+end
+
+rule "coming home from vacation"
+when
+	Item iPhoneHeikeAlmostHome changed to ON or
+	Item iPhoneDirkAlmostHome changed to ON
+then
+	if (LoftMode.state == 4) {
+		logAndWriteReason.apply( "End Vacation Mode due to H&D approaching home" )
+		postUpdate(LoftMode, 1)
+	}
+end
+
+rule "going in vacation"
+when
+	Item iPhoneHeikeAlmostHome changed to OFF or
+	Item iPhoneDirkAlmostHome changed to OFF
+then
+	if (LoftMode.state != 4 && iPhoneHeikeAlmostHome.state == OFF && iPhoneDirkAlmostHome.state == OFF
+      && Guests.state == OFF) {
+		logAndWriteReason.apply( "Vacation Mode due to H&D far away" )
+		postUpdate(LoftMode, 4)
+	}
+end
+
+rule "Vacation when Door closed and wasp off"
+when
+	Item Window_AppDoor changed to CLOSED
+then
+	timerDoorClosedForVacation = createTimer(now.plusMinutes(30)) [|
+		if (WaspInABox.state == OFF && iPhoneHeikeAlmostHome.state == OFF && iPhoneDirkAlmostHome.state == OFF
+          && Guests.state == OFF) {
+			logAndWriteReason.apply( "Vacation Mode due to H&D far away" )
+			postUpdate(LoftMode, 4)								// vacation
+		}
+	]
+end
+
+rule "Notify when appartment door opens while on vacation"
+when
+	Item Window_AppDoor changed to OPEN
+then
+	if (LoftMode.state == 4) {
+		logAndWriteReason.apply( "Appartment door opened during vacation!" )
+		sendNotification("dirk.trescher@web.de", "Die Wohnungstür wurde geöffnet!")
+	}
+end
+
+// -----------------------------------------------------------------------------------------------------------
+
+rule "Guest bed open indicating guests present"
+when
+	Item Window_Guests changed to OPEN
+then
+	postUpdate(Guests, ON)
+end
+
+rule "Guest bed closed indicating guests not present"
+when
+	Item Window_Guests changed to CLOSED
+then
+	postUpdate(Guests, OFF)
+end

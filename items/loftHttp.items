@@ -1,0 +1,8 @@
+//String Subst1Title { http="<[humboldSubstitute1:60000:REGEX(.*?<div class=\"mon_title\">(.*?)</div>.*)]" }
+//String Subst1Line1 { http="<[humboldSubstitute1:60000:REGEX(s\/.*?<div class=\"mon_title\">(.*?)</div>.*\/$1\/g)]" }
+//String Subst1Line1 { http="<[humboldSubstitute1:60000:REGEX(s/.*?>6D<.*<td.*>(.*?)<\/td><td.*>(.*?)<\/td><td.*>(.*?)<\/td><td.*>(.*?)<\/td><td.*>(.*?)<\/td><td.*>(.*?)<\/td><td.*>(.*?)<\/td><td.*>(.*?).*<\/td><\/tr>.*/Std\. $1 Vertreter $2 Fach $3 Raum $4 Fach $5/g)]" }
+
+//String Subst2Title { http="<[humboldSubstitute2:60000:REGEX(.*?<div class=\"mon_title\">(.*?)</div>.*)]" }
+
+Switch AppartmentDoorBeacon "Appartment Door Beacon"
+Switch BeaconIPhoneDirkActive "Dirks iPhone active"

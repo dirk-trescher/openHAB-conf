@@ -1,0 +1,28 @@
+var Timer timerGarageOpen = null
+
+
+rule "use garage switch as impulse"
+when
+	Item Garagentor changed to ON
+then
+	createTimer(now.plusSeconds(2)) [|
+		sendCommand(Garagentor, OFF)
+	]
+end
+
+
+rule "warn when garage open too long"
+when
+	Item Window_Garage changed to OPEN
+then
+	timerGarageOpen = createTimer(now.plusMinutes(30)) [|
+		sendNotification("dirk.trescher@web.de", "Das Garagentor ist schon 30 Min. offen!")
+	]
+end
+
+rule "cancel garage open timer"
+when
+	Item Window_Garage changed to CLOSED
+then
+	timerGarageOpen.cancel()
+end

@@ -1,0 +1,30 @@
+
+############################# Fritz!Box TR064 Binding #######################################
+#
+## Binding for accessing FritzBoxes using the TR064 protocol. Uses http(s) requests.
+
+# URL. Either use http://<fbox-ip>:49000 or https://<fbox-ip>:49443 (https preferred!)
+fritzboxtr064:url=https://192.168.178.1:49443
+
+# Refresh Interval (60000ms default)
+fritzboxtr064:refresh=60000
+
+# User Name (only use this value if you configured a user in fbox webui/config!)
+# If this parameter is missing, "dslf-config" is used as default username
+# It is recommended to to switch to authentication by username in fritzbox config
+# and add a separate config user for this binding.
+fritzboxtr064:user=openHAB
+
+# PW
+fritzboxtr064:pass=holi7dayS
+
+
+################################ Z-Wave  Binding ######################################
+#
+# The Z-Wave controller port. Valid values are e.g. COM1 for Windows and /dev/ttyS0 or
+# /dev/ttyUSB0 for Linux
+# zwave:port=/dev/ttyACM0
+
+# Z-Wave nightly heal time. This is the hour (eg 2AM) at which the automatic nightly
+# network heal will be performed.
+#zwave:healtime=2

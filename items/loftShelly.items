@@ -1,0 +1,27 @@
+Number SolarPower1        "Solar-Stromgewinnung 1 [%.1f W]"   <solarplant>   (gSolarPower)    {channel="shelly:shellyplugs:3aa822:meter#currentWatts"}
+Number SolarEnergy1                                         <solarplant>   (gSolarEnergy)   {channel="shelly:shellyplugs:3aa822:meter#totalKWH"}
+Number Solar1Signal       "Solar 1 Signalstärke [%.0f]"      <signal>       (gSignal)       {channel="shelly:shellyplugs:3aa822:device#wifiSignal"}
+
+Number SolarPower2        "Solar-Stromgewinnung 2 [%.1f W]"   <solarplant>   (gSolarPower)    {channel="shelly:shellyplugs:09231a135f:meter#currentWatts"}
+Number SolarEnergy2                                         <solarplant>   (gSolarEnergy)   {channel="shelly:shellyplugs:09231a135f:meter#totalKWH"}
+Number Solar2Signal       "Solar 2 Signalstärke [%.0f]"      <signal>       (gSignal)       {channel="shelly:shellyplugs:09231a135f:device#wifiSignal"}
+
+Number SolarPower         "Solar-Stromgewinnung [%.1f W]"   <solarplant>   (gSolarPower)
+Number SolarPowerEinspeisung1 "eingespeister Strom 1 [%d W]"   <solarplant>   (gSolarPower)
+Number SolarPowerEinspeisung2 "eingespeister Strom 2 [%d W]"   <solarplant>   (gSolarPower)
+Number SolarPowerEinspeisung  "eingespeister Strom [%d W]"   <solarplant>   (gSolarPower)
+Number SolarEnergyEinspeisung "ges. eingespeiste Energie [%.1f kWh]" <solarplant>   (gSolarEnergy)
+Number SolarEnergyEinspeisungToday "heute eingespeiste Energie [%.2f kWh]" <solarplant>   (gSolarEnergyToday)
+Number SolarEnergyEinspeisungYearly "jährl. eingespeiste Energie [%.1f kWh]" <solarplant>   (gSolarEnergy)
+Number SolarEnergy1Offset
+Number SolarEnergy2Offset
+Number SolarEnergyToday   "heute erzeugte Energie [%.2f kWh]" <solarplant>   (gSolarEnergyToday)
+Number SolarEnergyDaily   "tägl. Solar-Energie [%.2f kWh]" <solarplant>   (gSolarEnergyDaily)
+Number SolarEnergyDaily1  "tägl. Solar-Energie 1 [%.2f kWh]" <solarplant>   (gSolarEnergyDaily)
+Number SolarEnergyDaily2  "tägl. Solar-Energie 2 [%.2f kWh]" <solarplant>   (gSolarEnergyDaily)
+Number SolarEnergyYearly   "jährl. Solar-Energie [%.1f kWh]" <solarplant>   (gSolarEnergy)
+Number SolarEnergyYearly1  "jährl. Solar-Energie 1 [%.1f kWh]" <solarplant>   (gSolarEnergy)
+Number SolarEnergyYearly2  "jährl. Solar-Energie 2 [%.1f kWh]" <solarplant>   (gSolarEnergy)
+
+Number HAMasterSwitchPower     "Home Automatisierung Zentrale [%.2f W]"   <energy>   (gPower)      {channel="shelly:shellyplugs:b51d993f14:meter#currentWatts"}
+Number HAMasterSwitchEnergy     "Energieverbrauch Home Automatisierung [%.3f kWh]"   <energy>   (gEnergy)   {channel="shelly:shellyplugs:b51d993f14:meter#totalKWH"}

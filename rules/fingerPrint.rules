@@ -1,0 +1,84 @@
+rule "update Heartbeat Date"
+when
+    Item FingerHeartbeat changed
+then
+//    logInfo("Fingerprint", "Heartbeat Date converted")
+    postUpdate(FingerHeartbeatDate, now.toLocalDateTime().toString())
+end
+
+rule "buzzer when fingerprint authenticated"
+when
+    Item FingerUser changed
+then
+    if (FingerUser.state as Number > 0) {
+        logInfo("Fingerprint", "doorBuzzer appartment door on by " + FingerUser.state)
+        sendCommand(DoorBuzzer_Up, ON)
+
+        createTimer(now.plusSeconds(10)) [|
+            postUpdate(FingerUser, "0")
+        ]
+    }
+end
+
+rule "learn new finger"
+when
+    Item LearnNewFinger received command ON
+then
+	val mqttActions = getActions("mqtt","mqtt:broker:1fd8bb3ef8")
+    mqttActions.publishMQTT("finger/learn", "0")
+
+    createTimer(now.plusSeconds(18)) [|
+        postUpdate(LearnNewFinger, OFF)
+    ]
+end
+
+rule "switch on / off"
+when
+    Item FingerOnOff received command
+then
+    var switchState = "1"
+    if (receivedCommand == OFF) {
+        switchState = "0"
+    }
+    val mqttActions = getActions("mqtt","mqtt:broker:1fd8bb3ef8")
+    mqttActions.publishMQTT("finger/switchOnOff", switchState)
+end
+
+rule "Fingerprint: switched off"
+when
+    Item FingerState changed
+then
+    if (FingerState.state == "OFF" && FingerOnOff.state != OFF) {
+        postUpdate(FingerOnOff, OFF)
+    } else if (FingerState.state == "ON" && FingerOnOff.state != ON) {
+        postUpdate(FingerOnOff, ON)
+    }
+end
+
+rule "Fingerprint: Alarm"
+when
+    Item FingerTamperAlarm changed
+then
+    if (FingerTamperAlarm.state == "ALARM") {
+        logInfo("Fingerprint", "MANIPULATIONS-ALARM!!!")
+        sendNotification("dirk.trescher@web.de", "Fingerabdruck-Sensor: MANIPULATIONS-ALARM!!!")
+    }
+end
+
+rule "check for number of registred fingerprints"
+when
+	Item FingerGetNrOfFingers received command ON
+then
+    val mqttActions = getActions("mqtt","mqtt:broker:1fd8bb3ef8")
+    mqttActions.publishMQTT("finger/getNrFingers", "0")
+
+    postUpdate(FingerGetNrOfFingers, OFF)
+end
+
+rule "set fingerprint sensitivity"
+when
+	Item FingerSetSensitivity changed
+then
+    val mqttActions = getActions("mqtt","mqtt:broker:1fd8bb3ef8")
+    mqttActions.publishMQTT("finger/setSensitivity", FingerSetSensitivity.state.toString())
+end

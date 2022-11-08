@@ -1,0 +1,540 @@
+import org.eclipse.smarthome.core.library.types.DecimalType
+import org.joda.time.DateTime
+
+var boolean waterHeatingOn = false
+var int showerStatus = 0				// 0 = off, 1 = on, 2 = pause
+var long lastUpdateOfToday = 0
+var double lastPowerAll = 0
+var double lastEnergyAll = 0
+var long lastUpdateOfWaterHeating = 0
+var long lastUpdateOfRest = 0
+var long lastUpdateOfEinspeisung = 0
+var double lastPowerEinspeisung = 0
+var Timer showerTimerOn = null
+var Timer showerTimerOff = null
+var Timer showerTimerDuration = null
+var Timer showerTimerErase = null
+var Timer timerBathingWater_trigger = null
+var Timer timerBathingWater = null
+var Timer timerFridgeOn = null
+
+
+rule "Init average power consumption"
+when
+	System started
+then
+	postUpdate(Power_avg, 8.5)
+end
+
+rule "reset power today at midnight"
+when
+	Time cron "0 0 0 * * ?"		// 00:00 each day
+then
+	postUpdate(Power_today, 0.0)
+    postUpdate(Energy_daily, Energy_today.state as DecimalType)
+	postUpdate(Energy_today, 0.0)
+    postUpdate(Energy_offset_today, Energy_all_yearly.state as DecimalType)
+    postUpdate(Energy_daily_Fridge, Energy_today_Fridge.state as DecimalType)
+    postUpdate(Energy_today_Fridge, 0.0)
+
+    var double energyDaily1 = ((SolarEnergy1.state as DecimalType)
+                             - (SolarEnergy1Offset.state as DecimalType)).doubleValue
+    if( energyDaily1 < 0.0 ) {
+        energyDaily1 = SolarEnergy1.state as DecimalType
+    }
+    postUpdate(SolarEnergyDaily1, energyDaily1)
+
+    var double energyDaily2 = ((SolarEnergy2.state as DecimalType)
+                             - (SolarEnergy2Offset.state as DecimalType)).doubleValue
+    if( energyDaily2 < 0.0 ) {
+        energyDaily2 = SolarEnergy2.state as DecimalType
+    }
+    postUpdate(SolarEnergyDaily2, energyDaily2)
+    SolarEnergyDaily.postUpdate(energyDaily1 + energyDaily2)
+
+    SolarEnergyEinspeisungToday.postUpdate(0.0)
+
+    postUpdate(SolarEnergy1Offset, SolarEnergy1.state as DecimalType)
+    postUpdate(SolarEnergy2Offset, SolarEnergy2.state as DecimalType)
+    SolarEnergyToday.postUpdate(0.0)
+
+    postUpdate(SolarEnergyYearly1, (SolarEnergyYearly1.state as DecimalType)
+                                   + energyDaily1)
+    postUpdate(SolarEnergyYearly2, (SolarEnergyYearly2.state as DecimalType)
+                                   + energyDaily2)
+    postUpdate(SolarEnergyYearly, (SolarEnergyYearly1.state as DecimalType)
+                                  + energyDaily1
+                                + (SolarEnergyYearly2.state as DecimalType)
+                                  + energyDaily2)
+end
+
+rule "reset energy at 1st of Jan"
+when
+	Time cron "5 0 0 1 1 ?"		// 1st of Jan each year
+then
+	postUpdate(Energy_offset_bigFlat, Energy_raw_bigFlat.state as DecimalType)
+	postUpdate(Energy_offset_smallFlat, Energy_raw_smallFlat.state as DecimalType)
+    postUpdate(Energy_offset_Fridge, Energy_raw_Fridge.state as DecimalType)
+
+    postUpdate(SolarEnergyYearly1, 0)
+    postUpdate(SolarEnergyYearly2, 0)
+    postUpdate(SolarEnergyEinspeisungYearly, 0)
+end
+
+
+rule "Solar Power Sum"
+when
+    Item SolarPower1 changed or
+	Item SolarPower2 changed
+then
+	SolarPower.postUpdate((SolarPower1.state as DecimalType)
+                        + (SolarPower2.state as DecimalType))
+end
+
+rule "Solar Energy Today"
+when
+    Item SolarEnergy1 changed or
+    Item SolarEnergy2 changed
+then
+    var double energyDaily1 = (SolarEnergy1.state as DecimalType).doubleValue
+    if (SolarEnergy1Offset.state != NULL) {
+        energyDaily1 = energyDaily1 - (SolarEnergy1Offset.state as DecimalType).doubleValue
+    }
+    if( energyDaily1 < 0.0 ) {
+        energyDaily1 = 0.0
+        SolarEnergy1Offset.postUpdate(SolarEnergy1.state as DecimalType)
+    }
+    var double energyDaily2 = (SolarEnergy2.state as DecimalType).doubleValue
+    if (SolarEnergy2Offset.state != NULL) {
+        energyDaily2 = energyDaily2 - (SolarEnergy2Offset.state as DecimalType).doubleValue
+    }
+    if( energyDaily2 < 0.0 ) {
+        energyDaily2 = 0.0
+        SolarEnergy2Offset.postUpdate(SolarEnergy2.state as DecimalType)
+    }
+    SolarEnergyToday.postUpdate(energyDaily1 + energyDaily2)
+end
+
+rule "Solar Einspeisung"
+when
+    Item Power1_bigFlat changed or
+	Item Power3_smallFlat changed
+then
+	var int sum = (Power1_bigFlat.state as DecimalType).intValue
+                + (Power2_bigFlat.state as DecimalType).intValue
+                + (Power3_bigFlat.state as DecimalType).intValue
+	if (sum < 0) {
+        postUpdate(SolarPowerEinspeisung1, - sum)
+    } else {
+        postUpdate(SolarPowerEinspeisung1, 0)
+    }
+	sum = (Power1_smallFlat.state as DecimalType).intValue
+        + (Power2_smallFlat.state as DecimalType).intValue
+        + (Power3_smallFlat.state as DecimalType).intValue
+	if (sum < 0) {
+        postUpdate(SolarPowerEinspeisung2, - sum)
+    } else {
+        postUpdate(SolarPowerEinspeisung2, 0)
+    }
+    SolarPowerEinspeisung.postUpdate((SolarPowerEinspeisung1.state as DecimalType)
+                                   + (SolarPowerEinspeisung2.state as DecimalType))
+end
+
+rule "Einspeisung Energie"
+when
+    Item SolarPowerEinspeisung1 changed or
+    Item SolarPowerEinspeisung2 changed
+then
+	if (lastPowerEinspeisung > 0 && lastUpdateOfEinspeisung > 0) {
+		var double power = lastPowerEinspeisung
+        var double deltaTime = now.toInstant.toEpochMilli - lastUpdateOfEinspeisung
+
+        if (deltaTime > 0) {
+            var double current_Ws = (power * (deltaTime / 1000.0)).doubleValue
+            var double current_kWh = (current_Ws / (1000.0 * 3600.0)).doubleValue
+
+            var double prev_kWh = 0.0
+            if (SolarEnergyEinspeisung.state != NULL ) {
+                prev_kWh = (SolarEnergyEinspeisung.state as DecimalType).doubleValue
+            }
+            var double prevYearly_kWh = 0.0
+            if (SolarEnergyEinspeisungYearly.state != NULL ) {
+                prevYearly_kWh = (SolarEnergyEinspeisungYearly.state as DecimalType).doubleValue
+            }
+            var double prevToday_kWh = 0.0
+            if (SolarEnergyEinspeisungToday.state != NULL ) {
+                prevToday_kWh = (SolarEnergyEinspeisungToday.state as DecimalType).doubleValue
+            }
+
+            postUpdate(SolarEnergyEinspeisung, prev_kWh + current_kWh)
+            postUpdate(SolarEnergyEinspeisungYearly, prevYearly_kWh + current_kWh)
+            postUpdate(SolarEnergyEinspeisungToday, prevToday_kWh + current_kWh)
+        }
+	}
+    lastPowerEinspeisung = (SolarPowerEinspeisung1.state as DecimalType).doubleValue +
+                           (SolarPowerEinspeisung2.state as DecimalType).doubleValue
+	lastUpdateOfEinspeisung = now.toInstant.toEpochMilli
+end
+
+rule "Power w/o Solar"
+when
+    Item Power1_bigFlat changed or
+	Item Power3_smallFlat changed
+then
+    postUpdate(Power1_bigFlat_woSolar, (Power1_bigFlat.state as DecimalType)
+                                     + (SolarPower1.state as DecimalType))
+    postUpdate(Power3_smallFlat_woSolar, (Power3_smallFlat.state as DecimalType)
+                                       + (SolarPower2.state as DecimalType))
+end
+
+
+rule "Sum Big Flat"
+when
+    Item Power1_bigFlat changed or
+    Item Power2_bigFlat changed or
+    Item Power3_bigFlat changed
+then
+	var int sum = (Power1_bigFlat.state as DecimalType).intValue
+                + (Power2_bigFlat.state as DecimalType).intValue
+                + (Power3_bigFlat.state as DecimalType).intValue
+	if (sum < 0) {
+        postUpdate(Power_bigFlat, 0)
+    } else {
+        postUpdate(Power_bigFlat, sum)
+    }
+end
+
+rule "Sum Small Flat"
+when
+    Item Power1_smallFlat changed or
+    Item Power2_smallFlat changed or
+    Item Power3_smallFlat changed
+then
+	var int sum = (Power1_smallFlat.state as DecimalType).intValue
+                + (Power2_smallFlat.state as DecimalType).intValue
+                + (Power3_smallFlat.state as DecimalType).intValue
+	if (sum < 0) {
+        postUpdate(Power_smallFlat, 0)
+    } else {
+        postUpdate(Power_smallFlat, sum)
+    }
+end
+
+rule "Sum Small and Big Flats"
+when
+	Item Power_bigFlat changed or
+	Item Power_smallFlat changed
+then
+	if (Power_bigFlat.state != NULL && Power_smallFlat.state != NULL) {
+		postUpdate(Power_all, (Power_bigFlat.state as DecimalType) + (Power_smallFlat.state as DecimalType))
+	}
+end
+
+
+rule "Energy Today Integrated from Power"
+when
+	Item Power_all changed
+then
+	var double prev_kWh = 0.0
+	if (Power_today.state != NULL) {
+		prev_kWh = (Power_today.state as DecimalType).doubleValue
+	}
+
+	if (lastPowerAll > 0 && lastUpdateOfToday > 0) {
+		var double power = lastPowerAll
+        var double deltaTime = now.toInstant.toEpochMilli - lastUpdateOfToday
+        var double delta_Ws = (power * (deltaTime / 1000.0)).doubleValue
+        var double today_kWh = (prev_kWh + delta_Ws / (1000.0 * 3600.0)).doubleValue
+        postUpdate(Power_today, today_kWh)
+	}
+    lastPowerAll = (Power_all.state as DecimalType).doubleValue
+	lastUpdateOfToday = now.toInstant.toEpochMilli
+end
+
+rule "Add Energy Values"
+when
+	Item Energy_raw_bigFlat changed or
+	Item Energy_raw_smallFlat changed
+then
+    if (Energy_raw_bigFlat.state != NULL && Energy_raw_smallFlat.state != NULL) {
+        var double deltaBig = 0.0
+        if (Energy_offset_bigFlat.state != NULL) {
+            deltaBig = (Energy_raw_bigFlat.state as DecimalType) .doubleValue
+                       - (Energy_offset_bigFlat.state as DecimalType).doubleValue
+        } else {
+            postUpdate(Energy_offset_bigFlat, Energy_raw_bigFlat.state as DecimalType)
+        }
+
+        var double deltaSmall = 0.0
+        if (Energy_offset_smallFlat.state != NULL) {
+            deltaSmall = (Energy_raw_smallFlat.state as DecimalType).doubleValue
+                         - (Energy_offset_smallFlat.state as DecimalType).doubleValue
+        } else {
+            postUpdate(Energy_offset_smallFlat, Energy_raw_smallFlat.state as DecimalType)
+        }
+
+		postUpdate(Energy_bigFlat, deltaBig)
+		postUpdate(Energy_smallFlat, deltaSmall)
+		postUpdate(Energy_all_yearly, deltaBig + deltaSmall)
+	}
+end
+
+rule "Energy today directly measured"
+when
+	Item Energy_all_yearly changed
+then
+	if (Energy_all_yearly.state != NULL && Energy_offset_today.state != NULL) {
+        var double delta = (Energy_all_yearly.state as DecimalType).doubleValue
+                         - (Energy_offset_today.state as DecimalType).doubleValue
+        Energy_today.postUpdate(delta)
+	}
+end
+
+
+rule "integrate power water heating"
+when
+	Item Power_WaterHeating changed
+then
+    var double prev_kWh = 0.0
+    if (Power_WaterHeating_kWh.state != NULL) {
+        prev_kWh = (Power_WaterHeating_kWh.state as DecimalType).doubleValue
+    }
+    if (previousState != NULL && lastUpdateOfWaterHeating > 0) {
+        var double power = (previousState as DecimalType).doubleValue
+        var double deltaTime = now.toInstant.toEpochMilli - lastUpdateOfWaterHeating
+        var double delta_Ws = (power * (deltaTime / 1000.0)).doubleValue
+        var double waterHeating_kWh = (prev_kWh + delta_Ws / (1000.0 * 3600.0)).doubleValue
+        postUpdate(Power_WaterHeating_kWh, waterHeating_kWh)
+    }
+    lastUpdateOfWaterHeating = now.toInstant.toEpochMilli
+end
+
+
+rule "integrate power rest"
+when
+	Item Power_Rest changed
+then
+	var double prev_kWh = 0.0
+	if (Power_Rest_kWh.state != NULL ) {
+		prev_kWh = (Power_Rest_kWh.state as DecimalType).doubleValue
+	}
+	if (previousState != NULL && lastUpdateOfRest > 0) {
+		var double power = (previousState as DecimalType).doubleValue
+        var double deltaTime = now.toInstant.toEpochMilli - lastUpdateOfRest
+        if (deltaTime > 0) {
+            var double rest_Ws = (power * (deltaTime / 1000.0)).doubleValue
+            var double rest_kWh = (prev_kWh + rest_Ws / (1000.0 * 3600.0)).doubleValue
+            postUpdate(Power_Rest_kWh, rest_kWh)
+        }
+	}
+	lastUpdateOfRest = now.toInstant.toEpochMilli
+end
+
+
+rule "water heating rule"
+when
+	Item Power_bigFlat changed or
+	Item Power_smallFlat changed
+then
+	if (Power_bigFlat.state != NULL && Power_smallFlat.state != NULL) {
+		var int sum = (Power_bigFlat.state as DecimalType).intValue + (Power_smallFlat.state as DecimalType).intValue
+		if (sum > 4000) {
+			postUpdate(Power_WaterHeating, sum)
+		} else {
+			postUpdate(Power_Rest, sum)
+			postUpdate(Power_WaterHeating, 0)
+		}
+	}
+end
+
+
+rule "check Bath Tub in Bath"
+when
+	Item Power_bigFlat changed
+then
+	var int bathingPower = 14000
+	if (Temp_Max_1.state != NULL && Temp_Max_1.state > 15.0) {
+		bathingPower = 12000
+	} else if (Temp_Max_1.state != NULL && Temp_Max_1.state > 25.0) {
+		bathingPower = 10000
+	}
+
+	if (Power_bigFlat.state != NULL) {
+		if ((Power_bigFlat.state as DecimalType).intValue >= bathingPower) {
+//			logInfo( "power", "more than " + bathingPower + "W: " + Power_bigFlat.state )
+			if(timerBathingWater_trigger === null) {
+				logInfo( "power", "start bathing water trigger, more than " + bathingPower + "W: " + Power_bigFlat.state )
+				timerBathingWater_trigger = createTimer(now.plusMinutes(5)) [|
+					logInfo( "power", "start bathing water" )
+					postUpdate(BathingWater, ON)
+
+					if(timerBathingWater !== null) {
+						timerBathingWater.cancel()
+						timerBathingWater = null
+					}
+					timerBathingWater = createTimer(now.plusMinutes(45)) [|
+						logInfo( "power", "stop bathing water" )
+						postUpdate(BathingWater, OFF)
+					]
+				]
+			}
+		}
+		else if ((Power_bigFlat.state as DecimalType).intValue < bathingPower / 2.0) {
+			if(timerBathingWater_trigger !== null) {
+				logInfo( "power", "end bathing water trigger, power = " + Power_bigFlat.state )
+				timerBathingWater_trigger.cancel()
+				timerBathingWater_trigger = null
+			}
+		}
+	}
+end
+
+
+rule "check Shower in Bath"
+when
+	Item Power_bigFlat changed
+then
+	if (Power_bigFlat.state != NULL) {
+		if ((Power_bigFlat.state as DecimalType).intValue > 4000) {
+			postUpdate(HotWaterOn, ON)
+		} else {
+			postUpdate(HotWaterOn, OFF)
+		}
+	}
+end
+
+
+rule "shower duration start"
+when
+	Item HotWaterOn changed to ON
+then
+	if (showerTimerOff !== null) {
+		showerTimerOff.cancel()
+		showerTimerOff = null
+	}
+	if (showerStatus == 0) {
+		showerTimerOn = createTimer(now.plusSeconds(120)) [|			// do not erase shower duration with only short usage of hot water
+			logInfo( "power", "start shower duration" )
+			showerStatus = 1
+			postUpdate(ShowerDuration, 2)
+
+			if (showerTimerErase !== null) {
+				showerTimerErase.cancel()
+				showerTimerErase = null
+			}
+		]
+	} else if (showerStatus == 2) {
+		logInfo( "power", "continue shower duration" )
+
+		showerStatus = 1
+		var double duration = (ShowerDuration.state as DecimalType).doubleValue
+		postUpdate(ShowerDuration, duration)
+	}
+end
+
+
+rule "shower duration stop"
+when
+	Item HotWaterOn changed to OFF
+then
+	if (showerTimerOn !== null) {
+		showerTimerOn.cancel()
+		showerTimerOn = null
+	}
+	if (showerStatus == 1) {
+		showerStatus = 2
+
+		showerTimerOff = createTimer(now.plusSeconds(180)) [|
+			logInfo( "power", "stop shower duration" )
+
+			showerStatus = 0
+
+			if (showerTimerDuration !== null) {
+				showerTimerDuration.cancel()
+				showerTimerDuration = null
+			}
+
+			showerTimerErase = createTimer(now.plusMinutes(60)) [|
+				logInfo( "power", "erase shower duration" )
+				postUpdate(ShowerDuration, 0)
+			]
+		]
+	}
+end
+
+
+rule "shower duration"
+when
+	Item ShowerDuration changed
+then
+	if (showerTimerDuration !== null) {
+		showerTimerDuration.cancel()
+		showerTimerDuration = null
+	}
+	if (showerStatus == 1) {
+		showerTimerDuration = createTimer(now.plusSeconds(60)) [|
+			var double duration = (ShowerDuration.state as DecimalType).doubleValue
+			duration = duration + 1
+//			logInfo( "power", "shower duration " + duration )
+			postUpdate(ShowerDuration, duration)
+		]
+	}
+end
+
+
+rule "Energy fridge"
+when
+	Item Energy_raw_Fridge changed
+then
+	if (Energy_raw_Fridge.state != NULL) {
+
+        var double delta = 0.0
+        if (Energy_offset_Fridge.state != NULL) {
+            delta = (Energy_raw_Fridge.state as DecimalType).doubleValue
+                    - (Energy_offset_Fridge.state as DecimalType).doubleValue
+        } else {
+            postUpdate(Energy_offset_Fridge, Energy_raw_Fridge.state as DecimalType)
+        }
+
+		postUpdate(Energy_Fridge, delta)
+	}
+end
+
+
+rule "Energy today fridge"
+when
+	Item Energy_Fridge changed
+then
+	if (previousState != NULL && Energy_Fridge.state != NULL) {
+		var double delta_energy = (Energy_Fridge.state as DecimalType).doubleValue - (previousState as DecimalType).doubleValue
+
+        var double today_kWh = 0.0
+        if (Energy_today_Fridge.state != NULL) {
+            today_kWh = ((Energy_today_Fridge.state as DecimalType).doubleValue + delta_energy).doubleValue
+        }
+        postUpdate(Energy_today_Fridge, today_kWh)
+	}
+end
+
+
+rule "Fridge open"
+when
+	Item Fridge changed
+then
+	if((Fridge.state as DecimalType).doubleValue < 5.0) {
+		postUpdate(FridgeOpenTooLong, OFF)
+
+		if(timerFridgeOn !== null) {
+			timerFridgeOn.cancel()
+			timerFridgeOn = null
+		}
+	} else {
+		if(timerFridgeOn === null) {
+			timerFridgeOn = createTimer(now.plusMinutes(45)) [|
+				logInfo("power", "Fridge open too long")
+				postUpdate(FridgeOpenTooLong, ON)
+				sendNotification("dirk.trescher@web.de", "Die Kühlschranktür ist auf.")
+			]
+		}
+	}
+end

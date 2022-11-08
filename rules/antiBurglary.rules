@@ -1,0 +1,51 @@
+
+import java.util.Random;
+
+var boolean onoff = false
+
+rule "switch on light at vacation time"
+    when
+        Time cron "0 0 20 * * ?"
+    then {
+        if (LoftMode.state == 4) {
+
+            var Random rand1 = new Random();
+            var int randnum1 = rand1.nextInt(60)
+            createTimer(now.plusMinutes(randnum1),[|
+                logInfo("antiBurglar","Esszi light on")
+                postUpdate(Light_EatingScenes, 2)
+            ])
+
+            var Random rand2 = new Random();
+            var int randnum2 = rand2.nextInt(60)
+            createTimer(now.plusMinutes(randnum2),[|
+                logInfo("antiBurglar","Office light on")
+                postUpdate(Light_OfficeTopScenes, 1)
+            ])
+        }
+    }
+end
+
+rule "switch off light at vacation time"
+    when
+        Time cron "0 0 22 * * ?"
+    then {
+        if (LoftMode.state == 4) {
+            logInfo("antiBurglar","light off")
+
+            var Random rand1 = new Random();
+            var int randnum1 = rand1.nextInt(60)
+            createTimer(now.plusMinutes(randnum1),[|
+                logInfo("antiBurglar","Esszi light off")
+                postUpdate(Light_EatingScenes, 0)
+            ])
+
+            var Random rand2 = new Random();
+            var int randnum2 = rand2.nextInt(60)
+            createTimer(now.plusMinutes(randnum2),[|
+                logInfo("antiBurglar","Office light off")
+                postUpdate(Light_OfficeTopScenes, 0)
+            ])
+        }
+    }
+end

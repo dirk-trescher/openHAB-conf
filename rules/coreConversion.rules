@@ -1,0 +1,32 @@
+
+rule "Transform RasPi CPU Temp"
+when
+	Item PiCpuTemp changed
+then
+	var Number temp = Float::parseFloat(String::format("%s", PiCpuTemp.state))
+	postUpdate(PiCpuTempN, temp)
+end
+
+rule "Transform RasPi CPU Load"
+when
+	Item PiCpuLoad changed
+then
+	var Number load = Float::parseFloat(String::format("%s", PiCpuLoad.state))
+	postUpdate(PiCpuLoadN, load)
+end
+
+rule "Transform RasPi Memory Consumption"
+when
+	Item PiMemory changed
+then
+	var Number mem = Float::parseFloat(String::format("%s", PiMemory.state))
+	postUpdate(PiMemoryN, mem)
+end
+
+/*rule "exec whitelist workaround"
+when
+    System started
+then
+    executeCommandLine("/bin/touch /etc/openhab/misc/exec.whitelist")
+end
+*/

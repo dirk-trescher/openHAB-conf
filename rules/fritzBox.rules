@@ -1,0 +1,101 @@
+var long lastChangeOfDownstream = 0
+var long lastChangeOfUpstream = 0
+var Timer TimerStreamingStarting = null
+var Timer TimerStreamingEnding = null
+
+rule "reset dailyData"
+when
+	Time cron "0 0 0 * * ?"		// 0:00 each day
+then
+	postUpdate(FritzBoxUpstreamDaily, 0)
+	postUpdate(FritzBoxDownstreamDaily, 0)
+end
+
+rule "add delta to daily upstream"
+when
+	Item fboxWanTotalBytesSent changed
+then
+    var double newValue = 0.0
+    if (previousState != NULL ) {
+		var double delta = (fboxWanTotalBytesSent.state as DecimalType).doubleValue - (previousState as DecimalType).doubleValue
+
+        if (delta > 0.0) {
+            newValue += delta / 1000000.0
+            if (lastChangeOfUpstream > 0) {
+                var double deltaTime = now.toInstant.toEpochMilli - lastChangeOfUpstream
+                postUpdate(FritzBoxUploadRate, delta / (deltaTime * 125.0))
+            }
+        }
+        if (FritzBoxUpstreamDaily.state != NULL) {
+            newValue += (FritzBoxUpstreamDaily.state as DecimalType).doubleValue
+        }
+    }
+    postUpdate(FritzBoxUpstreamDaily, newValue)
+    lastChangeOfUpstream = now.toInstant.toEpochMilli
+end
+
+rule "add delta to daily downstream"
+when
+	Item fboxWanTotalBytesReceived changed
+then
+    var double newValue = 0.0
+    if (previousState != NULL ) {
+		var double delta = (fboxWanTotalBytesReceived.state as DecimalType).doubleValue - (previousState as DecimalType).doubleValue
+
+        if (delta > 0.0) {
+            newValue += delta / 1000000.0
+            if (lastChangeOfDownstream > 0) {
+                var double deltaTime = now.toInstant.toEpochMilli - lastChangeOfDownstream
+                postUpdate(FritzBoxDownloadRate, delta / (deltaTime * 125.0))
+            }
+        }
+        if (FritzBoxDownstreamDaily.state != NULL) {
+            newValue += (FritzBoxDownstreamDaily.state as DecimalType).doubleValue
+        }
+    }
+    postUpdate(FritzBoxDownstreamDaily, newValue)
+    lastChangeOfDownstream = now.toInstant.toEpochMilli
+end
+
+rule "Film schauen"
+when
+    Item FritzBoxDownloadRate changed
+then
+    if (FritzBoxDownloadRate.state > 1 && SpeedtestRunning.state != "Messung läuft...") {
+        TimerStreamingEnding?.cancel()
+        TimerStreamingEnding = null
+        if (StreamingMovie.state != ON && TimerStreamingStarting === null) {
+            TimerStreamingStarting = createTimer(now.plusMinutes(2)) [|
+    			postUpdate(StreamingMovie, ON)
+                TimerStreamingStarting = null
+            ]
+        }
+    } else {
+        TimerStreamingStarting?.cancel()
+        TimerStreamingStarting = null
+        if (StreamingMovie.state != OFF && TimerStreamingEnding === null) {
+            TimerStreamingEnding = createTimer(now.plusMinutes(5)) [|
+    			postUpdate(StreamingMovie, OFF)
+                TimerStreamingEnding = null
+            ]
+        }
+    }
+end
+
+rule "adapt max upstream"
+when
+	Time cron "0 0 0 * * ?"	or	// 0:00 each day
+	Item fboxWanLayer1UpstreamMaxBitRate changed
+then
+    var double maxUpstream = (fboxWanLayer1UpstreamMaxBitRate.state as DecimalType).doubleValue / 1000000.0
+    postUpdate(FritzBoxMaxUpstream, maxUpstream)
+end
+
+rule "adapt max downstream"
+when
+	Time cron "0 0 0 * * ?"	or	// 0:00 each day
+	Item fboxWanLayer1DownstreamMaxBitRate changed
+then
+    var double maxDownstream = (fboxWanLayer1DownstreamMaxBitRate.state as DecimalType).doubleValue / 1000000.0
+    postUpdate(FritzBoxMaxDownstream, maxDownstream)
+end

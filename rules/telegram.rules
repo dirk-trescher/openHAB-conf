@@ -1,0 +1,219 @@
+var boolean iCloudWarnSent = false
+var boolean memoryWarnSent = false
+var boolean freezeWarnSent = false
+var boolean tempLivingWarnSent = false
+var boolean tempBathWarnSent = false
+var boolean tempSleepWarnSent = false
+var boolean tempEmilieWarnSent = false
+var boolean tempNiklasWarnSent = false
+var boolean tempOfficeWarnSent = false
+var boolean tempHobbyWarnSent = false
+var boolean tempKidsBathWarnSent = false
+
+
+rule "iCloud not reachable"
+when
+	Time cron "0 0 * * * ?"
+then
+	if ((iPhoneDirkLocUpdate.state as DateTimeType).getZonedDateTime().plusDays(2).isBefore(now) ||
+	    (iPhoneHeikeLocUpdate.state as DateTimeType).getZonedDateTime().plusDays(2).isBefore(now)) {
+        if (!iCloudWarnSent) {
+    		sendNotification("dirk.trescher@web.de", "iCloud nicht mehr aktiv: Dirk " + iPhoneDirkLocUpdate.state + ", Heike " + iPhoneHeikeLocUpdate.state)
+	    	iCloudWarnSent = true
+        }
+	} else {
+		iCloudWarnSent = false
+	}
+end
+
+
+rule "Pi becoming too hot"
+when
+	Item PiCpuTempN changed
+then
+	if (PiCpuTempN.state > 75) {
+		sendNotification("dirk.trescher@web.de", "RasPi zu heiß!!! (" + PiCpuTempN.state + " °C)")
+	}
+end
+
+
+rule "Pi becoming too busy"
+when
+	Item PiCpuTempN changed
+then
+	if (PiCpuLoadN.state > 70) {
+		sendNotification("dirk.trescher@web.de", "RasPi zu beschäftigt! (" + PiCpuLoadN.state + " %)")
+	}
+end
+
+
+rule "Pi out of memory"
+when
+	Item PiMemoryN changed
+then
+	if (PiMemoryN.state > 95 && !memoryWarnSent) {
+		sendNotification("dirk.trescher@web.de", "RasPi out of memory! (" + PiMemoryN.state + " %)")
+		memoryWarnSent = true
+	}
+	if (PiMemoryN.state < 90) {
+		memoryWarnSent = false
+	}
+end
+
+
+rule "water freeze"
+when
+	Item Temp_Min_0 changed or
+	Item Temp_Min_1 changed or
+	Item Temp_Min_2 changed
+then
+	if (WaterOnOnRoof.state == ON && (Temp_Min_0.state <= 0 || Temp_Min_1.state <= 0 || Temp_Min_2.state <= 0) && !freezeWarnSent) {
+		freezeWarnSent = true
+		sendNotification("dirk.trescher@web.de", "Frostgefahr!!!")
+	}
+end
+
+
+rule "too cold in living room"
+when
+	Item Temp_Living changed
+then
+	if (Temp_Living.state < 18 &&
+			(Window_LivingLeft.state == OPEN || Window_LivingMiddle.state == OPEN || Window_LivingRight.state == OPEN) &&
+			!tempLivingWarnSent) {
+		sendNotification("dirk.trescher@web.de", "Zu kalt im Wohnzimmer: " + Temp_Living.state + " °C!")
+		tempLivingWarnSent = true
+
+		postUpdate(TriggerTooColdBlink, ON)
+	}
+	if (Temp_Living.state > 19) {
+		tempLivingWarnSent = false
+	}
+end
+
+rule "too cold in bath room"
+when
+	Item Temp_Bath changed
+then
+	if (Temp_Bath.state < 18 &&
+			RoofWindow_Bath.state < 100 &&
+			!tempBathWarnSent) {
+		sendNotification("dirk.trescher@web.de", "Zu kalt im Badezimmer: " + Temp_Bath.state + " °C!")
+		tempBathWarnSent = true
+
+		postUpdate(TriggerTooColdBlink, ON)
+	}
+	if (Temp_Bath.state > 19) {
+		tempBathWarnSent = false
+	}
+end
+
+rule "too cold in sleeping room"
+when
+	Item Temp_Sleep changed
+then
+	if (Temp_Sleep.state < 15 &&
+			(RoofWindow_Sleep.state < 100 || Window_Sleep.state == OPEN) &&
+			!tempSleepWarnSent) {
+		sendNotification("dirk.trescher@web.de", "Zu kalt im Schlafzimmer: " + Temp_Sleep.state + " °C!")
+		tempSleepWarnSent = true
+
+		postUpdate(TriggerTooColdBlink, ON)
+	}
+	if (Temp_Sleep.state > 16) {
+		tempSleepWarnSent = false
+	}
+end
+
+rule "too cold in Emilies room"
+when
+	Item Temp_Emilie changed
+then
+	if (Temp_Emilie.state < 17 &&
+			(Window_EmilieLeft.state == OPEN || Window_EmilieMiddle.state == OPEN || Window_EmilieRight.state == OPEN) &&
+			!tempEmilieWarnSent) {
+		sendNotification("dirk.trescher@web.de", "Zu kalt in Emilies Zimmer: " + Temp_Emilie.state + " °C!")
+		tempEmilieWarnSent = true
+
+		postUpdate(TriggerTooColdBlink, ON)
+	}
+	if (Temp_Emilie.state > 18) {
+		tempEmilieWarnSent = false
+	}
+end
+
+rule "too cold in Niklas room"
+when
+	Item Temp_Niklas changed
+then
+	if (Temp_Niklas.state < 17 &&
+			(Window_NiklasLeft.state == OPEN || Window_NiklasRight.state == OPEN) &&
+			!tempNiklasWarnSent) {
+		sendNotification("dirk.trescher@web.de", "Zu kalt in Niklas Zimmer: " + Temp_Niklas.state + " °C!")
+		tempNiklasWarnSent = true
+
+		postUpdate(TriggerTooColdBlink, ON)
+	}
+	if (Temp_Niklas.state > 18) {
+		tempNiklasWarnSent = false
+	}
+end
+
+rule "too cold in office"
+when
+	Item Temp_Office changed
+then
+	if (Temp_Office.state < 17 &&
+			(Window_OfficeDoor.state == OPEN || Window_OfficeLeft.state == OPEN || Window_OfficeRight.state == OPEN) &&
+			!tempOfficeWarnSent) {
+		sendNotification("dirk.trescher@web.de", "Zu kalt im Arbeitszimmer: " + Temp_Office.state + " °C!")
+		tempOfficeWarnSent = true
+
+		postUpdate(TriggerTooColdBlink, ON)
+	}
+	if (Temp_Office.state > 18) {
+		tempOfficeWarnSent = false
+	}
+end
+
+rule "too cold in hobby room"
+when
+	Item Temp_Hobby changed
+then
+	if (Temp_Hobby.state < 17 &&
+			Window_Hobby.state == OPEN &&
+			!tempHobbyWarnSent) {
+		sendNotification("dirk.trescher@web.de", "Zu kalt im Bastelzimmer: " + Temp_Hobby.state + " °C!")
+		tempHobbyWarnSent = true
+
+		postUpdate(TriggerTooColdBlink, ON)
+	}
+	if (Temp_Hobby.state > 18) {
+		tempHobbyWarnSent = false
+	}
+end
+
+rule "too cold in kids bath"
+when
+	Item Temp_KidsBath changed
+then
+	if (Temp_KidsBath.state < 18 &&
+			!tempKidsBathWarnSent) {
+		sendNotification("dirk.trescher@web.de", "Zu kalt im Gästebad: " + Temp_KidsBath.state + " °C!")
+		tempKidsBathWarnSent = true
+
+		postUpdate(TriggerTooColdBlink, ON)
+	}
+	if (Temp_KidsBath.state > 19) {
+		tempKidsBathWarnSent = false
+	}
+end
+
+
+rule "reset warnings"
+when
+	Time cron "0 0 8 * * ?"
+then
+	freezeWarnSent = false
+	memoryWarnSent = false
+end

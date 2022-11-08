@@ -1,0 +1,105 @@
+
+rule "rain sensor rains"
+when
+	Item Rainsensor changed to RAIN
+then
+	logInfo ("rainSensor", "rainSensor changed to raining")
+
+	postUpdate(RainsensorNum, 1)
+
+	if (RoofWindow_Kitchen.state < 100) {
+		sendCommand(RoofWindow_Kitchen, DOWN)
+		logInfo( "rainSensor", "close kitchen roof windows due to rain" )
+	}
+	if (RoofWindow_Bath.state < 100) {
+		sendCommand(RoofWindow_Bath, DOWN)
+		logInfo( "rainSensor", "close bath roof windows due to rain" )
+	}
+	if ((RoofWindow_Sleep.state < 100) &&
+		(now.getHour < 23 &&
+		(((now.getDayOfWeek == 6 || now.getDayOfWeek == 7) && now.getHour > 9) ||
+		  now.getHour > 7))) {
+		sendCommand(RoofWindow_Sleep, DOWN)
+		logInfo( "rainSensor", "close sleeping roof windows due to rain" )
+	}
+
+	if (Window_OfficeDoor.state == OPEN) {
+		sendNotification("dirk.trescher@web.de", "Es regnet und die Tür im Arbeitszimmer ist auf!")
+	}
+	if (Window_Terrace.state == OPEN) {
+		sendNotification("dirk.trescher@web.de", "Es regnet und die Tür zur Dachterrasse ist auf!")
+	}
+	logInfo( "rainSensor", "switch on heating due to rain" )
+
+	if (RainsensorHeating.state == OFF) {
+		sendCommand(RainsensorHeating, ON)
+	}
+end
+
+
+rule "close roof window sleeping room when raining on weekdays"
+when
+	Time cron "0 0 7 ? * MON-FRI" or		// 7:00 each weekday
+	Time cron "0 0 9 ? * SAT,SUN"			// 9:00 each Saturday and Sunday
+then
+	if (Rainsensor.state == ON && RoofWindow_Sleep.state < 100) {
+		logInfo( "rainSensor", "close sleeping room roof window due to rain" )
+		sendCommand(RoofWindow_Sleep, DOWN)
+	}
+end
+
+
+rule "rain sensor heating dewpoint"
+when
+	Item Temp_Dewpoint changed or
+	Item Temperature changed
+then
+	if (Temp_Dewpoint.state != NULL && Temperature.state != NULL) {
+		if ((Temp_Dewpoint.state as QuantityType<Number>) + 2.0 > Temperature.state) {
+			if (RainsensorHeating.state == OFF) {
+				logInfo( "rainSensor", "switch on heating due to dewpoint" )
+
+				sendCommand(RainsensorHeating, ON)
+			}
+		} else if (Rainsensor.state == 0) {
+			if (RainsensorHeating.state == ON) {
+				logInfo( "rainSensor", "switch off heating due to dewpoint" )
+
+				sendCommand(RainsensorHeating, OFF)
+			}
+		}
+	}
+end
+
+
+rule "rain sensor heating dry"
+when
+	Item Rainsensor changed to DRY
+then
+	logInfo ("rainSensor", "rainSensor changed to dry")
+
+	postUpdate(RainsensorNum, 0)
+	if ((Temp_Dewpoint.state as QuantityType<Number>).doubleValue <= (Temperature.state as QuantityType<Number>).doubleValue) {
+		logInfo( "rainSensor", "switch off heating due to no rain" )
+
+		sendCommand(RainsensorHeating, OFF)
+	}
+end
+
+
+rule "update sensor heating graph off"
+when
+	Item RainsensorHeating changed to OFF
+then
+	logInfo ("rainSensor", "rainSensor heating changed to OFF")
+	postUpdate(RainsensorHeatingNum, 0)
+end
+
+
+rule "update sensor heating graph on"
+when
+	Item RainsensorHeating changed to ON
+then
+	logInfo ("rainSensor", "rainSensor heating changed to ON")
+	postUpdate(RainsensorHeatingNum, 1)
+end
