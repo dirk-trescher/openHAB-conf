@@ -116,10 +116,11 @@ Number Hall_Temperature			"Temperatur [%.2f °C]"					<temperature>	(gMotionSens
 Number Hall_Luminance			"Helligkeit [%.0f Lux]"					<sun>			(gMotionSensor)					{channel="zwave:device:3dcec7afdc:node46:sensor_luminance"}
 Number Batt_HallMotion_disp		"Bewegungsmelder Flur [%.2f %%]"		<battery>		(gMotionSensor, gBatteries)		{channel="zwave:device:3dcec7afdc:node46:battery-level"}
 
-Switch OfficeMotion				"Bewegung [MAP(motion.map):%s]"			<motion>		(gMotionSensor)					{channel="zwave:device:3dcec7afdc:node32:alarm_motion"}
-Number Office_Temperature		"Temperatur [%.1f °C]"					<temperature>	(gMotionSensor)					{channel="zwave:device:3dcec7afdc:node32:sensor_temperature"}
-Number Office_Luminance			"Helligkeit [%.0f Lux]"					<sun>			(gMotionSensor)					{channel="zwave:device:3dcec7afdc:node32:sensor_luminance"}
-Number Batt_OfficeMotion_disp	"Bewegungsmelder Arbeitszimmer [%.2f %%]"	<battery>	(gMotionSensor, gBatteries)		{channel="zwave:device:3dcec7afdc:node32:battery-level"}
+Switch GuestLooMotion				"Bewegung [MAP(motion.map):%s]"			<motion>		(gMotionSensor)					{channel="zwave:device:3dcec7afdc:node47:alarm_motion"}
+Number GuestLoo_Temperature		"Temperatur [%.1f °C]"					<temperature>	(gMotionSensor)					{channel="zwave:device:3dcec7afdc:node47:sensor_temperature"}
+Number GuestLoo_Luminance			"Helligkeit [%.0f Lux]"					<sun>			(gMotionSensor)					{channel="zwave:device:3dcec7afdc:node47:sensor_luminance"}
+Number Batt_GuestLooMotion_disp	"Bewegungsmelder Gästetoilette [%.2f %%]"	<battery>	(gMotionSensor, gBatteries)		{channel="zwave:device:3dcec7afdc:node47:battery-level"}
+
 Switch Office_present			"im Arbeitszimmer [%s]"					<present>		(gMotionSensor)
 Switch Guests_awake             "Gäste wach [%s]"				    	<present>		(gMotionSensor)
 

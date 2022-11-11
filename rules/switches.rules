@@ -22,6 +22,7 @@ var Timer TimerNiklasDimmer = null
 
 var Timer TimerGuestLooDimmer = null
 var Timer TimerGuestOnLoo = null
+var Timer TimerGuestLooPreventAccidentalOff = null
 var boolean GuestOnLoo = false
 var Number GuestLooFanManOnOff = 0
 var Timer TimerGuestLooFanManOnOff = null
@@ -438,6 +439,14 @@ val	Functions.Function3<NumberItem, Functions.Function1<Integer, Void>, Function
 			SetLightsColor.apply(18f, 76, 96)			    // Ambient old strip
 		} else if (LightScenes.state == 12) {
 			SetLightsColor.apply(18, 76, 5)			        // Nightlight old strip
+		} else if (LightScenes.state == 13) {
+			SetLightsColor.apply(288, 100, 100)			        // purple
+		} else if (LightScenes.state == 14) {
+			SetLightsColor.apply(240, 100, 100)			        // blue
+		} else if (LightScenes.state == 15) {
+			SetLightsColor.apply(0, 100, 100)			        // red
+		} else if (LightScenes.state == 16) {
+			SetLightsColor.apply(120, 100, 100)			        // green
 		}
 	}
 
@@ -954,88 +963,14 @@ then
 	}
 end
 
-rule "Switch BathLongUp ON"
-when
-    Item Switch_BathLongUp received update ON or
-    Item Switch_BathInsideLongUp received update ON
-then
-    postUpdate(Switch_BathLongUp, OFF)
-
-	if (Switch_BathLongUpEnd.state == OFF && Switch_BathInsideLongUpEnd.state == OFF) {
-	  	var HSBType light = Light_BathLColor.state as HSBType
-	  	var int DimmValue = (light.getBrightness()).intValue
-
-	  	if (Light_BathScenes.state == 0 || DimmValue <= 0) {
-			if (Daylight.state == ON) {
-				postUpdate(Light_BathScenes, 1)
-			} else if (LoftMode.state == 2 ||						// sleeping
-				       (now.getHour() > 6 && now.getHour() < 23 )) {
-				postUpdate(Light_BathScenes, 5)
-			} else {
-				postUpdate(Light_BathScenes, 3)
-			}
-	  	} else {
-		  	if (DimmValue < 95) {
-		  		DimmValue = DimmValue + 5
-		  	} else {
-		  		DimmValue = 100
-		  	}
-
-			sendCommand(Light_BathLColor, new HSBType(light.getHue(), light.getSaturation(), new PercentType(DimmValue)))
-			sendCommand(Light_BathRColor, new HSBType(light.getHue(), light.getSaturation(), new PercentType(DimmValue)))
-	  	}
-
-		TimerBathDimmer?.cancel()
-		TimerBathDimmer = createTimer(now.plusSeconds(1)) [|
-			postUpdate(Switch_BathLongUp, ON)
-		]
-	}
-end
-
 rule "Switch BathLongDown ON"
 when
     Item Switch_BathLongDown received update ON or
     Item Switch_BathInsideLongDown received update ON
 then
-    postUpdate(Switch_BathLongDown, OFF)
-
-    if (Switch_BathLongDownEnd.state == OFF && Switch_BathInsideLongDownEnd.state == OFF) {
-	  	var HSBType light = Light_BathLColor.state as HSBType
-	  	var int DimmValue = (light.getBrightness()).intValue
-
-      	if (DimmValue >= 10) {
-      		DimmValue = DimmValue - 5
-      	} else if (DimmValue >= 2) {
-      		DimmValue = DimmValue - 1
-      	} else {
-			DimmValue = 1
-		}
-
-		sendCommand(Light_BathLColor, new HSBType(light.getHue(), light.getSaturation(), new PercentType(DimmValue)))
-		sendCommand(Light_BathRColor, new HSBType(light.getHue(), light.getSaturation(), new PercentType(DimmValue)))
-
-		TimerBathDimmer?.cancel()
-		TimerBathDimmer = createTimer(now.plusSeconds(1)) [|
-			postUpdate(Switch_BathLongDown, ON)
-		]
-	}
-end
-
-rule "Switch BathLong OFF"
-when
-    Item Switch_BathLongUpEnd received update ON or
-    Item Switch_BathInsideLongUpEnd received update ON or
-    Item Switch_BathLongDownEnd received update ON or
-    Item Switch_BathInsideLongDownEnd received update ON or
-    Item Switch_BathShortUp received update ON or
-    Item Switch_BathInsideShortUp received update ON or
-    Item Switch_BathShortDown received update ON or
-    Item Switch_BathInsideShortDown received update ON
-then
-	TimerBathDimmer?.cancel()
-	TimerBathDimmer = null
-    postUpdate(Switch_BathLongDown, OFF)
-    postUpdate(Switch_BathLongUp, OFF)
+    postUpdate(Light_BathScenes, 6)
+    Thread.sleep(30)
+    postUpdate(BathAmbientTrigger, ON)
 end
 
 rule "Ambient Bath"
@@ -1139,13 +1074,17 @@ then
 	}
 end
 
-/* -------------------- Niklas ------------------------------------------ */
+/* -------------------- Niklas Schreibtisch ------------------------------- */
 
-rule "Scenenauswahl für Niklass Licht"
+rule "Scenenauswahl für Niklass Schreibtisch Licht"
 when
 	Item Light_NiklasScenes changed
 then
-	setLightScenesTemp.apply(Light_NiklasScenes, SetNiklasLightsOnOff, SetNiklasLightsBright, SetNiklasLightsTemp)
+    if (Light_NiklasScenes.state < 13) {
+    	setLightScenesTemp.apply(Light_NiklasScenes, SetNiklasLightsOnOff, SetNiklasLightsBright, SetNiklasLightsTemp)
+    } else {
+        setLightScenes.apply(Light_NiklasScenes, SetNiklasLightsOnOff, SetNiklasLights)
+    }
 end
 
 rule "Switch Niklas Short Up"
@@ -1155,7 +1094,8 @@ then
 	if (Light_NiklasScenes.state == 0) {
 		if (Daylight.state == ON && now.getHour() < 21) {
 			postUpdate(Light_NiklasScenes, 1)
-		} else if (Daylight.state == OFF && now.getHour() < 21 && now.getHour() > 6) {
+		} else if (Daylight.state == ON ||
+                   Daylight.state == OFF && now.getHour() < 21 && now.getHour() > 6) {
 			postUpdate(Light_NiklasScenes, 2)
 		} else if (Daylight.state == OFF && now.getHour() < 23 && now.getHour() > 6) {
 			postUpdate(Light_NiklasScenes, 3)
@@ -1172,7 +1112,9 @@ then
 				postUpdate(Light_NiklasScenes, 1)
 			} else if (Light_NiklasScenes.state == 4) {
 				postUpdate(Light_NiklasScenes, 1)
-			}
+			} else {
+                postUpdate(Light_NiklasScenes, 1)
+            }
 		} else {
 			if (Light_NiklasScenes.state == 1) {
 				postUpdate(Light_NiklasScenes, 2)
@@ -1182,7 +1124,9 @@ then
 				postUpdate(Light_NiklasScenes, 4)
 			} else if (Light_NiklasScenes.state == 4) {
 				postUpdate(Light_NiklasScenes, 1)
-			}
+			} else {
+                postUpdate(Light_NiklasScenes, 3)
+            }
 		}
 	}
 end
@@ -1196,7 +1140,8 @@ then
 	} else {
 		if (Daylight.state == ON && now.getHour() < 21) {
 			postUpdate(Light_NiklasScenes, 1)
-		} else if (Daylight.state == OFF && now.getHour() < 21 && now.getHour() > 6) {
+		} else if (Daylight.state == ON ||
+                   Daylight.state == OFF && now.getHour() < 21 && now.getHour() > 6) {
 			postUpdate(Light_NiklasScenes, 2)
 		} else if (Daylight.state == OFF && now.getHour() < 23 && now.getHour() > 6) {
 			postUpdate(Light_NiklasScenes, 3)
@@ -1204,6 +1149,23 @@ then
 			postUpdate(Light_NiklasScenes, 4)
 		}
 	}
+end
+
+rule "Switch Niklas Long UP"
+when
+    Item Switch_NiklasLongUp received update ON
+then
+    if (Light_NiklasScenes.state < 13) {
+        postUpdate(Light_NiklasScenes, 13)
+    } else if (Light_NiklasScenes.state == 13) {
+        postUpdate(Light_NiklasScenes, 14)
+    } else if (Light_NiklasScenes.state == 14) {
+        postUpdate(Light_NiklasScenes, 15)
+    } else if (Light_NiklasScenes.state == 15) {
+        postUpdate(Light_NiklasScenes, 16)
+    } else if (Light_NiklasScenes.state == 16) {
+        postUpdate(Light_NiklasScenes, 13)
+    }
 end
 
 /* -------------------- Niklas Decke ------------------------------------ */
@@ -1215,7 +1177,7 @@ then
 	setLightScenesTemp.apply(Light_NiklasDeckeScenes, SetNiklasDeckeLightsOnOff, SetNiklasDeckeLightsBright, SetNiklasDeckeLightsTemp)
 end
 
-rule "Switch NiklasLongUp ON"
+rule "Switch Niklas Bottom Short Up"
 when
     Item Switch_NiklasDeskBotShortUp received update ON or
     Item Switch_NiklasBedShortUp received update ON
@@ -1223,7 +1185,8 @@ then
 	if (Light_NiklasDeckeScenes.state == 0) {
 		if (Daylight.state == ON && now.getHour() < 21) {
 			postUpdate(Light_NiklasDeckeScenes, 1)
-		} else if (Daylight.state == OFF && now.getHour() < 21 && now.getHour() > 6) {
+		} else if (Daylight.state == ON ||
+                   Daylight.state == OFF && now.getHour() < 21 && now.getHour() > 6) {
 			postUpdate(Light_NiklasDeckeScenes, 2)
 		} else if (Daylight.state == OFF && now.getHour() < 23 && now.getHour() > 6) {
 			postUpdate(Light_NiklasDeckeScenes, 3)
@@ -1255,7 +1218,7 @@ then
 	}
 end
 
-rule "Switch NiklasLongDown ON"
+rule "Switch Niklas Bottom Short Down"
 when
     Item Switch_NiklasDeskBotShortDown received update ON or
     Item Switch_NiklasBedShortDown received update ON
@@ -1265,7 +1228,8 @@ then
 	} else {
 		if (Daylight.state == ON && now.getHour() < 21) {
 			postUpdate(Light_NiklasDeckeScenes, 1)
-		} else if (Daylight.state == OFF && now.getHour() < 21 && now.getHour() > 6) {
+		} else if (Daylight.state == ON ||
+                   Daylight.state == OFF && now.getHour() < 21 && now.getHour() > 6) {
 			postUpdate(Light_NiklasDeckeScenes, 2)
 		} else if (Daylight.state == OFF && now.getHour() < 23 && now.getHour() > 6) {
 			postUpdate(Light_NiklasDeckeScenes, 3)
@@ -1275,16 +1239,13 @@ then
 	}
 end
 
-// rule "Switch NiklasLong OFF"
-// when
-//     Item Switch_NiklasLongUpEnd received update ON or
-//     Item Switch_NiklasLongDownEnd received update ON or
-//     Item Switch_NiklasShortUp received update ON or
-//     Item Switch_NiklasShortDown received update ON
-// then
-// 	Switch_NiklasLongDown.postUpdate(OFF)
-// 	Switch_NiklasLongUp.postUpdate(OFF)
-// end
+rule "Switch Niklas Long Down"
+when
+    Item Switch_NiklasBedLongDown received update ON
+then
+    postUpdate(Light_NiklasScenes, 0)
+    postUpdate(Light_NiklasDeckeScenes, 0)
+end
 
 /* -------------------- Gästetoilette ----------------------------------- */
 
@@ -1390,8 +1351,9 @@ when
     Item Switch_GuestLooShortDown received update ON or
     Item Switch_GuestLooLongDown received update ON
 then
-	if (Switch_GuestLooShortDown.state == ON ||
-		(TimerGuestLooNoDoubles === null || TimerGuestLooNoDoubles.hasTerminated())) {
+	if ((Switch_GuestLooShortDown.state == ON ||
+		(TimerGuestLooNoDoubles === null || TimerGuestLooNoDoubles.hasTerminated())) &&
+        (TimerGuestLooPreventAccidentalOff === null || TimerGuestLooPreventAccidentalOff.hasTerminated())) {
 		    TimerGuestLooNoDoubles = createTimer(now.plusSeconds(0.2)) [|
 		]
 
@@ -1408,6 +1370,24 @@ then
 			postUpdate(Light_GuestLooScenes, 0)
 		}
 	}
+end
+
+rule "Motion Guest Loo"
+when
+    Item GuestLooMotion received update ON
+then
+	if (Light_GuestLooScenes.state == 0) {
+        if (LoftMode.state == 2 || 		// sleeping
+                now.getHour() >= 23 || now.getHour() < 3) {	// or between 11pm and 3am
+            postUpdate(Light_GuestLooScenes, 1)
+        } else if (Daylight.state == OFF) {
+            postUpdate(Light_GuestLooScenes, 3)
+        } else {
+            postUpdate(Light_GuestLooScenes, 2)
+        }
+        TimerGuestLooPreventAccidentalOff = createTimer(now.plusSeconds(2)) [|
+        ]
+    }
 end
 
 rule "Fan GuestLoo on"

@@ -544,6 +544,9 @@ sitemap loft label="Loft"
 				Slider item=Leuchter_Gaestetoilette
 				Switch item=LueftungLow_Gaestetoilette
 				Switch item=LueftungHigh_Gaestetoilette
+                Text item=GuestLooMotion
+                Text item=GuestLoo_Temperature
+                Text item=GuestLoo_Luminance
 			}
 		}
 		Text label="Schlafzimmer" icon="bedroom" {
@@ -1243,6 +1246,7 @@ sitemap loft label="Loft"
                 Text label="WLAN" icon="settings" {
                     Text item=Solar1Signal
                     Text item=Solar2Signal
+                    Text item=HAMasterSwitchSignal
                 }
 				Text label="Esp32" icon="network" {
                     Frame label="Bewässerung" icon="water" {

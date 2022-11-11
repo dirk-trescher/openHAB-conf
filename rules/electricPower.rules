@@ -24,6 +24,8 @@ when
 	System started
 then
 	postUpdate(Power_avg, 8.5)
+    postUpdate(SolarEnergy1Offset, SolarEnergy1.state as DecimalType)
+    postUpdate(SolarEnergy2Offset, SolarEnergy2.state as DecimalType)
 end
 
 rule "reset power today at midnight"

@@ -25,3 +25,4 @@ Number SolarEnergyYearly2  "jährl. Solar-Energie 2 [%.1f kWh]" <solarplant>   (
 
 Number HAMasterSwitchPower     "Home Automatisierung Zentrale [%.2f W]"   <energy>   (gPower)      {channel="shelly:shellyplugs:b51d993f14:meter#currentWatts"}
 Number HAMasterSwitchEnergy     "Energieverbrauch Home Automatisierung [%.3f kWh]"   <energy>   (gEnergy)   {channel="shelly:shellyplugs:b51d993f14:meter#totalKWH"}
+Number HAMasterSwitchSignal       "Home Automatisierung Signalstärke [%.0f]"      <signal>       (gSignal)       {channel="shelly:shellyplugs:b51d993f14:device#wifiSignal"}
