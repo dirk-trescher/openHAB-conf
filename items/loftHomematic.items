@@ -4,7 +4,7 @@ Switch Reload_Datapoints   		"HomeMatic neu laden"			    						 				{ channel="h
 /* Thermostat */
 Switch HeatingPeriod			"Heizperiode"				<temperature>			(gTempAdmin)
 
-Number Temp_Living		    	"Wohnzimmer [%.1f °C]" 				<temperature> 	(grLiving, gTemperature){channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236614:2#ACTUAL_TEMPERATURE"}	// read
+Number Temp_Living		    	"Wohnzimmer Ist [%.1f °C]" 			<temperature> 	(gHeatLiv, grLiving, gTemperature){channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236614:2#ACTUAL_TEMPERATURE"}	// read
 String HeatingModus_Control_Living													(gTempAdmin)			{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236614:2#CONTROL_MODE"}		// read
 Number HeatingTarget_Living     "Wohnzimmer [%.1f °C]" 				<temperature> 	(grLiving, gTempTarget)	{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236614:2#SET_TEMPERATURE"}		// read/write
 Switch HeatingModus_Auto_Living 													(gTempAdmin)			{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236614:2#AUTO_MODE"}           // write
@@ -22,7 +22,7 @@ Number Batt_ThermoLiving_disp	"Thermostat Wohnzimmer [%.0f %%]" 	<battery>		(grL
 Number ThermoSignal_Living		"Thermostat Wohnzimmer [%.0f]"		<signal>		(gSignal)		        {channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236614:0#RSSI_DEVICE"}
 Switch ThermoUnreach_Living		"Thermostat Wohnzimmer [MAP(unreach.map):%s]"       (gUnreach)				{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236614:0#UNREACH"}
 
-Number Temp_Bath		    	"Bad [%.1f °C]" 					<temperature> 	(grBath, gTemperature)	{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236911:2#ACTUAL_TEMPERATURE"}
+Number Temp_Bath		    	"Bad Ist [%.1f °C]" 				<temperature> 	(gHeatBath, grBath, gTemperature)	{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236911:2#ACTUAL_TEMPERATURE"}
 String HeatingModus_Control_Bath													(gTempAdmin)			{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236911:2#CONTROL_MODE"}		// read
 Number HeatingTarget_Bath     	"Bad [%.1f °C]" 					<temperature> 	(grBath, gTempTarget)	{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236911:2#SET_TEMPERATURE"}
 Switch HeatingModus_Auto_Bath 														(gTempAdmin)			{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236911:2#AUTO_MODE"}
@@ -40,7 +40,7 @@ Number Batt_ThermoBath_disp		"Thermostat Bad [%.0f %%]" 			<battery>		(grBath, g
 Number ThermoSignal_Bath		"Thermostat Bad [%.0f]"				<signal>		(gSignal)		        {channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236911:0#RSSI_DEVICE"}
 Switch ThermoUnreach_Bath		"Thermostat Bad [MAP(unreach.map):%s]"				(gUnreach)				{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236911:0#UNREACH"}
 
-Number Temp_Sleep		    	"Schlafzimmer [%.1f °C]" 			<temperature> 	(grSleep, gTemperature)	{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236613:2#ACTUAL_TEMPERATURE"}
+Number Temp_Sleep		    	"Schlafzimmer Ist [%.1f °C]" 		<temperature> 	(gHeatSleep, grSleep, gTemperature)	{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236613:2#ACTUAL_TEMPERATURE"}
 String HeatingModus_Control_Sleep													(gTempAdmin)			{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236613:2#CONTROL_MODE"}		// read
 Number HeatingTarget_Sleep     	"Schlafzimmer [%.1f °C]" 			<temperature> 	(grSleep, gTempTarget)	{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236613:2#SET_TEMPERATURE"}
 Switch HeatingModus_Auto_Sleep 														(gTempAdmin)			{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236613:2#AUTO_MODE"}
@@ -58,7 +58,7 @@ Number Batt_ThermoSleep_disp	"Thermostat Schlafzimmer [%.0f %%]" 	<battery>	(grS
 Number ThermoSignal_Sleep		"Thermostat Schlafzimmer [%.0f]"		<signal>	(gSignal)		        {channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236613:0#RSSI_DEVICE"}
 Switch ThermoUnreach_Sleep		"Thermostat Schlafzimmer [MAP(unreach.map):%s]" 	(gUnreach)				{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236613:0#UNREACH"}
 
-Number Temp_Emilie		    	"Emilie [%.1f °C]" 					<temperature> 	(grEmilie, gTemperature){channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236868:2#ACTUAL_TEMPERATURE"}
+Number Temp_Emilie		    	"Emilie Ist [%.1f °C]" 				<temperature> 	(gHeatEmilie, grEmilie, gTemperature){channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236868:2#ACTUAL_TEMPERATURE"}
 String HeatingModus_Control_Emilie													(gTempAdmin)			{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236868:2#CONTROL_MODE"}		// read
 Number HeatingTarget_Emilie    	"Emilie [%.1f °C]" 					<temperature> 	(grEmilie, gTempTarget)	{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236868:2#SET_TEMPERATURE"}
 Switch HeatingModus_Auto_Emilie 													(gTempAdmin)			{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236868:2#AUTO_MODE"}
@@ -76,7 +76,7 @@ Number Batt_ThermoEmilie_disp	"Thermostat Emilie [%.0f %%]" 		<battery>		(grEmil
 Number ThermoSignal_Emilie	    "Thermostat Emilie [%.0f]"			<signal>		(gSignal)		        {channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236868:0#RSSI_DEVICE"}
 Switch ThermoUnreach_Emilie		"Thermostat Emilie [MAP(unreach.map):%s]" 			(gUnreach)				{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236868:0#UNREACH"}
 
-Number Temp_Niklas		    	"Niklas [%.1f °C]" 					<temperature> 	(grNiklas, gTemperature){channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0107775:2#ACTUAL_TEMPERATURE"}
+Number Temp_Niklas		    	"Niklas Ist [%.1f °C]" 				<temperature> 	(gHeatNiklas, grNiklas, gTemperature){channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0107775:2#ACTUAL_TEMPERATURE"}
 String HeatingModus_Control_Niklas													(gTempAdmin)			{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0107775:2#CONTROL_MODE"}		// read
 Number HeatingTarget_Niklas    	"Niklas [%.1f °C]" 					<temperature> 	(grNiklas, gTempTarget)	{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0107775:2#SET_TEMPERATURE"}
 Switch HeatingModus_Auto_Niklas 													(gTempAdmin)			{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0107775:2#AUTO_MODE"}
@@ -94,7 +94,7 @@ Number Batt_ThermoNiklas_disp	"Thermostat Niklas [%.0f %%]" 		<battery>		(grNikl
 Number ThermoSignal_Niklas		"Thermostat Niklas [%.0f]"			<signal>		(gSignal)		        {channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0107775:0#RSSI_DEVICE"}
 Switch ThermoUnreach_Niklas		"Thermostat Niklas [MAP(unreach.map):%s]"	       	(gUnreach)				{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0107775:0#UNREACH"}
 
-Number Temp_Office		    	"Arbeit [%.1f °C]"					<temperature>   (grOffice, gTemperature){channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236900:2#ACTUAL_TEMPERATURE"}
+Number Temp_Office		    	"Arbeit Ist [%.1f °C]"				<temperature>   (gHeatOffice, grOffice, gTemperature){channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236900:2#ACTUAL_TEMPERATURE"}
 String HeatingModus_Control_Office													(gTempAdmin)			{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236900:2#CONTROL_MODE"}		// read
 Number HeatingTarget_Office     "Arbeit [%.1f °C]"					<temperature>   (grOffice, gTempTarget)	{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236900:2#SET_TEMPERATURE"}
 Switch HeatingModus_Auto_Office 													(gTempAdmin)			{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236900:2#AUTO_MODE"}
@@ -112,7 +112,7 @@ Number Batt_ThermoOffice_disp	"Thermostat Arbeit [%.0f %%]" 		<battery>		(grOffi
 Number ThermoSignal_Office		"Thermostat Arbeit [%.0f]"			<signal>		(gSignal)		        {channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236900:0#RSSI_DEVICE"}
 Switch ThermoUnreach_Office		"Thermostat Arbeit [MAP(unreach.map):%s]"			(gUnreach)				{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236900:0#UNREACH"}
 
-Number Temp_Hobby		    	"Hobby [%.1f °C]"					<temperature>   (grHobby, gTemperature)	{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236894:2#ACTUAL_TEMPERATURE"}
+Number Temp_Hobby		    	"Hobby Ist [%.1f °C]"				<temperature>   (gHeatHobby, grHobby, gTemperature)	{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236894:2#ACTUAL_TEMPERATURE"}
 String HeatingModus_Control_Hobby													(gTempAdmin)			{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236894:2#CONTROL_MODE"}		// read
 Number HeatingTarget_Hobby      "Hobby [%.1f °C]"					<temperature>   (grHobby, gTempTarget)	{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236894:2#SET_TEMPERATURE"}
 Switch HeatingModus_Auto_Hobby														(gTempAdmin)			{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236894:2#AUTO_MODE"}
@@ -130,7 +130,7 @@ Number Batt_ThermoHobby_disp	"Thermostat Hobby [%.0f %%]" 		<battery>		(grHobby,
 Number ThermoSignal_Hobby		"Thermostat Hobby [%.0f]"			<signal>		(gSignal)		        {channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236894:0#RSSI_DEVICE"}
 Switch ThermoUnreach_Hobby		"Thermostat Hobby [MAP(unreach.map):%s]"			(gUnreach)				{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236894:0#UNREACH"}
 
-Number Temp_KidsBath	    	"Gästebad [%.1f °C]" 				<temperature> 	(grKidsBath, gTemperature)	{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236842:2#ACTUAL_TEMPERATURE"}
+Number Temp_KidsBath	    	"Gästebad Ist [%.1f °C]" 			<temperature> 	(gHeatKidsBath, grKidsBath, gTemperature)	{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236842:2#ACTUAL_TEMPERATURE"}
 String HeatingModus_Control_KidsBath												(gTempAdmin)				{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236842:2#CONTROL_MODE"}		// read
 Number HeatingTarget_KidsBath   "Gästebad [%.1f °C]" 				<temperature> 	(grKidsBath, gTempTarget)	{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236842:2#SET_TEMPERATURE"}
 Switch HeatingModus_Auto_KidsBath 													(gTempAdmin)				{channel="homematic:HG-HM-TC-IT-WM-W-EU:bc18ba0fac:MEQ0236842:2#AUTO_MODE"}
@@ -161,7 +161,7 @@ Switch TempFire_KidsBath        "Feuermelder Gästebad [MAP(smokeSensors.map):%s
 /* Heating */
 Number Heating_Living 				"Wohnzimmer-Ventil [%d %%]" 	<heating> 		(grLiving, gHeating)  		{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0055668:4#VALVE_STATE" }
 String HeatingValve_Modus_Control_Living											(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0055668:4#CONTROL_MODE"}
-Number HeatingValve_Target_Living   "Wohnzimmer-Ventil [%.1f °C]"	<temperature> 	(grLiving, gTempTargetValves)		{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0055668:4#SET_TEMPERATURE"}
+Number HeatingValve_Target_Living   "Wohnzimmer-Ventil Soll [%.1f °C]"	<temperature> 	(gHeatLiv, grLiving, gTempTargetValves)		{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0055668:4#SET_TEMPERATURE"}
 Switch HeatingValve_Auto_Living 													(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0055668:4#AUTO_MODE"}
 Number HeatingValve_Manu_Living   													(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0055668:4#MANU_MODE"}
 Switch HeatingValve_Boost_Living   													(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0055668:4#BOOST_MODE"}
@@ -177,7 +177,7 @@ Switch HeatingLiving_Unreach	"Heizung Wohnzimmer [MAP(unreach.map):%s]" 			(gUnr
 
 Number Heating_Bath 			"Bad-Ventil [%d %%]"				<heating> 		(grBath, gHeating)  		{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0054805:4#VALVE_STATE" }
 String HeatingValve_Modus_Control_Bath												(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0054805:4#CONTROL_MODE"}
-Number HeatingValve_Target_Bath    "Bad-Ventil [%.1f °C]" 			<temperature> 	(grBath, gTempTargetValves)		{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0054805:4#SET_TEMPERATURE"}
+Number HeatingValve_Target_Bath    "Bad-Ventil Soll [%.1f °C]" 			<temperature> 	(gHeatBath, grBath, gTempTargetValves)		{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0054805:4#SET_TEMPERATURE"}
 Switch HeatingValve_Auto_Bath 														(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0054805:4#AUTO_MODE"}
 Number HeatingValve_Manu_Bath   													(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0054805:4#MANU_MODE"}
 Switch HeatingValve_Boost_Bath   													(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0054805:4#BOOST_MODE"}
@@ -193,7 +193,7 @@ Switch HeatingBath_Unreach		"Heizung Bad [MAP(unreach.map):%s]" 				(gUnreach)		
 
 Number Heating_Sleep 			"Schlafzimmer-Ventil [%d %%]" 		<heating> 		(grSleep, gHeating)  		{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0056245:4#VALVE_STATE" }
 String HeatingValve_Modus_Control_Sleep												(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0056245:4#CONTROL_MODE"}
-Number HeatingValve_Target_Sleep    "Schlafzimmer-Ventil [%.1f °C]" <temperature> 	(grSleep, gTempTargetValves)		{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0056245:4#SET_TEMPERATURE"}
+Number HeatingValve_Target_Sleep    "Schlafzimmer-Ventil Soll [%.1f °C]" <temperature> 	(gHeatSleep, grSleep, gTempTargetValves)		{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0056245:4#SET_TEMPERATURE"}
 Switch HeatingValve_Auto_Sleep 														(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0056245:4#AUTO_MODE"}
 Number HeatingValve_Manu_Sleep   													(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0056245:4#MANU_MODE"}
 Switch HeatingValve_Boost_Sleep   													(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0056245:4#BOOST_MODE"}
@@ -207,10 +207,10 @@ Number Batt_HeatingSleep_disp	"Heizung Schlafzimmer [%.0f %%]" 	<battery>		(grSl
 Number HeatingSleep_Signal	    "Heizung Schlafzimmer [%.0f]"	    <signal>		(gSignal)		            {channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0056245:0#RSSI_DEVICE"}
 Switch HeatingSleep_Unreach		"Heizung Schlafzimmer [MAP(unreach.map):%s]" 		(gUnreach)					{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0056245:0#UNREACH"}
 
+Number Temp_Kitchen		    	"Küche Ist [%.1f °C]" 				<temperature> 	(gHeatKitchen, grKidsBath, gTemperature)	{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0054683:4#ACTUAL_TEMPERATURE"}
 Number HeatingValve_Kitchen 	"Küche-Ventil [%d %%]" 				<heating> 		(grKitchen, gHeating)  		{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0054683:4#VALVE_STATE" }
-Number Temp_Kitchen		    	"Küche [%.1f °C]" 					<temperature> 	(grKidsBath, gTemperature)	{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0054683:4#ACTUAL_TEMPERATURE"}
 String HeatingValve_Modus_Control_Kitchen											(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0054683:4#CONTROL_MODE"}
-Number HeatingValve_Target_Kitchen    "Küche-Ventil [%.1f °C]"		<temperature> 	(grKitchen, gTempTargetValves)	{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0054683:4#SET_TEMPERATURE"}
+Number HeatingValve_Target_Kitchen    "Küche-Ventil Soll [%.1f °C]"	<temperature> 	(gHeatKitchen, grKitchen, gTempTargetValves)	{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0054683:4#SET_TEMPERATURE"}
 Switch HeatingValve_Auto_Kitchen 													(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0054683:4#AUTO_MODE"}
 Number HeatingValve_Manu_Kitchen   													(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0054683:4#MANU_MODE"}
 Switch HeatingValve_Boost_Kitchen   												(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0054683:4#BOOST_MODE"}
@@ -228,7 +228,7 @@ Switch HeatingKitchen_Unreach	"Heizung Küche [MAP(unreach.map):%s]" 				(gUnrea
 
 Number Heating_EmilieRe			"Emilie rechtes Ventil [%d %%]"		<heating> 		(grEmilie, gHeating)  		{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0058066:4#VALVE_STATE" }
 String HeatingValve_Modus_Control_EmilieRe											(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0058066:4#CONTROL_MODE"}
-Number HeatingValve_Target_EmilieRe    "Emilie rechtes Ventil [%.1f °C]"	<temperature> 	(grEmilieRe, gTempTarget)	{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0058066:4#SET_TEMPERATURE"}
+Number HeatingValve_Target_EmilieRe    "Emilie rechtes Ventil Soll [%.1f °C]"	<temperature> 	(gHeatEmilie, grEmilieRe, gTempTarget)	{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0058066:4#SET_TEMPERATURE"}
 Switch HeatingValve_Auto_EmilieRe 													(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0058066:4#AUTO_MODE"}
 Number HeatingValve_Manu_EmilieRe   												(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0058066:4#MANU_MODE"}
 Switch HeatingValve_Boost_EmilieRe 													(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0058066:4#BOOST_MODE"}
@@ -244,7 +244,7 @@ Switch HeatingEmilieRe_Unreach	"Heizung Emilie rechts [MAP(unreach.map):%s]" 		(
 
 Number Heating_EmilieLi			"Emilie linkes Ventil [%d %%]" 		<heating> 		(grEmilie, gHeating)  		{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0063813:4#VALVE_STATE" }
 String HeatingValve_Modus_Control_EmilieLi											(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0063813:4#CONTROL_MODE"}
-Number HeatingValve_Target_EmilieLi    "Emilie linkes Ventil [%.1f °C]"	<temperature> 	(grEmilieLi, gTempTargetValves)	{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0063813:4#SET_TEMPERATURE"}
+Number HeatingValve_Target_EmilieLi    "Emilie linkes Ventil Soll [%.1f °C]"	<temperature> 	(grEmilieLi, gTempTargetValves)	{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0063813:4#SET_TEMPERATURE"}
 Switch HeatingValve_Auto_EmilieLi 													(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0063813:4#AUTO_MODE"}
 Number HeatingValve_Manu_EmilieLi   												(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0063813:4#MANU_MODE"}
 Switch HeatingValve_Boost_EmilieLi 													(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0063813:4#BOOST_MODE"}
@@ -260,7 +260,7 @@ Switch HeatingEmilieLi_Unreach	"Heizung Emilie links [MAP(unreach.map):%s]" 		(g
 
 Number Heating_Niklas			"Niklas-Ventil [%d %%]"				<heating> 		(grNiklas, gHeating)  		{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:LEQ1199145:4#VALVE_STATE" }
 String HeatingValve_Modus_Control_Niklas											(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:LEQ1199145:4#CONTROL_MODE"}
-Number HeatingValve_Target_Niklas    "Niklas-Ventil [%.1f °C]" 		<temperature> 	(grNiklas, gTempTargetValves)		{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:LEQ1199145:4#SET_TEMPERATURE"}
+Number HeatingValve_Target_Niklas    "Niklas-Ventil Soll [%.1f °C]" 		<temperature> 	(gHeatNiklas, grNiklas, gTempTargetValves)		{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:LEQ1199145:4#SET_TEMPERATURE"}
 Switch HeatingValve_Auto_Niklas 													(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:LEQ1199145:4#AUTO_MODE"}
 Number HeatingValve_Manu_Niklas   													(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:LEQ1199145:4#MANU_MODE"}
 Switch HeatingValve_Boost_Niklas   													(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:LEQ1199145:4#BOOST_MODE"}
@@ -276,7 +276,7 @@ Switch HeatingNiklas_Unreach	"Heizung Niklas [MAP(unreach.map):%s]" 				(gUnreac
 
 Number Heating_Office 			"Arbeit-Ventil [%d %%]"				<heating> 		(grOffice, gHeating)  		{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0063749:4#VALVE_STATE" }
 String HeatingValve_Modus_Control_Office											(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0063749:4#CONTROL_MODE"}
-Number HeatingValve_Target_Office    "Arbeit-Ventil [%.1f °C]" 		<temperature> 	(grOffice, gTempTargetValves)		{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0063749:4#SET_TEMPERATURE"}
+Number HeatingValve_Target_Office    "Arbeit-Ventil Soll [%.1f °C]" 		<temperature> 	(gHeatOffice, grOffice, gTempTargetValves)		{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0063749:4#SET_TEMPERATURE"}
 Switch HeatingValve_Auto_Office 													(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0063749:4#AUTO_MODE"}
 Number HeatingValve_Manu_Office   													(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0063749:4#MANU_MODE"}
 Switch HeatingValve_Boost_Office   													(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0063749:4#BOOST_MODE"}
@@ -292,7 +292,7 @@ Switch HeatingOffice_Unreach	"Heizung Arbeit [MAP(unreach.map):%s]" 				(gUnreac
 
 Number Heating_Hobby 			"Hobby-Ventil [%d %%]" 				<heating> 		(grHobby, gHeating)  		{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0054682:4#VALVE_STATE" }
 String HeatingValve_Modus_Control_Hobby												(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0054682:4#CONTROL_MODE"}
-Number HeatingValve_Target_Hobby    "Hobby-Ventil [%.1f °C]"		<temperature> 	(grHobby, gTempTargetValves)		{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0054682:4#SET_TEMPERATURE"}
+Number HeatingValve_Target_Hobby    "Hobby-Ventil Soll [%.1f °C]"		<temperature> 	(gHeatHobby, grHobby, gTempTargetValves)		{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0054682:4#SET_TEMPERATURE"}
 Switch HeatingValve_Auto_Hobby 														(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0054682:4#AUTO_MODE"}
 Number HeatingValve_Manu_Hobby   													(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0054682:4#MANU_MODE"}
 Switch HeatingValve_Boost_Hobby   													(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0054682:4#BOOST_MODE"}
@@ -308,7 +308,7 @@ Switch HeatingHobby_Unreach		"Heizung Hobby [MAP(unreach.map):%s]" 				(gUnreach
 
 Number Heating_KidsBath 		"Gästebad-Ventil [%d %%]"		 					(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0057159:4#VALVE_STATE"}
 String HeatingValve_Modus_Control_KidsBath											(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0057159:4#CONTROL_MODE"}
-Number HeatingValve_Target_KidsBath    "Gästebad-Ventil [%.1f °C]"	<temperature> 	(grKidsBath, gTempTargetValves)	{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0057159:4#SET_TEMPERATURE"}
+Number HeatingValve_Target_KidsBath    "Gästebad-Ventil Soll [%.1f °C]"	<temperature> 	(gHeatKidsBath, grKidsBath, gTempTargetValves)	{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0057159:4#SET_TEMPERATURE"}
 Switch HeatingValve_Auto_KidsBath 													(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0057159:4#AUTO_MODE"}
 Number HeatingValve_Manu_KidsBath   												(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0057159:4#MANU_MODE"}
 Switch HeatingValve_Boost_KidsBath 													(gTempAdmin)				{channel="homematic:HG-HM-CC-RT-DN:bc18ba0fac:MEQ0057159:4#BOOST_MODE"}
@@ -331,6 +331,19 @@ Number PlannedTarget_Niklas															(gTempAdmin)
 Number PlannedTarget_Office															(gTempAdmin)
 Number PlannedTarget_Hobby															(gTempAdmin)
 
+Number Heating_Living_disp			"Wohnzimmer Ventil [%d %%]"						(gHeatLiv, gTempAdmin)
+Number HeatingValve_Kitchen_disp    "Küche Ventil [%d %%]"                          (gHeatKitchen, gTempAdmin)
+Number Heating_Sleep_disp			"Schlafzimmer Ventil [%d %%]"					(gHeatSleep, gTempAdmin)
+Number Heating_Bath_disp			"Bad Ventil [%d %%]"		    				(gHeatBath, gTempAdmin)
+Number Heating_Emilie_disp			"Emilie Ventil [%d %%]"						    (gHeatEmilie, gTempAdmin)
+Number Heating_Niklas_disp			"Niklas Ventil [%d %%]"						    (gHeatNiklas, gTempAdmin)
+Number Heating_Office_disp			"Arbeitszimmer Ventil [%d %%]"					(gHeatOffice, gTempAdmin)
+Number Heating_Hobby_disp			"Hobby Ventil [%d %%]"						    (gHeatHobby, gTempAdmin)
+Number Heating_KidsBath_disp		"Gästebad Ventil [%d %%]"						(gHeatKidsBath, gTempAdmin)
+
+Number Heating_total                "Gesamt Heizung [%.2f]"             <radiator>  (gHeatAll)
+Number Heating_total_prev                                                           (gHeatAll)
+
 Number Counter_Living				"Wohnzimmer [%.2f ]"	        	<radiator>	(gTempAdmin)
 Number Counter_Sleep				"Schlafzimmer [%.2f ]"	        	<radiator>	(gTempAdmin)
 Number Counter_Kitchen				"Küche [%.2f ]"	        	        <radiator>	(gTempAdmin)
@@ -341,6 +354,8 @@ Number Counter_Office				"Arbeitszimmer [%.2f ]"	        	<radiator>	(gTempAdmin
 Number Counter_Hobby				"Bastelzimmer [%.2f ]"	        	<radiator>	(gTempAdmin)
 Number Counter_KidsBath				"Gästebad [%.2f ]"	              	<radiator>	(gTempAdmin)
 Number Counter_total                "Gesamtverbrauch [%.1f ]"                       (gTempAdmin)
+Number HeatingCounter_today         "Heizung heute [%.3f]"              <radiator>  (gHeatingAnalysis)
+Number HeatingCounter_daily         "Heizung täglich [%.3f]"            <radiator>  (gHeatingAnalysis)
 Number CounterLastTimeChanged_Living	                    			       		(gTempAdmin)
 Number CounterLastTimeChanged_Sleep									        	    (gTempAdmin)
 Number CounterLastTimeChanged_Kitchen								        	    (gTempAdmin)
@@ -351,6 +366,7 @@ Number CounterLastTimeChanged_Niklas									        	(gTempAdmin)
 Number CounterLastTimeChanged_Office									        	(gTempAdmin)
 Number CounterLastTimeChanged_Hobby									        	    (gTempAdmin)
 Number CounterLastTimeChanged_KidsBath								        	    (gTempAdmin)
+Number CounterLastTimeChanged_any   								        	    (gTempAdmin)
 Switch CounterResetAll               "alle Zähler auf 0 setzen"                     (gTempAdmin)
 
 /* Windows */
@@ -493,6 +509,11 @@ Rollershutter Rollershutter_EmilieLi "Jalousie Emilie links [%d %%]" 			<rollers
 String RollershutterDirection_EmilieLi															(gRollershutters)		{channel="homematic:HG-HM-LC-Bl1PBU-FM:bc18ba0fac:OEQ0541533:1#DIRECTION"}
 Switch RollerShutterDown_EmilieLi
 Number RollershutterEndPos_EmilieLi	"Jalousie Anschlag Emilie links [%d %%]"	<rollershutter> (gRollershutters)
+
+Rollershutter Rollershutter_Niklas  "Jalousie Niklas [%d %%]" 			        <rollershutter> (gRollershutters) 		{homekit="WindowCovering", channel="homematic:HG-HM-LC-Bl1PBU-FM:bc18ba0fac:QEQ1167429:1#LEVEL"}
+String RollershutterDirection_Niklas															(gRollershutters)		{channel="homematic:HG-HM-LC-Bl1PBU-FM:bc18ba0fac:QEQ1167429:1#DIRECTION"}
+Switch RollerShutterDown_Niklas
+Number RollershutterEndPos_Niklas	"Jalousie Anschlag Niklas [%d %%]"	        <rollershutter> (gRollershutters)
 
 /* Switches */
 Number Switch_EssZi1				"Schalter [MAP(switches.map):%s]"   	(grEating)
@@ -692,8 +713,20 @@ Switch Switch_OfficeBottomLongDown  "Schalter lang runter"	  				(grOffice)  			
 Switch Switch_OfficeBottomLongDownEnd "Schalter lang runter ende"			(grOffice)  		    {channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:PEQ1017309:2#PRESS_LONG_RELEASE"}
 Switch Switch_OfficeBottom_Batt 											(grOffice, gBatteries) 	{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:PEQ1017309:0#LOWBAT"}
 Number Switch_OfficeBottom_Batt_disp "Schalter Arbeit unten [MAP(batteries.map):%s]" <battery>	(grOffice, gBatteries)
-Number Switch_OfficeBottom_Signal	"Schalter Arbeit unten [%.0f]"   <signal>    (gSignal)		        {channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:PEQ1017309:0#RSSI_DEVICE"}
-Switch Switch_OfficeBottom_Unreach	"Schalter Arbeit unten [MAP(unreach.map):%s]"  		(gUnreach) 		{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:PEQ1017309:0#UNREACH"}
+Number Switch_OfficeBottom_Signal	"Schalter Arbeit unten [%.0f]"   <signal>    (gSignal)		    {channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:PEQ1017309:0#RSSI_DEVICE"}
+Switch Switch_OfficeBottom_Unreach	"Schalter Arbeit unten [MAP(unreach.map):%s]"  		(gUnreach) 	{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:PEQ1017309:0#UNREACH"}
+
+Number Switch_Hall			        "Schalter [MAP(switches.map):%s]"   	(grHall)
+Switch Switch_HallShortUp           "Schalter kurz hoch"  					(grHall)  			{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:MEQ0372766:1#PRESS_SHORT"}
+Switch Switch_HallLongUp            "Schalter lang hoch"	  				(grHall)  			{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:MEQ0372766:1#PRESS_LONG"}
+Switch Switch_HallLongUpEnd         "Schalter lang hoch ende"  				(grHall)  			{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:MEQ0372766:1#PRESS_LONG_RELEASE"}
+Switch Switch_HallShortDown         "Schalter kurz runter"  				(grHall)  			{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:MEQ0372766:2#PRESS_SHORT"}
+Switch Switch_HallLongDown          "Schalter lang runter"	  				(grHall)  			{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:MEQ0372766:2#PRESS_LONG"}
+Switch Switch_HallLongDownEnd       "Schalter lang runter ende"			    (grHall)  		    {channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:MEQ0372766:2#PRESS_LONG_RELEASE"}
+Switch Switch_Hall_Batt 										           (grHall, gBatteries) {channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:MEQ0372766:0#LOWBAT"}
+Number Switch_Hall_Batt_disp        "Schalter Flur [MAP(batteries.map):%s]" <battery>	(grHall, gBatteries)
+Number Switch_Hall_Signal	        "Schalter Flur [%.0f]"   <signal>       (gSignal)	        {channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:MEQ0372766:0#RSSI_DEVICE"}
+Switch Switch_Hall_Unreach	        "Schalter Flur [MAP(unreach.map):%s]"  	(gUnreach) 		    {channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:MEQ0372766:0#UNREACH"}
 
 
 /* Soil Humidity Sensors */

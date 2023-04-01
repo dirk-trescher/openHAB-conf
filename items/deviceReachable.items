@@ -61,10 +61,7 @@ Switch SmokeSleepStatus     "Status Rauchmelder Schlafzimmer [%s]"     <network>
 Switch SmokeNiklasStatus    "Status Rauchmelder Niklas [%s]"     <network>   (gDeviceStatus)
 Switch SmokeEmilieStatus    "Status Rauchmelder Emilie [%s]"     <network>   (gDeviceStatus)
 Switch SmokeOfficeStatus    "Status Rauchmelder Arbeitszimmer [%s]"     <network>   (gDeviceStatus)
+
 Switch MotionStairwayStatus "Status Bewegungsmelder Treppe [%s]"     <network>   (gDeviceStatus)
 Switch MotionHallStatus     "Status Bewegungsmelder Flur [%s]"     <network>   (gDeviceStatus)
-Switch MotionOfficeStatus   "Status Bewegungsmelder Arbeitszimmer [%s]"     <network>   (gDeviceStatus)
-
-/* Soil Humidity Sensors */
-Number Soil1_NumReceived    		 												(gHeartbeat)
-Number Soil1_Reachable			"Feuchtigkeit Erde 1 [%.0f]"			<signal>
+Switch MotionGuestLooStatus "Status Bewegungsmelder Gästetoilette [%s]"     <network>   (gDeviceStatus)

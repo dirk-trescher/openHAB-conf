@@ -20,6 +20,8 @@ sitemap loft label="Loft"
 				Selection 	item=Light_NiklasScenes label="Niklas" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]                  icon="light-on"  visibility=[Light_NiklasScenes!=0]
 				Selection 	item=Light_NiklasDeckeScenes label="Niklas Decke" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]       icon="light-off" visibility=[Light_NiklasDeckeScenes==0]
 				Selection 	item=Light_NiklasDeckeScenes label="Niklas Decke" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]       icon="light-on"  visibility=[Light_NiklasDeckeScenes!=0]
+				Selection 	item=Light_HallScenes label="Garderobe" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]        icon="light-off" visibility=[Light_HallScenes==0]
+				Selection 	item=Light_HallScenes label="Garderobe" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]        icon="light-on"  visibility=[Light_HallScenes!=0]
 				Selection 	item=Light_OfficeTopScenes label="Arbeitszimmer" mappings=[0=aus, 1=Tag, 2=Standard, 4=Nacht]        icon="light-off" visibility=[Light_OfficeTopScenes==0]
 				Selection 	item=Light_OfficeTopScenes label="Arbeitszimmer" mappings=[0=aus, 1=Tag, 2=Standard, 4=Nacht]        icon="light-on"  visibility=[Light_OfficeTopScenes!=0]
 				Selection 	item=Light_OfficeEffScenes label="Arbeitszimmer Effekt" mappings=[0=aus, 1=Tag, 2=Standard, 4=Nacht] icon="light-off" visibility=[Light_OfficeEffScenes==0]
@@ -73,6 +75,24 @@ sitemap loft label="Loft"
 			}
 		}
 		Group item=gHeating visibility=[HeatingPeriod==ON]  {
+            Frame label="Heizung gesamt" icon="radiator" {
+                Text item=Heating_total
+				Switch item=Heating_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 2="Tag", 3="Woche"]
+				Chart item=Heating_total period=h refresh=10000 visibility=[Heating_Chart_Period==0, Heating_Chart_Period=="NULL"]
+				Chart item=Heating_total period=8h refresh=40000 visibility=[Heating_Chart_Period==1]
+				Chart item=Heating_total period=D refresh=60000 visibility=[Heating_Chart_Period==2]
+				Chart item=Heating_total period=W refresh=300000 visibility=[Heating_Chart_Period==3]
+            }
+            Frame label="tägliche Heizung" icon="radiator" {
+                Text item=HeatingCounter_today
+				Switch item=Heating_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 2="Tag", 3="Woche", 4="Monat", 5="Jahr"]
+				Chart item=gHeatingAnalysis period=h refresh=10000 visibility=[Heating_Chart_Period==0, Heating_Chart_Period=="NULL"]
+				Chart item=gHeatingAnalysis period=8h refresh=40000 visibility=[Heating_Chart_Period==1]
+				Chart item=gHeatingAnalysis period=D refresh=60000 visibility=[Heating_Chart_Period==2]
+				Chart item=gHeatingAnalysis period=W refresh=300000 visibility=[Heating_Chart_Period==3]
+				Chart item=gHeatingAnalysis period=M refresh=600000 visibility=[Heating_Chart_Period==4]
+				Chart item=gHeatingAnalysis period=Y refresh=600000 visibility=[Heating_Chart_Period==5]
+            }
 			Frame label="Wohnzimmer" {
 				Switch item=HeatingModus_Living label="Modus" mappings=[0="Auto", 1="Manu", 2="Boost"]
 				Switch item=HeatingModus_DayNight_Living label="Auto Temperatur" mappings=[1="Nacht", 0="Tag", 2="Fenster"]
@@ -180,54 +200,68 @@ sitemap loft label="Loft"
 				Text item=HeatingValve_Modus_Control_KidsBath label="Control Mode Ventil [%s]"
 			}
 
-			Frame label="Ziel-Temperatur Wohnzimmer" icon="line" {
+			Frame label="Heizung Wohnzimmer" icon="line" {
 				Switch item=Heating_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 2="Tag", 3="Woche"]
-				Chart item=HeatingValve_Target_Living period=h refresh=10000 visibility=[Heating_Chart_Period==0, Temp_Chart_Period=="NULL"]
-				Chart item=HeatingValve_Target_Living period=8h refresh=40000 visibility=[Heating_Chart_Period==1]
-				Chart item=HeatingValve_Target_Living period=D refresh=60000 visibility=[Heating_Chart_Period==2]
-				Chart item=HeatingValve_Target_Living period=W refresh=300000 visibility=[Heating_Chart_Period==3]
+				Chart item=gHeatLiv period=h refresh=10000 visibility=[Heating_Chart_Period==0, Heating_Chart_Period=="NULL"]
+				Chart item=gHeatLiv period=8h refresh=40000 visibility=[Heating_Chart_Period==1]
+				Chart item=gHeatLiv period=D refresh=60000 visibility=[Heating_Chart_Period==2]
+				Chart item=gHeatLiv period=W refresh=300000 visibility=[Heating_Chart_Period==3]
 			}
-			Frame label="Ziel-Temperatur Küche" icon="line" {
+			Frame label="Heizung Küche" icon="line" {
 				Switch item=Heating_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 2="Tag", 3="Woche"]
-				Chart item=HeatingValve_Target_Kitchen period=h refresh=10000 visibility=[Heating_Chart_Period==0, Temp_Chart_Period=="NULL"]
-				Chart item=HeatingValve_Target_Kitchen period=8h refresh=40000 visibility=[Heating_Chart_Period==1]
-				Chart item=HeatingValve_Target_Kitchen period=D refresh=60000 visibility=[Heating_Chart_Period==2]
-				Chart item=HeatingValve_Target_Kitchen period=W refresh=300000 visibility=[Heating_Chart_Period==3]
+				Chart item=gHeatKitchen period=h refresh=10000 visibility=[Heating_Chart_Period==0, Heating_Chart_Period=="NULL"]
+				Chart item=gHeatKitchen period=8h refresh=40000 visibility=[Heating_Chart_Period==1]
+				Chart item=gHeatKitchen period=D refresh=60000 visibility=[Heating_Chart_Period==2]
+				Chart item=gHeatKitchen period=W refresh=300000 visibility=[Heating_Chart_Period==3]
 			}
-			Frame label="Ziel-Temperatur Bad" icon="line" {
+			Frame label="Heizung Schlafzimmer" icon="line" {
 				Switch item=Heating_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 2="Tag", 3="Woche"]
-				Chart item=HeatingValve_Target_Bath period=h refresh=10000 visibility=[Heating_Chart_Period==0, Temp_Chart_Period=="NULL"]
-				Chart item=HeatingValve_Target_Bath period=8h refresh=40000 visibility=[Heating_Chart_Period==1]
-				Chart item=HeatingValve_Target_Bath period=D refresh=60000 visibility=[Heating_Chart_Period==2]
-				Chart item=HeatingValve_Target_Bath period=W refresh=300000 visibility=[Heating_Chart_Period==3]
+				Chart item=gHeatSleep period=h refresh=10000 visibility=[Heating_Chart_Period==0, Heating_Chart_Period=="NULL"]
+				Chart item=gHeatSleep period=8h refresh=40000 visibility=[Heating_Chart_Period==1]
+				Chart item=gHeatSleep period=D refresh=60000 visibility=[Heating_Chart_Period==2]
+				Chart item=gHeatSleep period=W refresh=300000 visibility=[Heating_Chart_Period==3]
 			}
-			Frame label="Ziel-Temperatur Emilie rechts" icon="line" {
+			Frame label="Heizung Bad" icon="line" {
 				Switch item=Heating_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 2="Tag", 3="Woche"]
-				Chart item=HeatingValve_Target_EmilieRe period=h refresh=10000 visibility=[Heating_Chart_Period==0, Temp_Chart_Period=="NULL"]
-				Chart item=HeatingValve_Target_EmilieRe period=8h refresh=40000 visibility=[Heating_Chart_Period==1]
-				Chart item=HeatingValve_Target_EmilieRe period=D refresh=60000 visibility=[Heating_Chart_Period==2]
-				Chart item=HeatingValve_Target_EmilieRe period=W refresh=300000 visibility=[Heating_Chart_Period==3]
+				Chart item=gHeatBath period=h refresh=10000 visibility=[Heating_Chart_Period==0, Heating_Chart_Period=="NULL"]
+				Chart item=gHeatBath period=8h refresh=40000 visibility=[Heating_Chart_Period==1]
+				Chart item=gHeatBath period=D refresh=60000 visibility=[Heating_Chart_Period==2]
+				Chart item=gHeatBath period=W refresh=300000 visibility=[Heating_Chart_Period==3]
 			}
-			Frame label="Ziel-Temperatur Emilie links" icon="line" {
+			Frame label="Heizung Emilie" icon="line" {
 				Switch item=Heating_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 2="Tag", 3="Woche"]
-				Chart item=HeatingValve_Target_EmilieLi period=h refresh=10000 visibility=[Heating_Chart_Period==0, Temp_Chart_Period=="NULL"]
-				Chart item=HeatingValve_Target_EmilieLi period=8h refresh=40000 visibility=[Heating_Chart_Period==1]
-				Chart item=HeatingValve_Target_EmilieLi period=D refresh=60000 visibility=[Heating_Chart_Period==2]
-				Chart item=HeatingValve_Target_EmilieLi period=W refresh=300000 visibility=[Heating_Chart_Period==3]
+				Chart item=gHeatEmilie period=h refresh=10000 visibility=[Heating_Chart_Period==0, Heating_Chart_Period=="NULL"]
+				Chart item=gHeatEmilie period=8h refresh=40000 visibility=[Heating_Chart_Period==1]
+				Chart item=gHeatEmilie period=D refresh=60000 visibility=[Heating_Chart_Period==2]
+				Chart item=gHeatEmilie period=W refresh=300000 visibility=[Heating_Chart_Period==3]
 			}
-			Frame label="Ziel-Temperatur Niklas" icon="line" {
+			Frame label="Heizung Niklas" icon="line" {
 				Switch item=Heating_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 2="Tag", 3="Woche"]
-				Chart item=HeatingValve_Target_Niklas period=h refresh=10000 visibility=[Heating_Chart_Period==0, Temp_Chart_Period=="NULL"]
-				Chart item=HeatingValve_Target_Niklas period=8h refresh=40000 visibility=[Heating_Chart_Period==1]
-				Chart item=HeatingValve_Target_Niklas period=D refresh=60000 visibility=[Heating_Chart_Period==2]
-				Chart item=HeatingValve_Target_Niklas period=W refresh=300000 visibility=[Heating_Chart_Period==3]
+				Chart item=gHeatNiklas period=h refresh=10000 visibility=[Heating_Chart_Period==0, Heating_Chart_Period=="NULL"]
+				Chart item=gHeatNiklas period=8h refresh=40000 visibility=[Heating_Chart_Period==1]
+				Chart item=gHeatNiklas period=D refresh=60000 visibility=[Heating_Chart_Period==2]
+				Chart item=gHeatNiklas period=W refresh=300000 visibility=[Heating_Chart_Period==3]
 			}
-			Frame label="Ziel-Temperatur Arbeitszimmer" icon="line" {
+			Frame label="Heizung Arbeitszimmer" icon="line" {
 				Switch item=Heating_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 2="Tag", 3="Woche"]
-				Chart item=HeatingValve_Target_Office period=h refresh=10000 visibility=[Heating_Chart_Period==0, Temp_Chart_Period=="NULL"]
-				Chart item=HeatingValve_Target_Office period=8h refresh=40000 visibility=[Heating_Chart_Period==1]
-				Chart item=HeatingValve_Target_Office period=D refresh=60000 visibility=[Heating_Chart_Period==2]
-				Chart item=HeatingValve_Target_Office period=W refresh=300000 visibility=[Heating_Chart_Period==3]
+				Chart item=gHeatOffice period=h refresh=10000 visibility=[Heating_Chart_Period==0, Heating_Chart_Period=="NULL"]
+				Chart item=gHeatOffice period=8h refresh=40000 visibility=[Heating_Chart_Period==1]
+				Chart item=gHeatOffice period=D refresh=60000 visibility=[Heating_Chart_Period==2]
+				Chart item=gHeatOffice period=W refresh=300000 visibility=[Heating_Chart_Period==3]
+			}
+			Frame label="Heizung Bastelzimmer" icon="line" {
+				Switch item=Heating_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 2="Tag", 3="Woche"]
+				Chart item=gHeatHobby period=h refresh=10000 visibility=[Heating_Chart_Period==0, Heating_Chart_Period=="NULL"]
+				Chart item=gHeatHobby period=8h refresh=40000 visibility=[Heating_Chart_Period==1]
+				Chart item=gHeatHobby period=D refresh=60000 visibility=[Heating_Chart_Period==2]
+				Chart item=gHeatHobby period=W refresh=300000 visibility=[Heating_Chart_Period==3]
+			}
+			Frame label="Heizung Gästebad" icon="line" {
+				Switch item=Heating_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 2="Tag", 3="Woche"]
+				Chart item=gHeatKidsBath period=h refresh=10000 visibility=[Heating_Chart_Period==0, Heating_Chart_Period=="NULL"]
+				Chart item=gHeatKidsBath period=8h refresh=40000 visibility=[Heating_Chart_Period==1]
+				Chart item=gHeatKidsBath period=D refresh=60000 visibility=[Heating_Chart_Period==2]
+				Chart item=gHeatKidsBath period=W refresh=300000 visibility=[Heating_Chart_Period==3]
 			}
 		}
 		Group item=gWindows {
@@ -267,6 +301,8 @@ sitemap loft label="Loft"
 				Switch item=Rollershutter_EmilieRe label="Emilie rechts" icon="rollershutter"
 				Text item=Rollershutter_EmilieLi label="Emilie links [MAP(rollershutters.map):%s]" icon="rollershutter"
 				Switch item=Rollershutter_EmilieLi label="Emilie links" icon="rollershutter"
+				Text item=Rollershutter_Niklas label="Niklas [MAP(rollershutters.map):%s]" icon="rollershutter"
+				Switch item=Rollershutter_Niklas label="Niklas" icon="rollershutter"
 			}
 		}
 		Text item=gHumidity {
@@ -286,7 +322,6 @@ sitemap loft label="Loft"
 				Switch item=WLAN_Office_DelayOff
                 Switch item=WLAN24_LoftWork
                 Switch item=WLAN50_LoftWork
-				Switch item=WLAN_Roof_DelayOff
                 Switch item=WLAN24_LoftRoof
                 Switch item=WLAN50_LoftRoof
 			}
@@ -299,7 +334,6 @@ sitemap loft label="Loft"
 				Switch item=WLAN_Office_DelayOff
                 Switch item=WLAN24_LoftWork
                 Switch item=WLAN50_LoftWork
-				Switch item=WLAN_Roof_DelayOff
                 Switch item=WLAN24_LoftRoof
                 Switch item=WLAN50_LoftRoof
 			}
@@ -346,6 +380,7 @@ sitemap loft label="Loft"
                 Text item=Energy_all_yearly
                 Text item=Energy_offset_today label="Energy offset today [%.2f kWh]"
                 Text item=Energy_Fridge
+                Text item=Energy_Tumbler
 				Text item=Power_WaterHeating_kWh
 				Text item=Power_Rest_kWh
                 Text item=Energy_bigFlat
@@ -478,6 +513,7 @@ sitemap loft label="Loft"
 				Text item=Temp_Living label="Ist-Temperatur [%.1f °C]"
 				Text item=Heating_Living label="Heizung [%.2f]"
 				Text item=Humid_Living label="Feuchtigkeit [%.0f %%]"
+				Switch item=CameraRoof label="Klavier"
 				Text item=Window_LivingLeft  label="Fenster links [MAP(contact.map):%s]"
 				Text item=Window_LivingMiddle label="Fenster mitte [MAP(contact.map):%s]"
 				Text item=Window_LivingRight label="Fenster rechts [MAP(contact.map):%s]"
@@ -601,6 +637,8 @@ sitemap loft label="Loft"
 				Text item=Humid_Niklas label="Feuchtigkeit [%.0f %%]"
 				Text item=Window_NiklasLeft  label="Fenster links [MAP(contact.map):%s]"
 				Text item=Window_NiklasRight  label="Fenster rechts [MAP(contact.map):%s]"
+				Text item=Rollershutter_Niklas label="Niklas [MAP(rollershutters.map):%s]" icon="rollershutter"
+				Switch item=Rollershutter_Niklas label="Niklas" icon="rollershutter"
 			}
 			Frame label="Emilie" icon="girl_2" {
 				Selection item=Light_EmilieScenes label="Licht-Szenen" mappings=[0=aus, 1=Tag, 2=Standard, 7=Nacht]
@@ -688,7 +726,6 @@ sitemap loft label="Loft"
 					}
 				}
 				Text item=Window_Terrace label="Terrassentür [MAP(contact.map):%s]"
-				Switch item=CameraRoof label="Kamera"
 				Text item=Rainsensor {
 					Frame label="Wetter-Daten" {
 						Switch item=Temp_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 2="Tag", 3="Woche"]
@@ -700,7 +737,6 @@ sitemap loft label="Loft"
 				}
 				Text item=Humidity
 				Switch item=SnowOnRoof visibility=[WateringPeriod==OFF, WateringPeriod=="NULL"]
-				Switch item=WLAN_Roof_DelayOff label="WLAN"
 				Text item=Warn_no_rain visibility=[WateringPeriod==OFF, WateringPeriod=="NULL"]
 				Text item=Soil1_corr label="Feuchtigkeit Erde" visibility=[WateringPeriod==OFF, WateringPeriod=="NULL"] {
 					Frame label="Bodenfeuchtigkeit Tröge" {
@@ -951,6 +987,15 @@ sitemap loft label="Loft"
 			Text item=HallMotion
 			Text item=Hall_Temperature
 			Text item=Hall_Luminance
+
+            Selection item=Light_HallScenes label="Licht-Szenen" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]
+            Text label="Licht manuell" icon="dimmablelight" {
+                Frame label="Licht manuell" {
+                    Switch	item=Light_HallSwitch                    						label="Licht"
+                    Slider	item=Light_HallBright	visibility=[Light_HallSwitch==ON]  	    label="Helligkeit"
+                    Slider	item=Light_HallTemp 	visibility=[Light_HallSwitch==ON]  	    label="Temperatur"
+                }
+            }
 		}
 		Text label="Treppenhaus" icon="corridor" {
 			Switch item=DoorBuzzer_Down
@@ -1242,6 +1287,16 @@ sitemap loft label="Loft"
 					Chart item=Soil1_Signal period=8h refresh=40000 visibility=[PiCpu_Chart_Period==1]
 					Chart item=Soil1_Signal period=D refresh=60000 visibility=[PiCpu_Chart_Period==2]
 					Chart item=Soil1_Signal period=W refresh=300000 visibility=[PiCpu_Chart_Period==3]
+					Switch item=PiCpu_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 2="Tag", 3="Woche"]
+					Chart item=Switch_OfficeBottom_Signal period=h refresh=10000 visibility=[PiCpu_Chart_Period==0, PiCpu_Chart_Period=="NULL"]
+					Chart item=Switch_OfficeBottom_Signal period=8h refresh=40000 visibility=[PiCpu_Chart_Period==1]
+					Chart item=Switch_OfficeBottom_Signal period=D refresh=60000 visibility=[PiCpu_Chart_Period==2]
+					Chart item=Switch_OfficeBottom_Signal period=W refresh=300000 visibility=[PiCpu_Chart_Period==3]
+					Switch item=PiCpu_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 2="Tag", 3="Woche"]
+					Chart item=RoofWindow_Sleep_Signal period=h refresh=10000 visibility=[PiCpu_Chart_Period==0, PiCpu_Chart_Period=="NULL"]
+					Chart item=RoofWindow_Sleep_Signal period=8h refresh=40000 visibility=[PiCpu_Chart_Period==1]
+					Chart item=RoofWindow_Sleep_Signal period=D refresh=60000 visibility=[PiCpu_Chart_Period==2]
+					Chart item=RoofWindow_Sleep_Signal period=W refresh=300000 visibility=[PiCpu_Chart_Period==3]
 				}
                 Text label="WLAN" icon="settings" {
                     Text item=Solar1Signal
@@ -1355,7 +1410,7 @@ sitemap loft label="Loft"
 
 				Text item=MotionStairwayStatus 	visibility=[MotionStairwayStatus!=ON]
 				Text item=MotionHallStatus     	visibility=[MotionHallStatus!=ON]
-				Text item=MotionOfficeStatus   	visibility=[MotionOfficeStatus!=ON]
+				Text item=MotionGuestLooStatus 	visibility=[MotionGuestLooStatus!=ON]
 
 				Text item=Batt_ThermoLiving_disp  valuecolor=[Batt_ThermoLiving_disp=="NULL"="lightgray",Batt_ThermoLiving_disp>=40="#01DF01",<40="#d7df01",<26="#ff8000",<10="#ff0000"] visibility=[Batt_ThermoLiving_disp<20]
 				Text item=Batt_ThermoBath_disp  valuecolor=[Batt_ThermoBath_disp=="NULL"="lightgray",Batt_ThermoBath_disp>=40="#01DF01",<40="#d7df01",<26="#ff8000",<10="#ff0000"] visibility=[Batt_ThermoBath_disp<20]
@@ -1458,7 +1513,7 @@ sitemap loft label="Loft"
 
 				Text item=Batt_StairwayMotion_disp 	 	valuecolor=[Batt_StairwayMotion_disp=="NULL"="lightgray",Batt_StairwayMotion_disp>=40="#01DF01",<40="#d7df01",<26="#ff8000",<10="#ff0000"] visibility=[Batt_StairwayMotion_disp<20]
 				Text item=Batt_HallMotion_disp 	 		valuecolor=[Batt_HallMotion_disp=="NULL"="lightgray",Batt_HallMotion_disp>=40="#01DF01",<40="#d7df01",<26="#ff8000",<10="#ff0000"] visibility=[Batt_HallMotion_disp<20]
-				Text item=Batt_OfficeMotion_disp 	 	valuecolor=[Batt_OfficeMotion_disp=="NULL"="lightgray",Batt_OfficeMotion_disp>=40="#01DF01",<40="#d7df01",<26="#ff8000",<10="#ff0000"] visibility=[Batt_OfficeMotion_disp<20]
+            	Text item=Batt_GuestLooMotion_disp 	 	valuecolor=[Batt_GuestLooMotion_disp=="NULL"="lightgray",Batt_GuestLooMotion_disp>=40="#01DF01",<40="#d7df01",<26="#ff8000",<10="#ff0000"] visibility=[Batt_GuestLooMotion_disp<20]
 				Text item=Batt_SummerTaster_disp 		valuecolor=[Batt_SummerTaster_disp=="NULL"="lightgray",Batt_SummerTaster_disp>=40="#01DF01",<40="#d7df01",<26="#ff8000",<10="#ff0000"] visibility=[Batt_SummerTaster_disp<20]
 
 				Text item=Batt_Smoke_Sleep_disp	     	valuecolor=[Batt_Smoke_Sleep_disp=="NULL"="lightgray",Batt_Smoke_Sleep_disp>=40="#01DF01",<40="#d7df01",<26="#ff8000",<10="#ff0000"] visibility=[Batt_Smoke_Sleep_disp<20]
@@ -1524,7 +1579,7 @@ sitemap loft label="Loft"
 					Frame label="Bewegungsmelder" {
 						Text item=Batt_StairwayMotion_disp 	 	valuecolor=[Batt_StairwayMotion_disp=="NULL"="lightgray",Batt_StairwayMotion_disp>=40="#01DF01",<40="#d7df01",<26="#ff8000",<10="#ff0000"]
 						Text item=Batt_HallMotion_disp 	 		valuecolor=[Batt_HallMotion_disp=="NULL"="lightgray",Batt_HallMotion_disp>=40="#01DF01",<40="#d7df01",<26="#ff8000",<10="#ff0000"]
-						Text item=Batt_OfficeMotion_disp 	 	valuecolor=[Batt_OfficeMotion_disp=="NULL"="lightgray",Batt_OfficeMotion_disp>=40="#01DF01",<40="#d7df01",<26="#ff8000",<10="#ff0000"]
+						Text item=Batt_GuestLooMotion_disp 	 	valuecolor=[Batt_GuestLooMotion_disp=="NULL"="lightgray",Batt_GuestLooMotion_disp>=40="#01DF01",<40="#d7df01",<26="#ff8000",<10="#ff0000"]
 					}
 					Frame label="Rauchmelder" {
 						Text item=Batt_Smoke_Sleep_disp	     	valuecolor=[Batt_Smoke_Sleep_disp=="NULL"="lightgray",Batt_Smoke_Sleep_disp>=40="#01DF01",<40="#d7df01",<26="#ff8000",<10="#ff0000"]

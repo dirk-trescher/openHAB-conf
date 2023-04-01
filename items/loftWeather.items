@@ -1,5 +1,5 @@
 
-Number   Warn_no_rain   "[%d] Tage ohne Regen"  <water>
+Number   Warn_no_rain   "Tage ohne Regen [%d]"  <rain>  (gRain)
 
 String   Station_Id     "Stations-Id [%s]"                          {channel="weathercompany:weather-observations:2ce9ffd49a:stationId"}
 
@@ -28,7 +28,7 @@ DateTime ObservationTime  "Beobachtungszeit [%1$td.%1$tm.%1$tY %1$tH:%1$tM]"   {
 
 // precipitation
 Number:Speed   Rain_cur       "momentaner Regen [%.2f mm/h]"  (gRain)     {channel="weathercompany:weather-observations:ececb0ae89:1f960ac810:currentPrecipitationRate"}
-Number:Length   Precip_Total   "Gesamtniederschlag [%d mm]"    (gRain)     {channel="weathercompany:weather-observations:ececb0ae89:1f960ac810:currentPrecipitationTotal"}
+Number:Length   Precip_Total   "Gesamtniederschlag [%.1f mm]"    (gRain)     {channel="weathercompany:weather-observations:ececb0ae89:1f960ac810:currentPrecipitationTotal"}
 
 Number:Length   Rain           "Regen heute [%.2f mm]"         (gRain)     {channel="weathercompany:weather-forecast:ececb0ae89:local:forecastDay0#precipitationRain"}
 Number:Length   RainDay        "Regen tags [%.2f mm]"          (gRain)     {channel="weathercompany:weather-forecast:ececb0ae89:local:forecastDay0Day#precipitationRain"}

@@ -62,8 +62,21 @@ Group grNiklas      "Niklas"      	   	<boy_3>	     	(All)
 Group grHobby       "Hobbyraum"         <boy_1>        	(All)
 Group grOffice      "Arbeitszimmer"     <office>      	(All)
 Group grKidsBath	"Gästebad"			<bath>			(All)
+Group grHall        "Flur"              <corridor>      (All)
 Group gRoofWindows	"Dachfenster"		<window>		(All)
 Group gContacts     "Kontaktschalter"   <door>          (All)
+
+Group gHeatLiv      "Heizen Wohnzimmer" <sofa>          (All)
+Group gHeatKitchen  "Heizen Küche"      <kitchen>       (All)
+Group gHeatBath     "Heizen Badezimmer" <bath>          (All)
+Group gHeatSleep    "Heizen Schlafzimmer" <bed>         (All)
+Group gHeatEmilie   "Heizen Emilie"     <girl_2>        (All)
+Group gHeatNiklas   "Heizen Niklas"     <boy_3>         (All)
+Group gHeatOffice   "Heizen Arbeitszimmer" <office>     (All)
+Group gHeatHobby    "Heizen Hobby"      <boy_1>         (All)
+Group gHeatKidsBath "Heizen Gästebad"   <bath>          (All)
+Group gHeatingAnalysis "tägliche Heizung" <radiator>    (All)
+Group gHeatAll      "Heizen gesamt"     <radiator>      (All)
 
 /* active groups */
 Group:Switch:OR(ON, OFF) 		gLightsCount	"Lichter [%d]" 						<light>			(All)
@@ -118,40 +131,40 @@ Switch FridgeOpenTooLong        "Kühlschranktür ist auf"
 // iCloud items
 Switch iPhoneDirk				"Presence Dirk (iCloud) [MAP(presence.map):%s]"			<present>
 Number iPhoneDirk_disp			"Presence Dirk (iCloud)"					(gPresence)
-Location iPhoneDirkLoc			"Location Dirk (iCloud) [%s]"									{channel="icloud:device:2198c6b087:75ce4ede:location"}
-Number iPhoneDirkLocAcc			"Dirk Genauigkeit [%.0f m]"						<movecontrol>	{channel="icloud:device:2198c6b087:75ce4ede:locationAccuracy"}
-DateTime iPhoneDirkLocUpdate	"Standort update [%1$td.%1$tm.%1$ty %1$tH:%1$tM]" 		<time>	{channel="icloud:device:2198c6b087:75ce4ede:locationLastUpdate"}
-Switch iPhoneDirkFindMyPhone	"Find my phone"													{channel="icloud:device:2198c6b087:75ce4ede:findMyPhone"}
+Location iPhoneDirkLoc			"Location Dirk (iCloud) [%s]"									{channel="icloud:device:2198c6b087:802c7fe9:location"}
+Number iPhoneDirkLocAcc			"Dirk Genauigkeit [%.0f m]"						<movecontrol>	{channel="icloud:device:2198c6b087:802c7fe9:locationAccuracy"}
+DateTime iPhoneDirkLocUpdate	"Standort update [%1$td.%1$tm.%1$ty %1$tH:%1$tM]" 		<time>	{channel="icloud:device:2198c6b087:802c7fe9:locationLastUpdate"}
+Switch iPhoneDirkFindMyPhone	"Find my phone"													{channel="icloud:device:2198c6b087:802c7fe9:findMyPhone"}
 Number iPhoneDirkDistanceFromHome "Dirk von zu Hause weg [%.0f m]"				        <zoom>
 Switch iPhoneDirkAlmostHome
 Switch iPhoneDirkNoUpdate       "Update zu lange her"
 
 Switch iPhoneHeike				"Presence Heike (iCloud) [MAP(presence.map):%s]"		<present>
 Number iPhoneHeike_disp			"Presence Heike (iCloud)"					(gPresence)
-Location iPhoneHeikeLoc			"Standort Heike (iCloud) [%s]"									{channel="icloud:device:2198c6b087:9ae9130d:location"}
-Number iPhoneHeikeLocAcc		"Standort Genauigkeit [%.0f m]"					<movecontrol>	{channel="icloud:device:2198c6b087:9ae9130d:locationAccuracy"}
-DateTime iPhoneHeikeLocUpdate	"Standort update [%1$td.%1$tm.%1$ty %1$tH:%1$tM]" 		<time>	{channel="icloud:device:2198c6b087:9ae9130d:locationLastUpdate"}
-Switch iPhoneHeikeFindMyPhone	"Find my phone"													{channel="icloud:device:2198c6b087:9ae9130d:findMyPhone"}
+Location iPhoneHeikeLoc			"Standort Heike (iCloud) [%s]"									{channel="icloud:device:2198c6b087:d6fdb1a1:location"}
+Number iPhoneHeikeLocAcc		"Standort Genauigkeit [%.0f m]"					<movecontrol>	{channel="icloud:device:2198c6b087:d6fdb1a1:locationAccuracy"}
+DateTime iPhoneHeikeLocUpdate	"Standort update [%1$td.%1$tm.%1$ty %1$tH:%1$tM]" 		<time>	{channel="icloud:device:2198c6b087:d6fdb1a1:locationLastUpdate"}
+Switch iPhoneHeikeFindMyPhone	"Find my phone"													{channel="icloud:device:2198c6b087:d6fdb1a1:findMyPhone"}
 Number iPhoneHeikeDistanceFromHome "Heike von zu Hause weg [%.0f m]"					<zoom>
 Switch iPhoneHeikeAlmostHome
 Switch iPhoneHeikeNoUpdate      "Update zu lange her"
 
 Switch iPhoneNiklas				"Presence Niklas (iCloud) [MAP(presence.map):%s]"		<present>
 Number iPhoneNiklas_disp		"Presence Niklas (iCloud)"					(gPresence)
-Location iPhoneNiklasLoc		"Location Niklas (iCloud) [%s]"									{channel="icloud:device:2198c6b087:6d581886:location"}
-Number iPhoneNiklasLocAcc		"Niklas Genauigkeit [%.0f m]"					<movecontrol>	{channel="icloud:device:2198c6b087:6d581886:locationAccuracy"}
-DateTime iPhoneNiklasLocUpdate	"Standort update [%1$td.%1$tm.%1$ty %1$tH:%1$tM]" 		<time>	{channel="icloud:device:2198c6b087:6d581886:locationLastUpdate"}
-Switch iPhoneNiklasFindMyPhone	"Find my phone"													{channel="icloud:device:2198c6b087:6d581886:findMyPhone"}
+Location iPhoneNiklasLoc		"Location Niklas (iCloud) [%s]"									{channel="icloud:device:2198c6b087:c52243c7:location"}
+Number iPhoneNiklasLocAcc		"Niklas Genauigkeit [%.0f m]"					<movecontrol>	{channel="icloud:device:2198c6b087:c52243c7:locationAccuracy"}
+DateTime iPhoneNiklasLocUpdate	"Standort update [%1$td.%1$tm.%1$ty %1$tH:%1$tM]" 		<time>	{channel="icloud:device:2198c6b087:c52243c7:locationLastUpdate"}
+Switch iPhoneNiklasFindMyPhone	"Find my phone"													{channel="icloud:device:2198c6b087:c52243c7:findMyPhone"}
 Number iPhoneNiklasDistanceFromHome "Niklas von zu Hause weg [%.0f m]"					<zoom>
 Switch iPhoneNiklasAlmostHome
 Switch iPhoneNiklasNoUpdate     "Update zu lange her"
 
 Switch iPhoneEmilie				"Presence Emilie (iCloud) [MAP(presence.map):%s]"		<present>
 Number iPhoneEmilie_disp		"Presence Emilie (iCloud)"					(gPresence)
-Location iPhoneEmilieLoc		"Location Emilie (iCloud) [%s]"									{channel="icloud:device:2198c6b087:c2f795c6:location"}
-Number iPhoneEmilieLocAcc		"Emilie Genauigkeit [%.0f m]"					<movecontrol>	{channel="icloud:device:2198c6b087:c2f795c6:locationAccuracy"}
-DateTime iPhoneEmilieLocUpdate	"Standort update [%1$td.%1$tm.%1$ty %1$tH:%1$tM]" 		<time>	{channel="icloud:device:2198c6b087:c2f795c6:locationLastUpdate"}
-Switch iPhoneEmilieFindMyPhone	"Find my phone"													{channel="icloud:device:2198c6b087:c2f795c6:findMyPhone"}
+Location iPhoneEmilieLoc		"Location Emilie (iCloud) [%s]"									{channel="icloud:device:2198c6b087:29f84e0c:location"}
+Number iPhoneEmilieLocAcc		"Emilie Genauigkeit [%.0f m]"					<movecontrol>	{channel="icloud:device:2198c6b087:29f84e0c:locationAccuracy"}
+DateTime iPhoneEmilieLocUpdate	"Standort update [%1$td.%1$tm.%1$ty %1$tH:%1$tM]" 		<time>	{channel="icloud:device:2198c6b087:29f84e0c:locationLastUpdate"}
+Switch iPhoneEmilieFindMyPhone	"Find my phone"													{channel="icloud:device:2198c6b087:29f84e0c:findMyPhone"}
 Number iPhoneEmilieDistanceFromHome "Emilie von zu Hause weg [%.0f m]"					<zoom>
 Switch iPhoneEmilieAlmostHome
 Switch iPhoneEmilieNoUpdate     "Update zu lange her"

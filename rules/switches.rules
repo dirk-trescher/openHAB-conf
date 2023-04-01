@@ -4,6 +4,8 @@ import org.eclipse.smarthome.core.library.types.PercentType
 import org.eclipse.smarthome.model.script.actions.Timer
 import org.eclipse.xtext.xbase.lib.Functions
 import org.joda.time.LocalTime
+import java.util.List
+import java.util.Map
 
 val java.util.Random rand = new java.util.Random
 
@@ -23,6 +25,7 @@ var Timer TimerNiklasDimmer = null
 var Timer TimerGuestLooDimmer = null
 var Timer TimerGuestOnLoo = null
 var Timer TimerGuestLooPreventAccidentalOff = null
+var Timer TimerGuestLooInhibitMotion = null
 var boolean GuestOnLoo = false
 var Number GuestLooFanManOnOff = 0
 var Timer TimerGuestLooFanManOnOff = null
@@ -45,6 +48,115 @@ var Timer TimerSleepUpOff = null
 
 var Float EssZiHue = 0.0
 var Float EssZiSaturation = 0.0
+
+var List<Integer> SwitchOrderEssZi = newArrayList( 1, 2, 4 )        // three times-of-day
+var List< Map<Integer, Integer> > CycleOrderEssZi = newArrayList(
+newHashMap( 1 -> 2, 2 -> 3, 3 -> 1, 4 -> 1 ),                       // for each time-of-day the cycle order
+newHashMap( 1 -> 2, 2 -> 3, 3 -> 4, 4 -> 1 ),
+newHashMap( 1 -> 4, 4 -> 3, 3 -> 2, 2 -> 1 ) )
+var List<Integer> SwitchOrderBath = newArrayList( 1, 3, 5 )
+var List< Map<Integer, Integer> > CycleOrderBath = newArrayList(
+newHashMap( 1 -> 3, 3 -> 1, 5 -> 3, 6 -> 3 ),
+newHashMap( 1 -> 3, 3 -> 5, 5 -> 1, 6 -> 5 ),
+newHashMap( 1 -> 5, 3 -> 1, 5 -> 3, 6 -> 5 ) )
+var List<Integer> SwitchOrderEmilie = newArrayList( 1, 2, 7 )
+var List< Map<Integer, Integer> > CycleOrderEmilie = newArrayList(
+newHashMap( 1 -> 2, 2 -> 1, 7 -> 1 ),
+newHashMap( 1 -> 2, 2 -> 7, 7 -> 1 ),
+newHashMap( 1 -> 7, 2 -> 1, 7 -> 2 ) )
+var List<Integer> SwitchOrderNiklas = newArrayList( 1, 2, 3, 4 )
+var List< Map<Integer, Integer> > CycleOrderNiklas = newArrayList(
+newHashMap( 1 -> 2, 2 -> 3, 3 -> 1, 4 -> 1, 13 -> 1, 14 -> 1, 15 -> 1, 16 -> 1 ),
+newHashMap( 1 -> 2, 2 -> 3, 3 -> 4, 4 -> 1, 13 -> 3, 14 -> 3, 15 -> 3, 16 -> 3 ),
+newHashMap( 1 -> 2, 2 -> 3, 3 -> 4, 4 -> 1, 13 -> 3, 14 -> 3, 15 -> 3, 16 -> 3 ),
+newHashMap( 1 -> 2, 2 -> 3, 3 -> 4, 4 -> 1, 13 -> 3, 14 -> 3, 15 -> 3, 16 -> 3 ) )
+var List<Integer> SwitchOrderSleep = newArrayList( 10, 11, 12 )
+var List< Map<Integer, Integer> > CycleOrderSleep = newArrayList(
+newHashMap( 10 -> 11, 11 -> 10, 12 -> 10 ),
+newHashMap( 10 -> 11, 11 -> 12, 12 -> 10 ),
+newHashMap( 10 -> 11, 11 -> 12, 12 -> 10 ) )
+var List<Integer> SwitchOrderOffice = newArrayList( 1, 2, 4 )
+var List< Map<Integer, Integer> > CycleOrderOffice = newArrayList(
+newHashMap( 1 -> 2, 2 -> 3, 3 -> 1, 4 -> 1 ),
+newHashMap( 1 -> 2, 2 -> 3, 3 -> 4, 4 -> 1 ),
+newHashMap( 1 -> 4, 4 -> 3, 3 -> 2, 2 -> 1 ) )
+var List<Integer> SwitchOrderHall = newArrayList( 1, 2, 3, 4 )
+var List< Map<Integer, Integer> > CycleOrderHall = newArrayList(
+newHashMap( 1 -> 2, 2 -> 3, 3 -> 1, 4 -> 1 ),
+newHashMap( 1 -> 2, 2 -> 3, 3 -> 4, 4 -> 1 ),
+newHashMap( 1 -> 2, 2 -> 3, 3 -> 4, 4 -> 1 ),
+newHashMap( 1 -> 4, 4 -> 3, 3 -> 2, 2 -> 1 ) )
+
+
+val Functions.Function0<Integer> GetTimeOfDayEssZi = [
+    if (Daylight.state == ON) {
+        return 0
+    } else if (LoftMode.state != 2) {			// not sleeping
+        return 1
+    }
+    return 2
+]
+
+val Functions.Function0<Integer> GetTimeOfDayBath = [
+    if (Daylight.state == ON) {
+        return 0
+    } else if (LoftMode.state != 2 &&						// not sleeping and
+               now.getHour() >= 6 && now.getHour() < 23 ) { // between 6 and 23 o'clock
+        return 1
+    }
+    return 2
+]
+
+val Functions.Function0<Integer> GetTimeOfDayEmilie = [
+    if (Daylight.state == ON && now.getHour() < 21) {
+        return 0
+    } else if (now.getHour() >= 6 && now.getHour() < 21 ) { // between 6 and 21 o'clock
+        return 1
+    }
+    return 2
+]
+
+val Functions.Function0<Integer> GetTimeOfDayNiklas = [
+    if (Daylight.state == ON && now.getHour() < 21) {
+        return 0
+    } else if (Daylight.state == ON ||
+               Daylight.state == OFF && now.getHour() < 21 && now.getHour() > 6) { // between 6 and 21 o'clock
+        return 1
+    } else if (Daylight.state == OFF && now.getHour() < 23 && now.getHour() > 6) { // between 6 and 23 o'clock
+		return 2
+	}
+    return 3
+]
+
+val Functions.Function0<Integer> GetTimeOfDaySleep = [
+    if (Daylight.state == ON) {
+        return 0
+    } else if (LoftMode.state != 2) {			// not sleeping
+        return 1
+    }
+    return 2
+]
+
+val Functions.Function0<Integer> GetTimeOfDayOffice = [
+    if (Guests.state != ON || Daylight.state == ON) {
+        return 0
+    } else if (LoftMode.state != 2) {			// not sleeping
+        return 1
+    }
+    return 2
+]
+
+val Functions.Function0<Integer> GetTimeOfDayHall = [
+    if (Daylight.state == ON) {
+        return 0
+    } else if (LoftMode.state != 2 &&						// not sleeping and
+               now.getHour() >= 6 && now.getHour() < 23 ) { // between 6 and 23 o'clock
+        return 1
+    } else if (LoftMode.state != 2) { 						// not sleeping
+        return 2
+    }
+    return 3
+]
 
 
 val Functions.Function1<OnOffType, Void> SetEatingLightsOnOff = [ stateOnOff |
@@ -366,6 +478,25 @@ val	Functions.Function1<Integer, Void> SetOfficeEffLightsTemp = [ lightTemp |
 	return null
 ]
 
+val Functions.Function1<OnOffType, Void> SetHallLightOnOff = [ stateOnOff |
+
+	Light_HallBright.sendCommand(stateOnOff)
+	return null
+]
+
+val	Functions.Function1<Integer, Void> SetHallLightBright = [ bright |
+
+	Light_HallBright.sendCommand(new PercentType(bright))
+	return null
+]
+
+val	Functions.Function1<Integer, Void> SetHallLightTemp = [ lightTemp |
+
+    Light_HallTemp.sendCommand(lightTemp)
+	return null
+]
+
+
 val	Functions.Function4<NumberItem, Functions.Function1<Integer, Void>, Functions.Function1<Integer, Void>, Functions.Function1<Integer, Void>, Void> setLightScenesTemp = [
 	LightScenes, SetLightsOnOff, SetLightsColor, SetLightsTemp |
 
@@ -459,81 +590,74 @@ rule "Blink blue when temperature too cold"
 when
 	Item TriggerTooColdBlink changed to ON
 then
-	var Number EatingSceneBuffer = Light_EatingScenes.state
+    SetEatingLightsOnOff.apply(ON)
+	SetEatingLights.apply(215f, 100, 100)      // blue
 
-	sendCommand(Light_EatingOutSwitch, ON)
-	sendCommand(Light_EatingInSwitch, ON)
+    SetBathLightsOnOff.apply(ON)
+    SetBathLights.apply(215f, 100, 100)      // blue
 
-	SetEatingLights.apply(215f, 100, 100)
+    SetSleepLightsOnOff.apply(ON)
+    SetSleepLights.apply(215f, 100, 100)      // blue
 
-	createTimer(now.plusSeconds(2)) [|
-		sendCommand(Light_EatingOutSwitch, OFF)
-		sendCommand(Light_EatingInSwitch, OFF)
+    SetOfficeTopLightsOnOff.apply(ON)
+    SetOfficeTopLights.apply(215f, 100, 100)      // blue
 
-		createTimer(now.plusSeconds(2)) [|
-			sendCommand(Light_EatingOutSwitch, ON)
-			sendCommand(Light_EatingInSwitch, ON)
+    (1..4).forEach[
+        SetEatingLightsOnOff.apply(OFF)
+        SetBathLightsOnOff.apply(OFF)
+        SetSleepLightsOnOff.apply(OFF)
+        SetOfficeTopLightsOnOff.apply(OFF)
+        Thread::sleep(1000)
 
-			createTimer(now.plusSeconds(2)) [|
-				sendCommand(Light_EatingOutSwitch, OFF)
-				sendCommand(Light_EatingInSwitch, OFF)
+        SetEatingLightsOnOff.apply(ON)
+        SetBathLightsOnOff.apply(ON)
+        SetSleepLightsOnOff.apply(ON)
+        SetOfficeTopLightsOnOff.apply(ON)
+        Thread::sleep(2000)
+    ]
+    setLightScenesTemp.apply(Light_EatingScenes, SetEatingLightsOnOff, SetEatingLightsBright, SetEatingLightsTemp)
+    setLightScenesTemp.apply(Light_BathScenes, SetBathLightsOnOff, SetBathLightsBright, SetBathLightsTemp)
+    setLightScenes.apply(Light_SleepScenes, SetSleepLightsOnOff, SetSleepLights)
+	setLightScenesTemp.apply(Light_OfficeTopScenes, SetOfficeTopLightsOnOff, SetOfficeTopLightsBright, SetOfficeTopLightsTemp)
 
-				createTimer(now.plusSeconds(2)) [|
-					sendCommand(Light_EatingOutSwitch, ON)
-					sendCommand(Light_EatingInSwitch, ON)
-
-					createTimer(now.plusSeconds(2)) [|
-						if (Light_EatingScenes.state > 0) {
-							postUpdate(Light_EatingScenes, EatingSceneBuffer)
-						} else {
-							postUpdate(Light_EatingScenes, 0)
-						}
-
-						postUpdate(TriggerTooColdBlink, OFF)
-					]
-				]
-			]
-		]
-	]
-
+    postUpdate(TriggerTooColdBlink, OFF)
 end
 
 rule "Blink red when fire alarm is on"
 when
 	Item TriggerFireAlarmBlink changed to ON
 then
-	var Number EatingSceneBuffer = Light_EatingScenes.state
-
     SetEatingLightsOnOff.apply(ON)
+	SetEatingLights.apply(0, 100, 100)      // red
 
-	SetEatingLights.apply(0, 100, 100)
+    SetBathLightsOnOff.apply(ON)
+    SetBathLights.apply(0, 100, 100)      // red
 
-	createTimer(now.plusSeconds(2)) [|
+    SetSleepLightsOnOff.apply(ON)
+    SetSleepLights.apply(0, 100, 100)      // red
+
+    SetOfficeTopLightsOnOff.apply(ON)
+    SetOfficeTopLights.apply(0, 100, 100)      // red
+
+    (1..4).forEach[
         SetEatingLightsOnOff.apply(OFF)
+        SetBathLightsOnOff.apply(OFF)
+        SetSleepLightsOnOff.apply(OFF)
+        SetOfficeTopLightsOnOff.apply(OFF)
+        Thread::sleep(1000)
 
-		createTimer(now.plusSeconds(2)) [|
-            SetEatingLightsOnOff.apply(ON)
+        SetEatingLightsOnOff.apply(ON)
+        SetBathLightsOnOff.apply(ON)
+        SetSleepLightsOnOff.apply(ON)
+        SetOfficeTopLightsOnOff.apply(ON)
+        Thread::sleep(2000)
+    ]
+    setLightScenesTemp.apply(Light_EatingScenes, SetEatingLightsOnOff, SetEatingLightsBright, SetEatingLightsTemp)
+    setLightScenesTemp.apply(Light_BathScenes, SetBathLightsOnOff, SetBathLightsBright, SetBathLightsTemp)
+    setLightScenes.apply(Light_SleepScenes, SetSleepLightsOnOff, SetSleepLights)
+	setLightScenesTemp.apply(Light_OfficeTopScenes, SetOfficeTopLightsOnOff, SetOfficeTopLightsBright, SetOfficeTopLightsTemp)
 
-			createTimer(now.plusSeconds(2)) [|
-                SetEatingLightsOnOff.apply(OFF)
-
-				createTimer(now.plusSeconds(2)) [|
-        		    SetEatingLightsOnOff.apply(ON)
-
-					createTimer(now.plusSeconds(2)) [|
-						if (EatingSceneBuffer > 0) {
-							postUpdate(Light_EatingScenes, EatingSceneBuffer)
-						} else {
-							postUpdate(Light_EatingScenes, 0)
-						}
-
-						postUpdate(TriggerFireAlarmBlink, OFF)
-					]
-				]
-			]
-		]
-	]
-
+    postUpdate(TriggerFireAlarmBlink, OFF)
 end
 
 rule "Switch off night-light in the morning"
@@ -557,7 +681,7 @@ then
 		postUpdate(Light_BathScenes, 0)
 		BathLight = false
 	}
-	if (Light_EmilieScenes.state == 3) {
+	if (Light_EmilieScenes.state == 7) {
 		sendCommand(Light_EmilieScenes, 0)
 	}
 	if (Light_SleepScenes.state == 12) {
@@ -580,9 +704,11 @@ then
 	sendCommand(Light_SleepScenes, 0)
 end
 
-rule "Switch WebCam OFF when sleeping"
+rule "Switch Piano OFF when sleeping"
 when
-    Item LoftMode changed to 2				// sleep
+    Item LoftMode changed to 1 or		    // absent
+    Item LoftMode changed to 2 or		    // sleep
+    Item LoftMode changed to 4				// vacation
 then
 	sendCommand(CameraRoof, OFF)
 end
@@ -601,46 +727,12 @@ when
     Item Switch_EssZi1ShortUp received update ON or
     Item Switch_EssZi2ShortUp received update ON
 then
+    val TimeOfDay = GetTimeOfDayEssZi.apply()
+
 	if (Light_EatingScenes.state == 0) {
-		if (Daylight.state == ON) {
-			postUpdate(Light_EatingScenes, 1)
-		} else if (LoftMode.state != 2) {			// not sleeping
-			postUpdate(Light_EatingScenes, 2)
-		} else {
-			postUpdate(Light_EatingScenes, 4)
-		}
+        Light_EatingScenes.postUpdate( SwitchOrderEssZi.get(TimeOfDay) )
 	} else {
-		if (Daylight.state == ON) {
-			if (Light_EatingScenes.state == 1) {
-				postUpdate(Light_EatingScenes, 2)
-			} else if (Light_EatingScenes.state == 2) {
-				postUpdate(Light_EatingScenes, 3)
-			} else if (Light_EatingScenes.state == 3) {
-				postUpdate(Light_EatingScenes, 1)
-			} else if (Light_EatingScenes.state == 4) {
-				postUpdate(Light_EatingScenes, 1)
-			}
-		} else if (LoftMode.state != 2) {			// not sleeping
-			if (Light_EatingScenes.state == 1) {
-				postUpdate(Light_EatingScenes, 2)
-			} else if (Light_EatingScenes.state == 2) {
-				postUpdate(Light_EatingScenes, 3)
-			} else if (Light_EatingScenes.state == 3) {
-				postUpdate(Light_EatingScenes, 4)
-			} else if (Light_EatingScenes.state == 4) {
-				postUpdate(Light_EatingScenes, 1)
-			}
-		} else {
-			if (Light_EatingScenes.state == 1) {
-				postUpdate(Light_EatingScenes, 4)
-			} else if (Light_EatingScenes.state == 2) {
-				postUpdate(Light_EatingScenes, 1)
-			} else if (Light_EatingScenes.state == 3) {
-				postUpdate(Light_EatingScenes, 2)
-			} else if (Light_EatingScenes.state == 4) {
-				postUpdate(Light_EatingScenes, 3)
-			}
-		}
+        Light_EatingScenes.postUpdate( CycleOrderEssZi.get(TimeOfDay).get((Light_EatingScenes.state as Number).intValue) )
 	}
 end
 
@@ -652,13 +744,8 @@ then
 	if (Light_EatingScenes.state > 0) {
 		postUpdate(Light_EatingScenes, 0)
 	} else {
-		if (Daylight.state == ON) {
-			postUpdate(Light_EatingScenes, 1)
-		} else if (LoftMode.state != 2) {			// not sleeping
-			postUpdate(Light_EatingScenes, 2)
-		} else {
-			postUpdate(Light_EatingScenes, 4)
-		}
+        val TimeOfDay = GetTimeOfDayEssZi.apply()
+        Light_EatingScenes.postUpdate( SwitchOrderEssZi.get(TimeOfDay) )
 	}
 end
 
@@ -682,13 +769,9 @@ then
 	  	var int DimmValue = (light.getBrightness()).intValue
 
 	  	if (Light_EatingScenes.state == 0 || DimmValue <= 0) {
-			if (Daylight.state == ON) {
-				postUpdate(Light_EatingScenes, 1)
-			} else if (LoftMode.state != 2) {			// not sleeping
-				postUpdate(Light_EatingScenes, 2)
-			} else {
-				postUpdate(Light_EatingScenes, 4)
-			}
+            val TimeOfDay = GetTimeOfDayEssZi.apply()
+            Light_EatingScenes.postUpdate( SwitchOrderEssZi.get(TimeOfDay) )
+
             DimmValue = 0
 
             Thread.sleep(50)
@@ -780,7 +863,7 @@ when
 then
 	if (Light_EatingScenes.state == 1) {
 
-        var Float LightTemp = 8.0f			// Fallback value
+        var Float LightTemp = 14.0f			// Fallback value
 		if (Light_EatingOutTemp.state != NULL) {
 			LightTemp = (Light_EatingOutTemp.state as DecimalType).floatValue
 			LightTemp = LightTemp + 1.0f
@@ -789,8 +872,8 @@ then
 		sendCommand(Light_EatingOutTemp, LightTemp)
 		sendCommand(Light_EatingInTemp, LightTemp)
 
-		if (LightTemp < 45.0f) {
-			createTimer(now.plusSeconds(30)) [|
+		if (LightTemp < 62.0f) {
+			createTimer(now.plusSeconds(10)) [|
 				postUpdate(EssZiLightTempWarmerTrigger, ON)
 			]
 		} else {
@@ -816,7 +899,7 @@ when
 then
 	if (Light_EatingScenes.state == 2) {
 
-		var Float LightTemp = 45.0f			// Fallback value
+		var Float LightTemp = 62.0f			// Fallback value
 		if (Light_EatingOutTemp.state != NULL) {
 			LightTemp = (Light_EatingOutTemp.state as DecimalType).floatValue
 			LightTemp = LightTemp - 1.0f
@@ -825,8 +908,8 @@ then
 		sendCommand(Light_EatingOutTemp, LightTemp)
 		sendCommand(Light_EatingInTemp, LightTemp)
 
-		if (LightTemp > 8.0f) {
-			createTimer(now.plusSeconds(30)) [|
+		if (LightTemp > 14.0f) {
+			createTimer(now.plusSeconds(10)) [|
 				postUpdate(EssZiLightTempColderTrigger, ON)
 			]
 		} else {
@@ -879,6 +962,27 @@ then
 	}
 end
 
+rule "Switch WohnZi Long DOWN"
+when
+    Item Switch_WohnZiLongDown received update ON
+then
+    if (RollershutterDirection_Living.state == "UP") {
+        Rollershutter_Living.sendCommand(STOP)
+    } else if (RollershutterDirection_Living.state != "DOWN") {
+        Rollershutter_Living.sendCommand(DOWN)
+    }
+end
+
+rule "Switch WohnZi Long UP"
+when
+    Item Switch_WohnZiLongUp received update ON
+then
+    if (RollershutterDirection_Living.state == "DOWN") {
+        Rollershutter_Living.sendCommand(STOP)
+    } else if (RollershutterDirection_Living.state != "UP") {
+        Rollershutter_Living.sendCommand(UP)
+    }
+end
 /* -------------------- Bad ----------------------------------- */
 
 rule "Scenenauswahl für Badezimmerlicht"
@@ -899,48 +1003,12 @@ when
     Item Switch_BathShortUp received update ON or
     Item Switch_BathInsideShortUp received update ON
 then
+    val TimeOfDay = GetTimeOfDayBath.apply()
+
 	if (Light_BathScenes.state == 0) {
-		if (Daylight.state == ON) {
-			postUpdate(Light_BathScenes, 1)
-		} else if (LoftMode.state == 2 ||						// sleeping
-			       (now.getHour() < 6 || now.getHour() >= 23 )) {
-			postUpdate(Light_BathScenes, 5)
-		} else {
-			postUpdate(Light_BathScenes, 3)
-		}
+        Light_BathScenes.postUpdate( SwitchOrderBath.get(TimeOfDay) )
 	} else {
-		if (Daylight.state == ON) {
-			if (Light_BathScenes.state == 1) {
-				postUpdate(Light_BathScenes, 3)
-			} else if (Light_BathScenes.state == 3) {
-				postUpdate(Light_BathScenes, 1)
-			} else if (Light_BathScenes.state == 5) {
-				postUpdate(Light_BathScenes, 3)
-			} else if (Light_BathScenes.state == 6) {
-				postUpdate(Light_BathScenes, 3)
-			}
-		} else if (LoftMode.state == 2 ||						// sleeping
-			       (now.getHour() < 6 || now.getHour() >= 23 )) {
-			if (Light_BathScenes.state == 1) {
-				postUpdate(Light_BathScenes, 5)
-			} else if (Light_BathScenes.state == 3) {
-				postUpdate(Light_BathScenes, 1)
-			} else if (Light_BathScenes.state == 5) {
-				postUpdate(Light_BathScenes, 3)
-			} else if (Light_BathScenes.state == 6) {
-				postUpdate(Light_BathScenes, 5)
-			}
-		} else {
-			if (Light_BathScenes.state == 1) {
-				postUpdate(Light_BathScenes, 3)
-			} else if (Light_BathScenes.state == 3) {
-				postUpdate(Light_BathScenes, 5)
-			} else if (Light_BathScenes.state == 5) {
-				postUpdate(Light_BathScenes, 1)
-			} else if (Light_BathScenes.state == 6) {
-				postUpdate(Light_BathScenes, 5)
-			}
-		}
+        Light_BathScenes.postUpdate( CycleOrderBath.get(TimeOfDay).get((Light_BathScenes.state as Number).intValue) )
 	}
 end
 
@@ -952,14 +1020,8 @@ then
 	if (Light_BathScenes.state > 0) {
 		postUpdate(Light_BathScenes, 0)
 	} else {
-		if (Daylight.state == ON) {
-			postUpdate(Light_BathScenes, 1)
-		} else if (LoftMode.state == 2 ||						// sleeping
-			       (now.getHour() < 6 || now.getHour() >= 23 )) {
-			postUpdate(Light_BathScenes, 5)
-		} else {
-			postUpdate(Light_BathScenes, 3)
-		}
+        val TimeOfDay = GetTimeOfDayBath.apply()
+        Light_BathScenes.postUpdate( SwitchOrderBath.get(TimeOfDay) )
 	}
 end
 
@@ -1019,40 +1081,12 @@ when
     Item Switch_EmilieDoorShortUp received update ON or
     Item Switch_EmilieSleepShortUp received update ON
 then
+    val TimeOfDay = GetTimeOfDayBath.apply()
+
 	if (Light_EmilieScenes.state == 0) {
-		if (Daylight.state == ON && now.getHour() < 20) {
-			postUpdate(Light_EmilieScenes, 1)
-		} else if (now.getHour() > 6 && now.getHour() < 20) {
-			postUpdate(Light_EmilieScenes, 2)
-		} else {
-			postUpdate(Light_EmilieScenes, 7)
-		}
+        Light_EmilieScenes.postUpdate( SwitchOrderEmilie.get(TimeOfDay) )
 	} else {
-		if (Daylight.state == ON && now.getHour() < 20) {
-			if (Light_EmilieScenes.state == 1) {
-				postUpdate(Light_EmilieScenes, 2)
-			} else if (Light_EmilieScenes.state == 2) {
-				postUpdate(Light_EmilieScenes, 1)
-			} else if (Light_EmilieScenes.state == 7) {
-				postUpdate(Light_EmilieScenes, 1)
-			}
-		} else if (now.getHour() > 6 && now.getHour() < 20 ) {
-			if (Light_EmilieScenes.state == 1) {
-				postUpdate(Light_EmilieScenes, 2)
-			} else if (Light_EmilieScenes.state == 2) {
-				postUpdate(Light_EmilieScenes, 7)
-			} else if (Light_EmilieScenes.state == 7) {
-				postUpdate(Light_EmilieScenes, 1)
-			}
-		} else {
-			if (Light_EmilieScenes.state == 1) {
-				postUpdate(Light_EmilieScenes, 7)
-			} else if (Light_EmilieScenes.state == 2) {
-				postUpdate(Light_EmilieScenes, 1)
-			} else if (Light_EmilieScenes.state == 7) {
-				postUpdate(Light_EmilieScenes, 2)
-			}
-		}
+        Light_EmilieScenes.postUpdate( CycleOrderEmilie.get(TimeOfDay).get((Light_EmilieScenes.state as Number).intValue) )
 	}
 end
 
@@ -1064,14 +1098,41 @@ then
 	if (Light_EmilieScenes.state > 0) {
 		postUpdate(Light_EmilieScenes, 0)
 	} else {
-		if (Daylight.state == ON && now.getHour() < 20) {
-			postUpdate(Light_EmilieScenes, 1)
-		} else if (now.getHour() > 6 && now.getHour() < 20) {
-			postUpdate(Light_EmilieScenes, 2)
-		} else {
-			postUpdate(Light_EmilieScenes, 7)
-		}
+        val TimeOfDay = GetTimeOfDayEmilie.apply()
+        Light_EmilieScenes.postUpdate( SwitchOrderEmilie.get(TimeOfDay) )
 	}
+end
+
+rule "Switch Emilie Long DOWN - Jalousie runter"
+when
+    Item Switch_EmilieDoorLongDown received update ON
+then
+    if (RollershutterDirection_EmilieLi.state == "UP") {
+        Rollershutter_EmilieLi.sendCommand(STOP)
+    } else if (RollershutterDirection_EmilieLi.state != "DOWN") {
+        Rollershutter_EmilieLi.sendCommand(DOWN)
+    }
+    if (RollershutterDirection_EmilieRe.state == "UP") {
+        Rollershutter_EmilieRe.sendCommand(STOP)
+    } else if (RollershutterDirection_EmilieRe.state != "DOWN") {
+        Rollershutter_EmilieRe.sendCommand(DOWN)
+    }
+end
+
+rule "Switch Emilie Long UP - Jalousie hoch"
+when
+    Item Switch_EmilieDoorLongUp received update ON
+then
+    if (RollershutterDirection_EmilieLi.state == "DOWN") {
+        Rollershutter_EmilieLi.sendCommand(STOP)
+    } else if (RollershutterDirection_EmilieLi.state != "UP") {
+        Rollershutter_EmilieLi.sendCommand(UP)
+    }
+    if (RollershutterDirection_EmilieRe.state == "DOWN") {
+        Rollershutter_EmilieRe.sendCommand(STOP)
+    } else if (RollershutterDirection_EmilieRe.state != "UP") {
+        Rollershutter_EmilieRe.sendCommand(UP)
+    }
 end
 
 /* -------------------- Niklas Schreibtisch ------------------------------- */
@@ -1091,43 +1152,12 @@ rule "Switch Niklas Short Up"
 when
     Item Switch_NiklasShortUp received update ON
 then
+    val TimeOfDay = GetTimeOfDayNiklas.apply()
+
 	if (Light_NiklasScenes.state == 0) {
-		if (Daylight.state == ON && now.getHour() < 21) {
-			postUpdate(Light_NiklasScenes, 1)
-		} else if (Daylight.state == ON ||
-                   Daylight.state == OFF && now.getHour() < 21 && now.getHour() > 6) {
-			postUpdate(Light_NiklasScenes, 2)
-		} else if (Daylight.state == OFF && now.getHour() < 23 && now.getHour() > 6) {
-			postUpdate(Light_NiklasScenes, 3)
-		} else {
-			postUpdate(Light_NiklasScenes, 4)
-		}
+        Light_NiklasScenes.postUpdate( SwitchOrderNiklas.get(TimeOfDay) )
 	} else {
-		if (Daylight.state == ON && now.getHour() < 21) {
-			if (Light_NiklasScenes.state == 1) {
-				postUpdate(Light_NiklasScenes, 2)
-			} else if (Light_NiklasScenes.state == 2) {
-				postUpdate(Light_NiklasScenes, 3)
-			} else if (Light_NiklasScenes.state == 3) {
-				postUpdate(Light_NiklasScenes, 1)
-			} else if (Light_NiklasScenes.state == 4) {
-				postUpdate(Light_NiklasScenes, 1)
-			} else {
-                postUpdate(Light_NiklasScenes, 1)
-            }
-		} else {
-			if (Light_NiklasScenes.state == 1) {
-				postUpdate(Light_NiklasScenes, 2)
-			} else if (Light_NiklasScenes.state == 2) {
-				postUpdate(Light_NiklasScenes, 3)
-			} else if (Light_NiklasScenes.state == 3) {
-				postUpdate(Light_NiklasScenes, 4)
-			} else if (Light_NiklasScenes.state == 4) {
-				postUpdate(Light_NiklasScenes, 1)
-			} else {
-                postUpdate(Light_NiklasScenes, 3)
-            }
-		}
+        Light_NiklasScenes.postUpdate( CycleOrderNiklas.get(TimeOfDay).get((Light_NiklasScenes.state as Number).intValue) )
 	}
 end
 
@@ -1138,16 +1168,8 @@ then
 	if (Light_NiklasScenes.state > 0) {
 		postUpdate(Light_NiklasScenes, 0)
 	} else {
-		if (Daylight.state == ON && now.getHour() < 21) {
-			postUpdate(Light_NiklasScenes, 1)
-		} else if (Daylight.state == ON ||
-                   Daylight.state == OFF && now.getHour() < 21 && now.getHour() > 6) {
-			postUpdate(Light_NiklasScenes, 2)
-		} else if (Daylight.state == OFF && now.getHour() < 23 && now.getHour() > 6) {
-			postUpdate(Light_NiklasScenes, 3)
-		} else {
-			postUpdate(Light_NiklasScenes, 4)
-		}
+        val TimeOfDay = GetTimeOfDayNiklas.apply()
+        Light_NiklasScenes.postUpdate( SwitchOrderNiklas.get(TimeOfDay) )
 	}
 end
 
@@ -1182,39 +1204,12 @@ when
     Item Switch_NiklasDeskBotShortUp received update ON or
     Item Switch_NiklasBedShortUp received update ON
 then
+    val TimeOfDay = GetTimeOfDayNiklas.apply()
+
 	if (Light_NiklasDeckeScenes.state == 0) {
-		if (Daylight.state == ON && now.getHour() < 21) {
-			postUpdate(Light_NiklasDeckeScenes, 1)
-		} else if (Daylight.state == ON ||
-                   Daylight.state == OFF && now.getHour() < 21 && now.getHour() > 6) {
-			postUpdate(Light_NiklasDeckeScenes, 2)
-		} else if (Daylight.state == OFF && now.getHour() < 23 && now.getHour() > 6) {
-			postUpdate(Light_NiklasDeckeScenes, 3)
-		} else {
-			postUpdate(Light_NiklasDeckeScenes, 4)
-		}
+        Light_NiklasDeckeScenes.postUpdate( SwitchOrderNiklas.get(TimeOfDay) )
 	} else {
-		if (Daylight.state == ON && now.getHour() < 21) {
-			if (Light_NiklasDeckeScenes.state == 1) {
-				postUpdate(Light_NiklasDeckeScenes, 2)
-			} else if (Light_NiklasDeckeScenes.state == 2) {
-				postUpdate(Light_NiklasDeckeScenes, 3)
-			} else if (Light_NiklasDeckeScenes.state == 3) {
-				postUpdate(Light_NiklasDeckeScenes, 1)
-			} else if (Light_NiklasDeckeScenes.state == 4) {
-				postUpdate(Light_NiklasDeckeScenes, 1)
-			}
-		} else {
-			if (Light_NiklasDeckeScenes.state == 1) {
-				postUpdate(Light_NiklasDeckeScenes, 2)
-			} else if (Light_NiklasDeckeScenes.state == 2) {
-				postUpdate(Light_NiklasDeckeScenes, 3)
-			} else if (Light_NiklasDeckeScenes.state == 3) {
-				postUpdate(Light_NiklasDeckeScenes, 4)
-			} else if (Light_NiklasDeckeScenes.state == 4) {
-				postUpdate(Light_NiklasDeckeScenes, 1)
-			}
-		}
+        Light_NiklasDeckeScenes.postUpdate( CycleOrderNiklas.get(TimeOfDay).get((Light_NiklasDeckeScenes.state as Number).intValue) )
 	}
 end
 
@@ -1226,16 +1221,8 @@ then
 	if (Light_NiklasDeckeScenes.state > 0) {
 		postUpdate(Light_NiklasDeckeScenes, 0)
 	} else {
-		if (Daylight.state == ON && now.getHour() < 21) {
-			postUpdate(Light_NiklasDeckeScenes, 1)
-		} else if (Daylight.state == ON ||
-                   Daylight.state == OFF && now.getHour() < 21 && now.getHour() > 6) {
-			postUpdate(Light_NiklasDeckeScenes, 2)
-		} else if (Daylight.state == OFF && now.getHour() < 23 && now.getHour() > 6) {
-			postUpdate(Light_NiklasDeckeScenes, 3)
-		} else {
-			postUpdate(Light_NiklasDeckeScenes, 4)
-		}
+        val TimeOfDay = GetTimeOfDayNiklas.apply()
+        Light_NiklasDeckeScenes.postUpdate( SwitchOrderNiklas.get(TimeOfDay) )
 	}
 end
 
@@ -1247,13 +1234,35 @@ then
     postUpdate(Light_NiklasDeckeScenes, 0)
 end
 
+rule "Switch Niklas Long DOWN"
+when
+    Item Switch_NiklasDeskBotLongDown received update ON
+then
+    if (RollershutterDirection_Niklas.state == "UP") {
+        Rollershutter_Niklas.sendCommand(STOP)
+    } else if (RollershutterDirection_Niklas.state != "DOWN") {
+        Rollershutter_Niklas.sendCommand(DOWN)
+    }
+end
+
+rule "Switch Niklas Long UP"
+when
+    Item Switch_NiklasDeskBotLongUp received update ON
+then
+    if (RollershutterDirection_Niklas.state == "DOWN") {
+        Rollershutter_Niklas.sendCommand(STOP)
+    } else if (RollershutterDirection_Niklas.state != "UP") {
+        Rollershutter_Niklas.sendCommand(UP)
+    }
+end
+
+
 /* -------------------- Gästetoilette ----------------------------------- */
 
 rule "Scenenauswahl für Gästetoiletten-Licht"
 when
 	Item Light_GuestLooScenes changed
 then
-logInfo("Switches", "Scenes: Light_GuestLooScenes: " + Light_GuestLooScenes.state)
 	if (Light_GuestLooScenes.state == 0) {
 		sendCommand(Leuchter_Gaestetoilette, OFF)
 
@@ -1354,8 +1363,16 @@ then
 	if ((Switch_GuestLooShortDown.state == ON ||
 		(TimerGuestLooNoDoubles === null || TimerGuestLooNoDoubles.hasTerminated())) &&
         (TimerGuestLooPreventAccidentalOff === null || TimerGuestLooPreventAccidentalOff.hasTerminated())) {
-		    TimerGuestLooNoDoubles = createTimer(now.plusSeconds(0.2)) [|
+
+        TimerGuestLooNoDoubles = createTimer(now.plusSeconds(0.2)) [|
 		]
+
+        if (Switch_GuestLooLongDown.state == ON) {
+            if (TimerGuestLooInhibitMotion === null || TimerGuestLooInhibitMotion.hasTerminated()) {
+                TimerGuestLooInhibitMotion = createTimer(now.plusMinutes(5)) [|
+                ]
+            }
+        }
 
 		if (Light_GuestLooScenes.state == 0) {
 			if (LoftMode.state == 2 || 		// sleeping
@@ -1376,17 +1393,21 @@ rule "Motion Guest Loo"
 when
     Item GuestLooMotion received update ON
 then
-	if (Light_GuestLooScenes.state == 0) {
-        if (LoftMode.state == 2 || 		// sleeping
-                now.getHour() >= 23 || now.getHour() < 3) {	// or between 11pm and 3am
-            postUpdate(Light_GuestLooScenes, 1)
-        } else if (Daylight.state == OFF) {
-            postUpdate(Light_GuestLooScenes, 3)
-        } else {
-            postUpdate(Light_GuestLooScenes, 2)
+	if (Light_GuestLooScenes.state == 0 &&
+            (TimerGuestLooInhibitMotion === null || TimerGuestLooInhibitMotion.hasTerminated())) {
+        if (LoftMode.state != 2 && 		// !sleeping
+            (LoftMode.state == 3 || now.getHour() < 1 || now.getHour() >= 5)) {	// or Party or not between 1am and 5am
+
+            if (now.getHour() >= 23 || now.getHour() < 6) {
+                postUpdate(Light_GuestLooScenes, 1)
+            } else if (Daylight.state == OFF) {
+                postUpdate(Light_GuestLooScenes, 3)
+            } else {
+                postUpdate(Light_GuestLooScenes, 2)
+            }
+            TimerGuestLooPreventAccidentalOff = createTimer(now.plusSeconds(2)) [|
+            ]
         }
-        TimerGuestLooPreventAccidentalOff = createTimer(now.plusSeconds(2)) [|
-        ]
     }
 end
 
@@ -1434,11 +1455,11 @@ when
 	Item Light_GuestLooScenes changed
 then
 	if (Light_GuestLooScenes.state > 0) {
-		if (Light_GuestLooScenes.state == 1) {
-			SetGuestLooSky.apply(25.0f, 89, 1)
-		} else if (LoftMode.state == 3) {
+		if (LoftMode.state == 3) {
 			var hue = rand.nextInt(360)
 			SetGuestLooSky.apply(hue, 100, 100)
+		} else if (Light_GuestLooScenes.state == 1) {
+			SetGuestLooSky.apply(25.0f, 89, 1)
 		} else if (Daylight.state == ON) {
 			SetGuestLooSky.apply(210.0f, 15, 100)
 		} else if (Twilight.state == ON) {
@@ -1475,40 +1496,12 @@ when
     Item Switch_Sleep1ShortUp received update ON or
     Item Switch_Sleep2ShortUp received update ON
 then
+    val TimeOfDay = GetTimeOfDaySleep.apply()
+
 	if (Light_SleepScenes.state == 0) {
-		if (Daylight.state == ON) {
-			postUpdate(Light_SleepScenes, 10)
-		} else if (LoftMode.state != 2) {			// not sleeping
-			postUpdate(Light_SleepScenes, 11)
-		} else {
-			postUpdate(Light_SleepScenes, 12)
-		}
+        Light_SleepScenes.postUpdate( SwitchOrderSleep.get(TimeOfDay) )
 	} else {
-		if (Daylight.state == ON) {
-			if (Light_SleepScenes.state == 10) {
-				postUpdate(Light_SleepScenes, 11)
-			} else if (Light_SleepScenes.state == 11) {
-				postUpdate(Light_SleepScenes, 10)
-			} else if (Light_SleepScenes.state == 12) {
-				postUpdate(Light_SleepScenes, 10)
-			}
-		} else if (LoftMode.state != 2) {			// not sleeping
-			if (Light_SleepScenes.state == 10) {
-				postUpdate(Light_SleepScenes, 11)
-			} else if (Light_SleepScenes.state == 11) {
-				postUpdate(Light_SleepScenes, 12)
-			} else if (Light_SleepScenes.state == 12) {
-				postUpdate(Light_SleepScenes, 10)
-			}
-		} else {
-			if (Light_SleepScenes.state == 10) {
-				postUpdate(Light_SleepScenes, 11)
-			} else if (Light_SleepScenes.state == 11) {
-				postUpdate(Light_SleepScenes, 12)
-			} else if (Light_SleepScenes.state == 12) {
-				postUpdate(Light_SleepScenes, 10)
-			}
-		}
+        Light_SleepScenes.postUpdate( CycleOrderSleep.get(TimeOfDay).get((Light_SleepScenes.state as Number).intValue) )
 	}
 end
 
@@ -1520,14 +1513,33 @@ then
 	if (Light_SleepScenes.state > 0) {
 		postUpdate(Light_SleepScenes, 0)
 	} else {
-		if (Daylight.state == ON) {
-			postUpdate(Light_SleepScenes, 10)
-		} else if (LoftMode.state != 2) {			// not sleeping
-			postUpdate(Light_SleepScenes, 11)
-		} else {
-			postUpdate(Light_SleepScenes, 12)
-		}
+        val TimeOfDay = GetTimeOfDaySleep.apply()
+        Light_SleepScenes.postUpdate( SwitchOrderSleep.get(TimeOfDay) )
 	}
+end
+
+rule "Switch Sleep Long DOWN"
+when
+    Item Switch_Sleep1LongDown received update ON or
+    Item Switch_Sleep2LongDown received update ON
+then
+    if (RollershutterDirection_Sleep.state == "UP") {
+        Rollershutter_Sleep.sendCommand(STOP)
+    } else if (RollershutterDirection_Sleep.state != "DOWN") {
+        Rollershutter_Sleep.sendCommand(DOWN)
+    }
+end
+
+rule "Switch Sleep Long UP"
+when
+    Item Switch_Sleep1LongUp received update ON or
+    Item Switch_Sleep2LongUp received update ON
+then
+    if (RollershutterDirection_Sleep.state == "DOWN") {
+        Rollershutter_Sleep.sendCommand(STOP)
+    } else if (RollershutterDirection_Sleep.state != "UP") {
+        Rollershutter_Sleep.sendCommand(UP)
+    }
 end
 
 rule "Switch off sleep light during daylight"
@@ -1554,30 +1566,12 @@ rule "Switch OfficeTop Short Up"
 when
     Item Switch_OfficeTopShortUp received update ON
 then
+    val TimeOfDay = GetTimeOfDayOffice.apply()
+
 	if (Light_OfficeTopScenes.state == 0) {
-		if (Guests.state != ON || Daylight.state == ON) {
-			postUpdate(Light_OfficeTopScenes, 1)
-		} else {
-			postUpdate(Light_OfficeTopScenes, 2)
-		}
+        Light_OfficeTopScenes.postUpdate( SwitchOrderOffice.get(TimeOfDay) )
 	} else {
-		if (Daylight.state == ON && now.getHour() < 21 && now.getHour() > 6) {
-			if (Light_OfficeTopScenes.state == 1) {
-				postUpdate(Light_OfficeTopScenes, 2)
-			} else if (Light_OfficeTopScenes.state == 2) {
-				postUpdate(Light_OfficeTopScenes, 1)
-			} else if (Light_OfficeTopScenes.state == 4) {
-				postUpdate(Light_OfficeTopScenes, 1)
-			}
-		} else {
-			if (Light_OfficeTopScenes.state == 1) {
-				postUpdate(Light_OfficeTopScenes, 2)
-			} else if (Light_OfficeTopScenes.state == 2) {
-				postUpdate(Light_OfficeTopScenes, 4)
-			} else if (Light_OfficeTopScenes.state == 4) {
-				postUpdate(Light_OfficeTopScenes, 1)
-			}
-		}
+        Light_OfficeTopScenes.postUpdate( CycleOrderOffice.get(TimeOfDay).get((Light_OfficeTopScenes.state as Number).intValue) )
 	}
 end
 
@@ -1588,11 +1582,8 @@ then
 	if (Light_OfficeTopScenes.state > 0) {
 		postUpdate(Light_OfficeTopScenes, 0)
 	} else {
-		if (Guests.state != ON || Daylight.state == ON) {
-			postUpdate(Light_OfficeTopScenes, 1)
-		} else {
-			postUpdate(Light_OfficeTopScenes, 2)
-		}
+        val TimeOfDay = GetTimeOfDayOffice.apply()
+        Light_OfficeTopScenes.postUpdate( SwitchOrderOffice.get(TimeOfDay) )
 	}
 end
 
@@ -1609,30 +1600,12 @@ rule "Switch OfficeEffect Short Up"
 when
     Item Switch_OfficeBottomShortUp received update ON
 then
+    val TimeOfDay = GetTimeOfDayOffice.apply()
+
 	if (Light_OfficeEffScenes.state == 0) {
-		if (Guests.state != ON || Daylight.state == ON) {
-			postUpdate(Light_OfficeEffScenes, 1)
-		} else {
-			postUpdate(Light_OfficeEffScenes, 2)
-		}
+        Light_OfficeEffScenes.postUpdate( SwitchOrderOffice.get(TimeOfDay) )
 	} else {
-		if (Daylight.state == ON && now.getHour() < 21) {
-			if (Light_OfficeEffScenes.state == 1) {
-				postUpdate(Light_OfficeEffScenes, 2)
-			} else if (Light_OfficeEffScenes.state == 2) {
-				postUpdate(Light_OfficeEffScenes, 1)
-			} else if (Light_OfficeEffScenes.state == 4) {
-				postUpdate(Light_OfficeEffScenes, 1)
-			}
-		} else {
-			if (Light_OfficeEffScenes.state == 1) {
-				postUpdate(Light_OfficeEffScenes, 2)
-			} else if (Light_OfficeEffScenes.state == 2) {
-				postUpdate(Light_OfficeEffScenes, 4)
-			} else if (Light_OfficeEffScenes.state == 4) {
-				postUpdate(Light_OfficeEffScenes, 1)
-			}
-		}
+        Light_OfficeEffScenes.postUpdate( CycleOrderOffice.get(TimeOfDay).get((Light_OfficeEffScenes.state as Number).intValue) )
 	}
 end
 
@@ -1643,10 +1616,41 @@ then
 	if (Light_OfficeEffScenes.state > 0) {
 		postUpdate(Light_OfficeEffScenes, 0)
 	} else {
-		if (Guests.state != ON || Daylight.state == ON) {
-			postUpdate(Light_OfficeEffScenes, 1)
-		} else {
-			postUpdate(Light_OfficeEffScenes, 2)
-		}
+        val TimeOfDay = GetTimeOfDayOffice.apply()
+        Light_OfficeEffScenes.postUpdate( SwitchOrderOffice.get(TimeOfDay) )
+	}
+end
+
+/* -------------------- Garderobe ------------------------------------------ */
+
+rule "Scenenauswahl für Garderobe Licht"
+when
+	Item Light_HallScenes changed
+then
+	setLightScenesTemp.apply(Light_HallScenes, SetHallLightOnOff, SetHallLightBright, SetHallLightTemp)
+end
+
+rule "Switch Hall Short Up"
+when
+    Item Switch_HallShortUp received update ON
+then
+    val TimeOfDay = GetTimeOfDayHall.apply()
+
+	if (Light_HallScenes.state == 0) {
+        Light_HallScenes.postUpdate( SwitchOrderHall.get(TimeOfDay) )
+	} else {
+        Light_HallScenes.postUpdate( CycleOrderHall.get(TimeOfDay).get((Light_HallScenes.state as Number).intValue) )
+	}
+end
+
+rule "Switch Hall Short Down"
+when
+    Item Switch_HallShortDown received update ON
+then
+	if (Light_HallScenes.state > 0) {
+		postUpdate(Light_HallScenes, 0)
+	} else {
+        val TimeOfDay = GetTimeOfDayHall.apply()
+        Light_HallScenes.postUpdate( SwitchOrderHall.get(TimeOfDay) )
 	}
 end

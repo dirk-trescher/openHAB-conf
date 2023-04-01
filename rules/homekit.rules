@@ -1,18 +1,14 @@
-
+/*
 rule "HomeKit Light Eating"
 when
     Item HKLightEating changed
 then
-    if (HKLightEating.state == ON) {
-        if (Daylight.state == ON) {
-			postUpdate(Light_EatingScenes, 1)
-		} else if (LoftMode.state != 2) {			// not sleeping
-			postUpdate(Light_EatingScenes, 2)
-		} else {
-			postUpdate(Light_EatingScenes, 4)
-		}
-    } else {
-        postUpdate(Light_EatingScenes, 0)
+    if (HKLightEating.state == ON && Light_EatingScenes.state == 0 ||
+      HKLightEating.state == OFF && Light_EatingScenes.state > 0) {
+
+        Switch_EssZi1ShortDown.postUpdate(ON)
+        Thread.sleep(500)
+        Switch_EssZi1ShortDown.postUpdate(OFF)
     }
 end
 
@@ -35,14 +31,12 @@ rule "HomeKit Light Living"
 when
     Item HKLightLiving changed
 then
-    if (HKLightLiving.state == ON) {
-        if (Daylight.state == ON) {
-			postUpdate(Light_WohnZiScenes, 1)
-		} else {
-			postUpdate(Light_WohnZiScenes, 2)
-		}
-    } else {
-        postUpdate(Light_WohnZiScenes, 0)
+    if (HKLightLiving.state == ON && Light_WohnZiScenes.state == 0 ||
+      HKLightLiving.state == OFF && Light_WohnZiScenes.state > 0) {
+
+        Switch_WohnZiShortDown.postUpdate(ON)
+        Thread.sleep(500)
+        Switch_WohnZiShortDown.postUpdate(OFF)
     }
 end
 
@@ -60,3 +54,4 @@ then
         }
     }
 end
+*/

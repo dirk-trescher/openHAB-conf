@@ -39,19 +39,23 @@ then
     postUpdate(Energy_daily_Fridge, Energy_today_Fridge.state as DecimalType)
     postUpdate(Energy_today_Fridge, 0.0)
 
-    var double energyDaily1 = ((SolarEnergy1.state as DecimalType)
-                             - (SolarEnergy1Offset.state as DecimalType)).doubleValue
+    var double energyDaily1 = (SolarEnergy1.state as DecimalType).doubleValue
+    if (SolarEnergy1Offset.state != NULL) {
+        energyDaily1 = energyDaily1 - (SolarEnergy1Offset.state as DecimalType).doubleValue
+    }
     if( energyDaily1 < 0.0 ) {
         energyDaily1 = SolarEnergy1.state as DecimalType
     }
-    postUpdate(SolarEnergyDaily1, energyDaily1)
+    SolarEnergyDaily1.postUpdate(energyDaily1)
 
-    var double energyDaily2 = ((SolarEnergy2.state as DecimalType)
-                             - (SolarEnergy2Offset.state as DecimalType)).doubleValue
+    var double energyDaily2 = (SolarEnergy2.state as DecimalType).doubleValue
+    if (SolarEnergy2Offset.state != NULL) {
+        energyDaily2 = energyDaily2 - (SolarEnergy2Offset.state as DecimalType).doubleValue
+    }
     if( energyDaily2 < 0.0 ) {
         energyDaily2 = SolarEnergy2.state as DecimalType
     }
-    postUpdate(SolarEnergyDaily2, energyDaily2)
+    SolarEnergyDaily2.postUpdate(energyDaily2)
     SolarEnergyDaily.postUpdate(energyDaily1 + energyDaily2)
 
     SolarEnergyEinspeisungToday.postUpdate(0.0)
@@ -77,6 +81,7 @@ then
 	postUpdate(Energy_offset_bigFlat, Energy_raw_bigFlat.state as DecimalType)
 	postUpdate(Energy_offset_smallFlat, Energy_raw_smallFlat.state as DecimalType)
     postUpdate(Energy_offset_Fridge, Energy_raw_Fridge.state as DecimalType)
+    postUpdate(Energy_offset_Tumbler, Tumbler_EnergyRaw.state as DecimalType)
 
     postUpdate(SolarEnergyYearly1, 0)
     postUpdate(SolarEnergyYearly2, 0)
@@ -480,6 +485,25 @@ then
 //			logInfo( "power", "shower duration " + duration )
 			postUpdate(ShowerDuration, duration)
 		]
+	}
+end
+
+
+rule "Energy tumbler"
+when
+	Item Tumbler_EnergyRaw changed
+then
+	if (Tumbler_EnergyRaw.state != NULL) {
+
+        var double delta = 0.0
+        if (Energy_offset_Tumbler.state != NULL) {
+            delta = (Tumbler_EnergyRaw.state as DecimalType).doubleValue
+                    - (Energy_offset_Tumbler.state as DecimalType).doubleValue
+        } else {
+            Energy_offset_Tumbler.postUpdate(Tumbler_EnergyRaw.state as DecimalType)
+        }
+
+		Energy_Fridge.postUpdate(delta)
 	}
 end
 

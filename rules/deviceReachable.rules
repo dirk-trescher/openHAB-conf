@@ -507,12 +507,12 @@ then
     processON.apply(MotionHallStatus, notified, 1440, timers, locks)
 end
 
-rule "Motion office received update"
+rule "Motion Guest Loo received update"
 when
-    Item OfficeMotion received update or
-    Item Office_Temperature received update or
-    Item Office_Luminance received update or
-    Item Batt_OfficeMotion_disp received update
+    Item GuestLooMotion received update or
+    Item GuestLoo_Temperature received update or
+    Item GuestLoo_Luminance received update or
+    Item Batt_GuestLooMotion_disp received update
 then
-    processON.apply(MotionOfficeStatus, notified, 1440, timers, locks)
+    processON.apply(MotionGuestLooStatus, notified, 1440, timers, locks)
 end

@@ -392,7 +392,7 @@ then
 		}
 	}
 end
-
+/*
 rule "Guests coming - switch off Office"
 when
 	Item Guests changed to ON
@@ -400,7 +400,8 @@ then
 	logAndWriteReason.apply( "Office present OFF due to guests" )
 	postUpdate(Office_present, OFF)
 end
-
+*/
+/*
 rule "Guests wake up - Luminance"
 when
 	Item Office_Luminance changed
@@ -416,7 +417,8 @@ then
 		}
 	}
 end
-
+*/
+/*
 rule "Guests not wake up - time"
 when
 	Time cron "0 0 21 * * ?"		// 21:00 each day
@@ -426,43 +428,8 @@ then
 		postUpdate(Guests_awake, OFF)
 	}
 end
-
+*/
 // ----------------------------------------------------------
-
-rule "Start Night due to time"
-when
-	Time cron "0 0 23 * * ?"		// 23:00 each day
-then
-	if (LoftMode.state == 0) {				// da
-	  	if (Light_EatingScenes.state == 0 || Light_EatingScenes.state == 4) {
-		  	if (Light_WohnZiScenes.state == 0) {
-			  	if (Light_BathScenes.state == 0) {
-				  	if (Light_SleepScenes.state == 0) {
-    				  	if (Light_OfficeTopScenes.state == 0 && Light_OfficeEffScenes.state == 0) {
-	    					if ((FritzBoxMacOnlineLaptop.state == OFF || FritzBoxMacOnlineLaptop.state == NULL)/* &&
-		    				    (FritzBoxMacOnlineMacBook.state == OFF || FritzBoxMacOnlineMacBook.state == NULL)*/) {
-			    		  		if (Office_present.state == OFF	|| Guests.state == ON) {
-				    				logAndWriteReason.apply( "Sleeping Mode at 11 PM (all lights are off)" )
-					    			postUpdate(LoftMode, 2)
-						    	}
-						    }
-                        }
-					}
-			  	}
-		  	}
-	  	}
-	}
-end
-
-rule "Start Night at 2:00 even if lights are on"
-when
-	Time cron "0 0 2 * * ?"		// 2:00 each day
-then
-	if (LoftMode.state == 0 && SleepOverride.state != ON) {				// da
-	  	logAndWriteReason.apply( "Sleeping Mode at 2 AM" )
-		postUpdate(LoftMode, 2)
-	}
-end
 
 //rule "Appartment door closed for at least 10 min"
 //when
@@ -663,6 +630,51 @@ then
 	}
 end
 
+
+rule "Start Night due to time"
+when
+	Time cron "0 0 23 * * ?"		// 23:00 each day
+then
+	if (LoftMode.state == 0) {				// da
+        if (SleepOverride.state != ON) {
+            if (StreamingMovie.state == OFF) {
+                if (Light_EatingScenes.state == 0 || Light_EatingScenes.state == 4) {
+                    if (Light_WohnZiScenes.state == 0) {
+                        if (Light_BathScenes.state == 0) {
+                            if (Light_SleepScenes.state == 0) {
+                                if (Light_OfficeTopScenes.state == 0 && Light_OfficeEffScenes.state == 0) {
+                                    if (Light_HallScenes.state == 0 || Light_HallScenes.state == 4) {
+                                        if ((FritzBoxMacOnlineLaptop.state == OFF || FritzBoxMacOnlineLaptop.state == NULL)/* &&
+                                            (FritzBoxMacOnlineMacBook.state == OFF || FritzBoxMacOnlineMacBook.state == NULL)*/) {
+                                            if (Office_present.state == OFF	|| Guests.state == ON) {
+                                                logAndWriteReason.apply( "Sleeping Mode at 11 PM (all lights are off)" )
+                                                postUpdate(LoftMode, 2)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+	}
+end
+
+rule "Start Night at 2:00 even if lights are on"
+when
+	Time cron "0 0 2 * * ?"		// 2:00 each day
+then
+	if (LoftMode.state == 0 && SleepOverride.state != ON) {				// da
+	  	logAndWriteReason.apply( "Sleeping Mode at 2 AM" )
+		postUpdate(LoftMode, 2)
+	}
+    if (SleepOverride.state == ON) {
+        SleepOverride.postUpdate(OFF)
+    }
+end
+
 rule "Start/End Sleeping Mode due to lights"
 when
 	Item Light_EatingScenes changed or
@@ -671,6 +683,7 @@ when
 	Item Light_BathScenes changed or
     Item Light_OfficeEffScenes changed or
     Item Light_OfficeTopScenes changed or
+    Item Light_HallScenes changed or
 	Item FritzBoxMacOnlineLaptop changed or
 //	Item FritzBoxMacOnlineMacBook changed or
 	Item Office_present changed or
@@ -681,40 +694,44 @@ then
 	if (LoftMode.state != 3 && LoftMode.state != 4) {		// nicht Party und nicht Vacation
 		if (Daylight.state == OFF) {
 			if (now.getHour() < 6 || now.getHour() >= 23) {
-			  	if (Light_EatingScenes.state == 0 || Light_EatingScenes.state == 4) {
-				  	if (Light_WohnZiScenes.state == 0) {
-					  	if (Light_BathScenes.state == 0) {
-						  	if (Light_SleepScenes.state == 0) {
-            				  	if (Light_OfficeTopScenes.state == 0 && Light_OfficeEffScenes.state == 0) {
-						  		    if ( (FritzBoxMacOnlineLaptop.state == OFF || FritzBoxMacOnlineLaptop.state == NULL)/* &&
-								         (FritzBoxMacOnlineMacBook.state == OFF || FritzBoxMacOnlineMacBook.state == NULL)*/ ) {
-							  		    if (Office_present.state == OFF	|| Guests.state == ON) {
-										    if (StreamingMovie.state == OFF) {
+                if (SleepOverride.state != ON) {
+                    if (Light_EatingScenes.state == 0 || Light_EatingScenes.state == 4) {
+                        if (Light_WohnZiScenes.state == 0) {
+                            if (Light_BathScenes.state == 0) {
+                                if (Light_SleepScenes.state == 0) {
+                                    if (Light_OfficeTopScenes.state == 0 && Light_OfficeEffScenes.state == 0) {
+                                        if (Light_HallScenes.state == 0 || Light_HallScenes.state == 4) {
+                                            if ( (FritzBoxMacOnlineLaptop.state == OFF || FritzBoxMacOnlineLaptop.state == NULL)/* &&
+                                                (FritzBoxMacOnlineMacBook.state == OFF || FritzBoxMacOnlineMacBook.state == NULL)*/ ) {
+                                                if (Office_present.state == OFF	|| Guests.state == ON) {
+                                                    if (StreamingMovie.state == OFF) {
 
-											    presentTimer?.cancel()
-    											presentTimer = null
+                                                        presentTimer?.cancel()
+                                                        presentTimer = null
 
-	    										allSleepingConditionsMet = true
+                                                        allSleepingConditionsMet = true
 
-		    									if (LoftMode.state != 2) {			// nicht Sleep
+                                                        if (LoftMode.state != 2) {			// nicht Sleep
 
-			    									logAndWriteReason.apply( "20 minutes to Sleeping Mode" )
+                                                            logAndWriteReason.apply( "20 minutes to Sleeping Mode" )
 
-				    								nightTimer = createTimer(now.plusMinutes(20)) [|
-					    								logAndWriteReason.apply( "Sleeping Mode due to all lights + Laptop off" )
-						    							postUpdate(LoftMode, 2)
-							    					]
-								    			} else {
-									    			logAndWriteReason.apply( "stop wakeup countdown, bath light went out")
-										    	}
+                                                            nightTimer = createTimer(now.plusMinutes(20)) [|
+                                                                logAndWriteReason.apply( "Sleeping Mode due to all lights + Laptop off" )
+                                                                postUpdate(LoftMode, 2)
+                                                            ]
+                                                        } else {
+                                                            logAndWriteReason.apply( "stop wakeup countdown, bath light went out")
+                                                        }
+                                                    }
+                                                }
                                             }
-										}
-									}
-								}
-						  	}
-					  	}
-				  	}
-			  	}
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
 			}
 		}
 		if (! allSleepingConditionsMet) {

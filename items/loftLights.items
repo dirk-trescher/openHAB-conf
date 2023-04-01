@@ -68,6 +68,11 @@ Color	Light_StairsBright		"Treppenhaus"  				<dimmablelight>	(Dimm, grStairs)  	
 Dimmer	Light_StairsTemp		"Treppenhaus"  				<dimmablelight>	(CTDimmer, grStairs)  			                {channel="hue:0220:0017881cc4e3:16:color_temperature"}
 Number 	Light_StairsScenes		"Szenen"					<dimmablelight>	(gLightScenes)
 
+Switch	Light_HallSwitch		"Garderobe"	   			    <dimmablelight>	(Switching, grHall, gLights, gLightsCount) 	{channel="hue:0220:0017881cc4e3:25:brightness"}
+Color	Light_HallBright		"Garderobe"  				<dimmablelight>	(Dimm, grHall)  				                {channel="hue:0220:0017881cc4e3:25:brightness"}
+Dimmer	Light_HallTemp		    "Garderobe"  				<dimmablelight>	(CTDimmer, grHall)  			                {channel="hue:0220:0017881cc4e3:25:color_temperature"}
+Number 	Light_HallScenes		"Szenen"					<dimmablelight>	(gLightScenes)
+
 
 Switch	TriggerTooColdBlink
 Switch  TriggerFireAlarmBlink

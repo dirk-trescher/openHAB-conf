@@ -3,16 +3,16 @@ val	Functions.Function3<NumberItem, Number, NumberItem, void> computeUsage = [La
 
     if (prevState != NULL && LastTimeChanged.state != NULL && prevState > 0) {
 	    var double deltaHours = (now.toInstant.toEpochMilli - (LastTimeChanged.state as Number).longValue) / (1000.0 * 60.0 * 60.0 * 24.0)
-	    var double deltaUsage = ((prevState).intValue * deltaHours).doubleValue / 100.0
+	    var double deltaUsage = ((prevState).doubleValue * deltaHours).doubleValue
 
         // logInfo("heating", "Usage of " + Counter.name + " since last change of valve: " + deltaUsage)
 
         if (Counter.state != NULL) {
             deltaUsage = deltaUsage + (Counter.state as Number).doubleValue
         }
-        postUpdate(Counter, deltaUsage)
+        Counter.postUpdate(deltaUsage)
     }
-    postUpdate(LastTimeChanged, (now.toInstant.toEpochMilli as Number))
+    LastTimeChanged.postUpdate(now.toInstant.toEpochMilli as Number)
 
     return null
 ]
@@ -112,8 +112,56 @@ then
                                    (Counter_Office.state as Number).doubleValue +
                                    (Counter_Hobby.state as Number).doubleValue +
                                    (Counter_KidsBath.state as Number).doubleValue
-        postUpdate(Counter_total, sumOfCounters)
+        Counter_total.postUpdate(sumOfCounters)
     }
+end
+
+rule "reset Heating Counter nightly"
+when
+	Time cron "0 0 0 * * ?"		// 00:00 each day
+then
+    HeatingCounter_daily.postUpdate(HeatingCounter_today.state)
+    HeatingCounter_today.postUpdate(0)
+end
+
+rule "update Heating"
+when
+    Time cron "0 * * * * ?" or		// every min
+    Item Heating_Living changed or
+    Item Heating_Sleep changed or
+    Item HeatingValve_Kitchen changed or
+    Item Heating_Bath changed or
+    Item Heating_EmilieRe changed or
+    Item Heating_EmilieLi changed or
+    Item Heating_Niklas changed or
+    Item Heating_Office changed or
+    Item Heating_Hobby changed or
+    Item Heating_KidsBath changed
+then
+    if (Heating_Living.state != NULL && Heating_Sleep.state != NULL && HeatingValve_Kitchen.state != NULL &&
+        Heating_Bath.state != NULL && Heating_EmilieRe.state != NULL && Heating_EmilieLi.state != NULL && Heating_Niklas.state != NULL &&
+        Heating_Office.state != NULL && Heating_Hobby.state != NULL && Heating_KidsBath.state != NULL) {
+        var double sumOfValves = (Heating_Living.state as Number).doubleValue / 100 +
+                                   (Heating_Sleep.state as Number).doubleValue / 100 +
+                                   (HeatingValve_Kitchen.state as Number).doubleValue / 100 +
+                                   (Heating_Bath.state as Number).doubleValue / 100 +
+                                   (Heating_EmilieRe.state as Number).doubleValue / 100 +
+                                   (Heating_EmilieLi.state as Number).doubleValue / 100 +
+                                   (Heating_Niklas.state as Number).doubleValue / 100 +
+                                   (Heating_Office.state as Number).doubleValue / 100 +
+                                   (Heating_Hobby.state as Number).doubleValue / 100 +
+                                   (Heating_KidsBath.state as Number).doubleValue / 100
+        postUpdate(Heating_total, sumOfValves)
+    }
+end
+
+rule "update Heating today"
+when
+    Item Heating_total received update
+then
+    computeUsage.apply(CounterLastTimeChanged_any, Heating_total_prev.state, HeatingCounter_today)
+
+    Heating_total_prev.postUpdate(Heating_total.state)
 end
 
 rule "reset heating counters"
@@ -131,3 +179,5 @@ then
     postUpdate(Counter_KidsBath, (0.0 as Number))
     postUpdate(CounterResetAll, OFF)
 end
+
+// =(Counter_Bath-1.15)/(1.75-1.15) * (788-765)+765

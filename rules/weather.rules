@@ -36,9 +36,9 @@ end
 
 rule "Warn if too long no rain in winter - reset"
 when
-	Item Condition changed
+	Item Precip_Total changed
 then
-	if (Condition.state == "Rain" || Condition.state == "Ice Pellets" || Condition.state == "Sleet") {
+	if (Precip_Total.state as Number > 2) {
 		postUpdate(Warn_no_rain, 0)
 	}
 end
@@ -49,13 +49,14 @@ when
 then
 	if (WateringPeriod.state == OFF) {
 		if (Warn_no_rain.state == NULL) {
-			postUpdate(Warn_no_rain, 0)
+			Warn_no_rain.postUpdate(0)
+            return
 		}
 		var days = (Warn_no_rain.state as DecimalType).intValue + 1
 		if (days > 7) {
 			sendNotification("dirk.trescher@web.de", "Zu lange kein Regen - Dachterrasse gießen")
-			days = 0
+			days = 5        // warn every other day
 		}
-		postUpdate(Warn_no_rain, days)
+		Warn_no_rain.postUpdate(days)
 	}
 end

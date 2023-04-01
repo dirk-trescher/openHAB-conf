@@ -1,3 +1,5 @@
+import java.util.HashMap
+
 var boolean bathWindowOpen = false
 var double heatingTargetBeforeWindowOpen
 
@@ -11,18 +13,18 @@ var Timer valveEnforceTimer_Office = null
 var Timer valveEnforceTimer_Hobby = null
 var Timer valveEnforceTimer_KidsBath = null
 
-var HashMap<String, Integer> PresentTemp = newHashMap(
-    "Living"            -> 20,
-    "Kitchen"           -> 20,
-    "Bath"              -> 21,
-    "Niklas"            -> 20,
-    "Emilie"            -> 20,
-    "Hobby"             -> 18,
-    "KidsBath"          -> 18,
-    "KidsBathGuests"    -> 20,
-    "Office"            -> 18,
-    "OfficeGuests"      -> 20
-) as HashMap
+var HashMap<String, Float> PresentTemp = newHashMap(
+    "Living"            -> 21.0,
+    "Kitchen"           -> 23.0,
+    "Bath"              -> 20.5,
+    "Niklas"            -> 19.0,
+    "Emilie"            -> 19.0,
+    "Hobby"             -> 18.0,
+    "KidsBath"          -> 18.0,
+    "KidsBathGuests"    -> 19.0,
+    "Office"            -> 18.0,
+    "OfficeGuests"      -> 20.0
+)
 
 /* ---------------------------------- */
 
@@ -766,6 +768,68 @@ end
 
 // ---------------------------------------------------------------------------
 
+rule "update Living Valve Display"
+when
+    Item Heating_Living changed
+then
+    Heating_Living_disp.postUpdate((newState as Number).doubleValue / 20 + 15)
+end
+
+rule "update Living Valve Display"
+when
+    Item HeatingValve_Kitchen changed
+then
+    HeatingValve_Kitchen_disp.postUpdate((newState as Number).doubleValue / 20 + 15)
+end
+
+rule "update Living Valve Display"
+when
+    Item Heating_Sleep changed
+then
+    Heating_Sleep_disp.postUpdate((newState as Number).doubleValue / 20 + 15)
+end
+
+rule "update Living Valve Display"
+when
+    Item Heating_Bath changed
+then
+    Heating_Bath_disp.postUpdate((newState as Number).doubleValue / 20 + 15)
+end
+
+rule "update Living Valve Display"
+when
+    Item Heating_EmilieRe changed
+then
+    Heating_Emilie_disp.postUpdate((newState as Number).doubleValue / 20 + 15)
+end
+
+rule "update Living Valve Display"
+when
+    Item Heating_Niklas changed
+then
+    Heating_Niklas_disp.postUpdate((newState as Number).doubleValue / 20 + 15)
+end
+
+rule "update Living Valve Display"
+when
+    Item Heating_Office changed
+then
+    Heating_Office_disp.postUpdate((newState as Number).doubleValue / 20 + 15)
+end
+
+rule "update Living Valve Display"
+when
+    Item Heating_Hobby changed
+then
+    Heating_Hobby_disp.postUpdate((newState as Number).doubleValue / 20 + 15)
+end
+
+rule "update Living Valve Display"
+when
+    Item Heating_KidsBath changed
+then
+    Heating_KidsBath_disp.postUpdate((newState as Number).doubleValue / 20 + 15)
+end
 
 // ---------------------------------------------------------------------------
 
@@ -819,7 +883,7 @@ when
 then
 	if (HeatingPeriod.state == ON) {
 		if (now.getHour() < 4 || now.getHour() >= 22) {
-			postUpdate(PlannedTarget_Living, 17)		// no heating before bedtime
+			postUpdate(PlannedTarget_Living, 19)		// no heating before bedtime
 		}
 		postUpdate(HeatingTarget_AllModi_Living, PlannedTarget_Living.state)
 	}
@@ -1201,9 +1265,9 @@ then
 		if (LoftMode.state == 1 || LoftMode.state == 2) {
 			logAndWriteReason.apply("lower heating due to Away or Sleeping")
 
-			postUpdate(PlannedTarget_Living, 17)
+			postUpdate(PlannedTarget_Living, 19.5)
 
-			postUpdate(HeatingValve_Target_AllModi_Kitchen, 19)
+			postUpdate(HeatingValve_Target_AllModi_Kitchen, 22)
 
 			postUpdate(PlannedTarget_Bath, 19)
 
@@ -1221,7 +1285,7 @@ then
 		}
 	}
 end
-
+/*
 rule "Rise Heating Niklas Emilie due to Away -> Present Mode"
 when
 	Item LoftMode changed
@@ -1240,7 +1304,7 @@ then
 		}
 	}
 end
-
+*/
 rule "Rise Heating due to Away / Sleeping -> Present Mode or Party Mode"
 when
 	Item LoftMode changed
@@ -1254,25 +1318,7 @@ then
 				LoftMode.state == 3) {
 
 				postUpdate(PlannedTarget_Living, PresentTemp.get("Living"))
-
-				if (Temp_Living.state < (PlannedTarget_Living.state as DecimalType) &&
-					AnyWindow_Living.state == OFF
-				) {
-					createTimer(now.plusSeconds(5)) [|
-						postUpdate(HeatingModus_Living, 2)			// Boost
-					]
-				}
-
 				postUpdate(HeatingValve_Target_AllModi_Kitchen, PresentTemp.get("Kitchen"))
-
-				if (Temp_Kitchen.state < (HeatingValve_Target_AllModi_Kitchen.state as DecimalType) &&
-					AnyWindow_Living.state == OFF
-				) {
-					createTimer(now.plusSeconds(10)) [|
-						postUpdate(HeatingValve_Modus_Kitchen, 2)			// Boost
-					]
-				}
-
 				postUpdate(PlannedTarget_Hobby, PresentTemp.get("Hobby"))
 
 				if (Guests.state == ON) {
@@ -1284,14 +1330,6 @@ then
 			}
 
 			postUpdate(PlannedTarget_Bath, PresentTemp.get("Bath"))
-
-			if (Temp_Bath.state < (PlannedTarget_Bath.state as DecimalType)
-				&& AnyWindow_Bath.state == OFF
-			) {
-				createTimer(now.plusSeconds(5)) [|
-					postUpdate(HeatingModus_Bath, 2)				// Boost
-				]
-			}
 		}
 	}
 end
@@ -1309,7 +1347,7 @@ then
 		}
 	}
 end
-
+/*
 rule "Rise Heating Niklas due to early morning when sleeping"
 when
 	Time cron "0 30 7 ? * MON-FRI" or		// 7:30 each weekday
@@ -1324,7 +1362,8 @@ then
 		}
 	}
 end
-
+*/
+/*
 rule "Rise Heating Emilie due to early morning when sleeping"
 when
 	Time cron "0 30 7 ? * MON-FRI" or		// 7:30 each weekday
@@ -1339,6 +1378,7 @@ then
 		}
 	}
 end
+*/
 
 rule "Lower Heating Niklas and Emilie before noon"
 when
@@ -1356,7 +1396,7 @@ then
 		}
 	}
 end
-
+/*
 rule "Rise Heating Niklas and Emilie afternoon when never away"
 when
 	Time cron "0 00 15 ? * MON-FRI"			// 15:00 each weekday
@@ -1373,7 +1413,7 @@ then
 		}
 	}
 end
-
+*/
 rule "Lower Heating Niklas and Emilie for the night"
 when
 	Time cron "0 30 18 * * ?"			// 18:30 each day
@@ -1391,6 +1431,19 @@ then
 	}
 end
 
+rule "Lower Heating Bath for the night"
+when
+	Time cron "0 30 21 * * ?"			// 21:30 each day
+then
+	if (HeatingPeriod.state == ON) {
+		if (LoftMode.state == 0) {								// present
+			logAndWriteReason.apply("lower heating bath for the night")
+
+			postUpdate(PlannedTarget_Bath, 19)
+		}
+	}
+end
+/*
 rule "Rise heating in Office due to Office present"
 when
 	Item Office_present changed to ON
@@ -1401,7 +1454,7 @@ then
 		}
 	}
 end
-
+*/
 rule "Lower heating in Office due to Office not present"
 when
 	Item Office_present changed to OFF
@@ -1412,7 +1465,7 @@ then
 		}
 	}
 end
-
+/*
 rule "Rise heating in Office due to Guests awake"
 when
 	Item Guests_awake changed to ON
@@ -1434,7 +1487,7 @@ then
 		}
 	}
 end
-
+*/
 
 rule "Heating change due to Vacation Mode"
 when
