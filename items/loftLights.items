@@ -27,9 +27,9 @@ Dimmer  Light_SleepDimmer		"Schlafzimmer"   			<dimmablelight>	(Dimm, grSleep)		
 Color	Light_SleepColor		"Schlafzimmer"   			<dimmablelight>	(Colorize, grSleep)  			                {channel="hue:0200:0017881cc4e3:14:color"}
 Number 	Light_SleepScenes		"Szenen"					<dimmablelight>	(gLightScenes)
 
-Switch	Light_EmilieSwitch		"Emilie"	   				<dimmablelight>	(Switching, grEmilie, gLights, gLightsCount) 	{channel="hue:0210:0017881cc4e3:15:color"}
-Color	Light_EmilieColor		"Emilie"  					<dimmablelight>	(Colorize, grEmilie)  		                	{channel="hue:0210:0017881cc4e3:15:color"}
-Dimmer	Light_EmilieTemp		"Emilie"  					<dimmablelight>	(CTDimmer, grEmilie)  		                	{channel="hue:0210:0017881cc4e3:15:color_temperature"}
+Switch	Light_EmilieSwitch		"Emilie"	   				<dimmablelight>	(Switching, grEmilie, gLights, gLightsCount) 	{channel="hue:0210:0017881cc4e3:27:color"}
+Color	Light_EmilieColor		"Emilie"  					<dimmablelight>	(Colorize, grEmilie)  		                	{channel="hue:0210:0017881cc4e3:27:color"}
+Dimmer	Light_EmilieTemp		"Emilie"  					<dimmablelight>	(CTDimmer, grEmilie)  		                	{channel="hue:0210:0017881cc4e3:27:color_temperature"}
 Number 	Light_EmilieScenes		"Szenen"					<dimmablelight>	(gLightScenes)
 
 Switch	Light_NiklasSwitch	    "Niklas"               		<dimmablelight>	(Switching, grNiklas, gLights) 	                {channel="hue:0210:0017881cc4e3:19:color"}
@@ -68,7 +68,7 @@ Color	Light_StairsBright		"Treppenhaus"  				<dimmablelight>	(Dimm, grStairs)  	
 Dimmer	Light_StairsTemp		"Treppenhaus"  				<dimmablelight>	(CTDimmer, grStairs)  			                {channel="hue:0220:0017881cc4e3:16:color_temperature"}
 Number 	Light_StairsScenes		"Szenen"					<dimmablelight>	(gLightScenes)
 
-Switch	Light_HallSwitch		"Garderobe"	   			    <dimmablelight>	(Switching, grHall, gLights, gLightsCount) 	{channel="hue:0220:0017881cc4e3:25:brightness"}
+Switch	Light_HallSwitch		"Garderobe"	   			    <dimmablelight>	(Switching, grHall, gLights, gLightsCount) 	    {channel="hue:0220:0017881cc4e3:25:brightness"}
 Color	Light_HallBright		"Garderobe"  				<dimmablelight>	(Dimm, grHall)  				                {channel="hue:0220:0017881cc4e3:25:brightness"}
 Dimmer	Light_HallTemp		    "Garderobe"  				<dimmablelight>	(CTDimmer, grHall)  			                {channel="hue:0220:0017881cc4e3:25:color_temperature"}
 Number 	Light_HallScenes		"Szenen"					<dimmablelight>	(gLightScenes)

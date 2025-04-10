@@ -4,28 +4,31 @@ sitemap loft label="Loft"
 		Text item=gLightsCount  {
 			Frame label="Lichter" {
 				Switch item=gLightsCount mappings=[OFF="alle aus"]
-				Selection	item=Light_EatingScenes label="Esszimmer" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]		 icon="light-off" visibility=[Light_EatingScenes==0]
-				Selection	item=Light_EatingScenes label="Esszimmer" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]		 icon="light-on"  visibility=[Light_EatingScenes!=0]
-				Selection	item=Light_WohnZiScenes label="Wohnzimmer" mappings=[0=aus, 10=Tag, 11=Antik]                        icon="light-off" visibility=[Light_WohnZiScenes==0]
-				Selection	item=Light_WohnZiScenes label="Wohnzimmer" mappings=[0=aus, 10=Tag, 11=Antik]                        icon="light-on"  visibility=[Light_WohnZiScenes!=0]
-				Selection	item=Light_BathScenes label="Badezimmer" mappings=[0=aus, 1=Tag, 3=Antik, 5=Nacht, 6=Ambient]        icon="light-off" visibility=[Light_BathScenes==0]
-				Selection	item=Light_BathScenes label="Badezimmer" mappings=[0=aus, 1=Tag, 3=Antik, 5=Nacht, 6=Ambient]        icon="light-on"  visibility=[Light_BathScenes!=0]
-				Selection 	item=Light_GuestLooScenes label="Gästetoilette" mappings=[0=aus, 1=Nacht, 2=Tag, 3=Abend]            icon="light-off" visibility=[Light_GuestLooScenes==0]
-				Selection 	item=Light_GuestLooScenes label="Gästetoilette" mappings=[0=aus, 1=Nacht, 2=Tag, 3=Abend]            icon="light-on"  visibility=[Light_GuestLooScenes!=0]
-				Selection	item=Light_SleepScenes label="Schlafzimmer" mappings=[0=aus, 10=Tag, 11=Antik, 12=Nacht]             icon="light-off" visibility=[Light_SleepScenes==0]
-				Selection	item=Light_SleepScenes label="Schlafzimmer" mappings=[0=aus, 10=Tag, 11=Antik, 12=Nacht]             icon="light-on"  visibility=[Light_SleepScenes!=0]
-				Selection 	item=Light_EmilieScenes label="Emilie" mappings=[0=aus, 1=Tag, 2=Standard, 7=Nacht]                  icon="light-off" visibility=[Light_EmilieScenes==0]
-				Selection 	item=Light_EmilieScenes label="Emilie" mappings=[0=aus, 1=Tag, 2=Standard, 7=Nacht]                  icon="light-on"  visibility=[Light_EmilieScenes!=0]
-				Selection 	item=Light_NiklasScenes label="Niklas" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]                  icon="light-off" visibility=[Light_NiklasScenes==0]
-				Selection 	item=Light_NiklasScenes label="Niklas" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]                  icon="light-on"  visibility=[Light_NiklasScenes!=0]
-				Selection 	item=Light_NiklasDeckeScenes label="Niklas Decke" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]       icon="light-off" visibility=[Light_NiklasDeckeScenes==0]
-				Selection 	item=Light_NiklasDeckeScenes label="Niklas Decke" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]       icon="light-on"  visibility=[Light_NiklasDeckeScenes!=0]
-				Selection 	item=Light_HallScenes label="Garderobe" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]        icon="light-off" visibility=[Light_HallScenes==0]
-				Selection 	item=Light_HallScenes label="Garderobe" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]        icon="light-on"  visibility=[Light_HallScenes!=0]
-				Selection 	item=Light_OfficeTopScenes label="Arbeitszimmer" mappings=[0=aus, 1=Tag, 2=Standard, 4=Nacht]        icon="light-off" visibility=[Light_OfficeTopScenes==0]
-				Selection 	item=Light_OfficeTopScenes label="Arbeitszimmer" mappings=[0=aus, 1=Tag, 2=Standard, 4=Nacht]        icon="light-on"  visibility=[Light_OfficeTopScenes!=0]
-				Selection 	item=Light_OfficeEffScenes label="Arbeitszimmer Effekt" mappings=[0=aus, 1=Tag, 2=Standard, 4=Nacht] icon="light-off" visibility=[Light_OfficeEffScenes==0]
-				Selection 	item=Light_OfficeEffScenes label="Arbeitszimmer Effekt" mappings=[0=aus, 1=Tag, 2=Standard, 4=Nacht] icon="light-on"  visibility=[Light_OfficeEffScenes!=0]
+				Selection	item=Light_EatingScenes label="Esszimmer" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]		 icon="lichtaus"  visibility=[Light_EatingScenes==0]
+				Selection	item=Light_EatingScenes label="Esszimmer" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]		 icon="lichtan"   visibility=[Light_EatingScenes!=0]
+				Selection	item=Light_WohnZiScenes label="Wohnzimmer" mappings=[0=aus, 10=Tag, 11=Antik]                        icon="lichtaus"  visibility=[Light_WohnZiScenes==0]
+				Selection	item=Light_WohnZiScenes label="Wohnzimmer" mappings=[0=aus, 10=Tag, 11=Antik]                        icon="lichtan"  visibility=[Light_WohnZiScenes!=0]
+				Selection	item=Light_BathScenes label="Badezimmer" mappings=[0=aus, 1=Tag, 3=Antik, 5=Nacht, 6=Ambient]        icon="lichtaus" visibility=[Light_BathScenes==0]
+				Selection	item=Light_BathScenes label="Badezimmer" mappings=[0=aus, 1=Tag, 3=Antik, 5=Nacht, 6=Ambient]        icon="lichtan"  visibility=[Light_BathScenes!=0]
+				Selection 	item=Light_GuestLooScenes label="Gästetoilette" mappings=[0=aus, 1=Nacht, 2=Tag, 3=Abend]            icon="lichtaus" visibility=[Light_GuestLooScenes==0]
+				Selection 	item=Light_GuestLooScenes label="Gästetoilette" mappings=[0=aus, 1=Nacht, 2=Tag, 3=Abend]            icon="lichtan"  visibility=[Light_GuestLooScenes!=0]
+				Selection	item=Light_SleepScenes label="Schlafzimmer Effekt" mappings=[0=aus, 10=Tag, 11=Antik, 12=Nacht]      icon="lichtaus" visibility=[Light_SleepScenes==0]
+				Selection	item=Light_SleepScenes label="Schlafzimmer Effekt" mappings=[0=aus, 10=Tag, 11=Antik, 12=Nacht]      icon="lichtan"  visibility=[Light_SleepScenes!=0]
+                Switch   	item=Switch_Sleep4 label="Schlafzimmer Kleiderschrank"
+                Switch   	item=Switch_Sleep5 label="Schlafzimmer Komode"
+				Selection 	item=Light_EmilieScenes label="Emilie vorne" mappings=[0=aus, 1=Tag, 2=Standard, 7=Nacht]            icon="lichtaus" visibility=[Light_EmilieScenes==0]
+				Selection 	item=Light_EmilieScenes label="Emilie vorne" mappings=[0=aus, 1=Tag, 2=Standard, 7=Nacht]            icon="lichtan"  visibility=[Light_EmilieScenes!=0]
+                Switch      item=Light_EmilieBed label="Emilie Bett"
+				Selection 	item=Light_NiklasScenes label="Niklas" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]                  icon="lichtaus" visibility=[Light_NiklasScenes==0]
+				Selection 	item=Light_NiklasScenes label="Niklas" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]                  icon="lichtan"  visibility=[Light_NiklasScenes!=0]
+				Selection 	item=Light_NiklasDeckeScenes label="Niklas Decke" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]       icon="lichtaus" visibility=[Light_NiklasDeckeScenes==0]
+				Selection 	item=Light_NiklasDeckeScenes label="Niklas Decke" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]       icon="lichtan"  visibility=[Light_NiklasDeckeScenes!=0]
+				Selection 	item=Light_HallScenes label="Garderobe" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]        icon="lichtaus" visibility=[Light_HallScenes==0]
+				Selection 	item=Light_HallScenes label="Garderobe" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]        icon="lichtan"  visibility=[Light_HallScenes!=0]
+				Selection 	item=Light_OfficeTopScenes label="Arbeitszimmer" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]        icon="lichtaus" visibility=[Light_OfficeTopScenes==0]
+				Selection 	item=Light_OfficeTopScenes label="Arbeitszimmer" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]        icon="lichtan"  visibility=[Light_OfficeTopScenes!=0]
+				Selection 	item=Light_OfficeEffScenes label="Arbeitszimmer Effekt" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht] icon="lichtaus" visibility=[Light_OfficeEffScenes==0]
+				Selection 	item=Light_OfficeEffScenes label="Arbeitszimmer Effekt" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht] icon="lichtan"  visibility=[Light_OfficeEffScenes!=0]
 			}
 		}
 		Text item=Temp_Outside {
@@ -389,13 +392,13 @@ sitemap loft label="Loft"
             Frame label="Solar Stromerzeugung Diagramme" {
                 Text label="Diagramme" icon="line" {
                     Frame label="Leistung" {
-                        Switch item=Power_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 2="Tag", 3="Woche", 4="Monat", 5="Jahr"]
-                        Chart item=gSolarPower period=h refresh=10000 visibility=[Power_Chart_Period==0, Power_Chart_Period=="NULL"]
-                        Chart item=gSolarPower period=8h refresh=40000 visibility=[Power_Chart_Period==1]
-                        Chart item=gSolarPower period=D refresh=60000 visibility=[Power_Chart_Period==2]
-                        Chart item=gSolarPower period=W refresh=300000 visibility=[Power_Chart_Period==3]
-                        Chart item=gSolarPower period=M refresh=1000000 visibility=[Power_Chart_Period==4]
-                        Chart item=gSolarPower period=Y refresh=1000000 visibility=[Power_Chart_Period==5]
+                        Switch item=Power_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 2="Tag", 3="2 Tage", 4="Woche", 5="Monat"]
+                        Chart item=gSolarPowerDiag period=h refresh=10000 visibility=[Power_Chart_Period==0, Power_Chart_Period=="NULL"]
+                        Chart item=gSolarPowerDiag period=8h refresh=40000 visibility=[Power_Chart_Period==1]
+                        Chart item=gSolarPowerDiag period=D refresh=60000 visibility=[Power_Chart_Period==2]
+                        Chart item=gSolarPowerDiag period=2D refresh=120000 visibility=[Power_Chart_Period==3]
+                        Chart item=gSolarPowerDiag period=W refresh=300000 visibility=[Power_Chart_Period==4]
+                        Chart item=gSolarPowerDiag period=M refresh=1000000 visibility=[Power_Chart_Period==5]
                     }
                     Frame label="täglicher Energieertrag" {
                         Switch item=Energy_daily_Chart_Period icon="time" label="Zeitraum" mappings=[0="Woche", 1="Monat", 2="2 Monate", 3="4 Monate", 4="Jahr"]
@@ -479,28 +482,16 @@ sitemap loft label="Loft"
 		Text item=Sunset_Time
 		Text item=NightStart_Time
 		Text item=NightEnd_Time
+		Switch item=Garagentor
 		Switch item=DoorBuzzer_Both
 	}
 
 	Frame label="Zimmer" {
-		Text label="Wohn-Esszimmer" icon="sofa" {
-			Frame label="Esszimmer" {
-				Selection	item=Light_EatingScenes label="Licht-Szenen" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]
-				Text label="Licht manuell" icon="dimmablelight" {
-					Frame label="Licht manuell" {
-						Switch      item=Light_EatingInSwitch                 							label="innen"
-						Colorpicker item=Light_EatingInColor  visibility=[Light_EatingInSwitch==ON]  	label="innen Farbe"
-						Slider      item=Light_EatingInTemp   visibility=[Light_EatingInSwitch==ON]  	label="innen Weiß"
-						Switch      item=Light_EatingOutSwitch                 							label="außen"
-						Colorpicker item=Light_EatingOutColor  visibility=[Light_EatingOutSwitch==ON]  	label="außen Farbe"
-						Slider      item=Light_EatingOutTemp   visibility=[Light_EatingOutSwitch==ON]  	label="außen Weiß"
-					}
-				}
-				Switch item=WLAN_Loft label="WLAN Loft"
-			}
+		Text label="Wohn-Esszimmer-Küche" icon="sofa" {
 			Frame label="Wohnzimmer" {
-				Selection	item=Light_WohnZiScenes label="Licht-Szenen" mappings=[0=aus, 10=Tag, 11=Antik]
-				Text label="Licht manuell" icon="dimmablelight" {
+				Selection	item=Light_WohnZiScenes label="Licht-Szenen" mappings=[0=aus, 10=Tag, 11=Antik]                        icon="lichtaus"  visibility=[Light_WohnZiScenes==0]
+				Selection	item=Light_WohnZiScenes label="Licht-Szenen" mappings=[0=aus, 10=Tag, 11=Antik]                        icon="lichtan"  visibility=[Light_WohnZiScenes!=0]
+				Text label="Licht manuell" icon="colorlight" {
 					Frame label="Licht manuell" {
 						Switch      item=Light_WohnZiSwitch                 									label="Sofa"
 						Colorpicker item=Light_WohnZiColor  		visibility=[Light_WohnZiSwitch==ON]  		label="Sofa Farbe"
@@ -513,12 +504,26 @@ sitemap loft label="Loft"
 				Text item=Temp_Living label="Ist-Temperatur [%.1f °C]"
 				Text item=Heating_Living label="Heizung [%.2f]"
 				Text item=Humid_Living label="Feuchtigkeit [%.0f %%]"
-				Switch item=CameraRoof label="Klavier"
 				Text item=Window_LivingLeft  label="Fenster links [MAP(contact.map):%s]"
 				Text item=Window_LivingMiddle label="Fenster mitte [MAP(contact.map):%s]"
 				Text item=Window_LivingRight label="Fenster rechts [MAP(contact.map):%s]"
 				Text item=Rollershutter_Living label="Wohnzimmer [MAP(rollershutters.map):%s]" icon="rollershutter"
 				Switch item=Rollershutter_Living label="Wohnzimmer" icon="rollershutter"
+			}
+			Frame label="Esszimmer" {
+				Selection	item=Light_EatingScenes label="Licht-Szenen" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]		 icon="lichtaus"  visibility=[Light_EatingScenes==0]
+				Selection	item=Light_EatingScenes label="Licht-Szenen" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]		 icon="lichtan"   visibility=[Light_EatingScenes!=0]
+				Text label="Licht manuell" icon="colorlight" {
+					Frame label="Licht manuell" {
+						Switch      item=Light_EatingInSwitch                 							label="innen"
+						Colorpicker item=Light_EatingInColor  visibility=[Light_EatingInSwitch==ON]  	label="innen Farbe"
+						Slider      item=Light_EatingInTemp   visibility=[Light_EatingInSwitch==ON]  	label="innen Weiß"
+						Switch      item=Light_EatingOutSwitch                 							label="außen"
+						Colorpicker item=Light_EatingOutColor  visibility=[Light_EatingOutSwitch==ON]  	label="außen Farbe"
+						Slider      item=Light_EatingOutTemp   visibility=[Light_EatingOutSwitch==ON]  	label="außen Weiß"
+					}
+				}
+				Switch item=WLAN_Loft label="WLAN Loft"
 			}
 			Frame label="Küche" {
 				Text item=HeatingValve_Kitchen label="Heizung [%.2f]"
@@ -533,12 +538,14 @@ sitemap loft label="Loft"
 				}
 				Switch item=RoofWindow_Kitchen label="Dachfenster [%d %%]" icon="contact-closed" visibility=[RoofWindow_Kitchen==100]
 				Switch item=RoofWindow_Kitchen label="Dachfenster [%d %%]" icon="contact-open" visibility=[RoofWindow_Kitchen<100]
+                Switch item=Fridge_OnOff
 			}
 		}
 		Text label="Badezimmer" icon="bath" {
 			Frame {
-				Selection	item=Light_BathScenes label="Licht-Szenen" mappings=[0=aus, 3=Antik, 1=Tag, 5=Nacht, 6=Ambient]
-				Text label="Licht manuell" icon="dimmablelight" {
+				Selection	item=Light_BathScenes label="Licht-Szenen" mappings=[0=aus, 1=Tag, 3=Antik, 5=Nacht, 6=Ambient]        icon="lichtaus" visibility=[Light_BathScenes==0]
+				Selection	item=Light_BathScenes label="Licht-Szenen" mappings=[0=aus, 1=Tag, 3=Antik, 5=Nacht, 6=Ambient]        icon="lichtan"  visibility=[Light_BathScenes!=0]
+				Text label="Licht manuell" icon="colorlight" {
 					Frame label="Licht manuell" {
 						Switch      item=Light_BathLSwitch                 						label="Decke links"
 						Colorpicker item=Light_BathLColor  visibility=[Light_BathLSwitch==ON]  	label="Decke links Farbe"
@@ -569,8 +576,9 @@ sitemap loft label="Loft"
 		}
 		Text label="Gästetoilette" icon="toilet" {
 			Frame {
-				Selection item=Light_GuestLooScenes label="Licht-Szenen" mappings=[0=aus, 1=Nacht, 2=Tag, 3=Abend]
-				Text label="Himmel manuell" icon="dimmablelight" {
+				Selection 	item=Light_GuestLooScenes label="Licht-Szenen" mappings=[0=aus, 1=Nacht, 2=Tag, 3=Abend]            icon="lichtaus" visibility=[Light_GuestLooScenes==0]
+				Selection 	item=Light_GuestLooScenes label="Licht-Szenen" mappings=[0=aus, 1=Nacht, 2=Tag, 3=Abend]            icon="lichtan"  visibility=[Light_GuestLooScenes!=0]
+				Text label="Himmel manuell" icon="colorlight" {
 					Frame label="Licht manuell" {
 						Switch      item=Light_GuestLooSkySwitch                 						    label="Himmel"
 						Colorpicker item=Light_GuestLooSkyColor  visibility=[Light_GuestLooSkySwitch==ON]  	label="Himmel Farbe"
@@ -587,13 +595,16 @@ sitemap loft label="Loft"
 		}
 		Text label="Schlafzimmer" icon="bedroom" {
 			Frame {
-				Selection	item=Light_SleepScenes label="Licht-Szenen" mappings=[0=aus, 10=Tag, 11=Antik, 12=Nacht]
-				Text label="Licht manuell" icon="dimmablelight" {
+				Selection	item=Light_SleepScenes label="Licht-Szenen" mappings=[0=aus, 10=Tag, 11=Antik, 12=Nacht]      icon="lichtaus" visibility=[Light_SleepScenes==0]
+				Selection	item=Light_SleepScenes label="Licht-Szenen" mappings=[0=aus, 10=Tag, 11=Antik, 12=Nacht]      icon="lichtan"  visibility=[Light_SleepScenes!=0]
+				Text label="Licht manuell" icon="colorlight" {
 					Frame label="Licht manuell" {
 						Switch      item=Light_SleepSwitch                 						label="Decke"
 						Colorpicker item=Light_SleepColor  visibility=[Light_SleepSwitch==ON]  	label="Decke Farbe"
 					}
 				}
+                Switch item=Switch_Sleep4
+                Switch item=Switch_Sleep5
 				Setpoint item=HeatingTarget_Sleep step=0.5 minValue=12 maxValue=30 label="Soll-Temperatur [%.1f °C]"
 				Text item=Temp_Sleep label="Ist-Temperatur [%.1f °C]"
 				Text item=Heating_Sleep label="Heizung [%.2f]"
@@ -615,16 +626,18 @@ sitemap loft label="Loft"
 		}
 		Text label="Kinder" icon="boy_3" {
 			Frame label="Niklas" icon="boy_3" {
-				Selection item=Light_NiklasScenes label="Licht-Szenen" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]
-				Text label="Licht manuell" icon="dimmablelight" {
+				Selection 	item=Light_NiklasScenes label="Licht-Szenen" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]                  icon="lichtaus" visibility=[Light_NiklasScenes==0]
+				Selection 	item=Light_NiklasScenes label="Licht-Szenen" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]                  icon="lichtan"  visibility=[Light_NiklasScenes!=0]
+				Text label="Licht manuell" icon="colorlight" {
 					Frame label="Licht manuell" {
 						Switch      item=Light_NiklasSwitch                 						label="An/Aus"
 						Colorpicker item=Light_NiklasColor  visibility=[Light_NiklasSwitch==ON]  	label="Farbe"
 						Slider      item=Light_NiklasTemp   visibility=[Light_NiklasSwitch==ON]  	label="Weiß"
 					}
 				}
-				Selection item=Light_NiklasDeckeScenes label="Decke-Szenen" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]
-				Text label="Decke manuell" icon="dimmablelight" {
+				Selection 	item=Light_NiklasDeckeScenes label="Decke-Szenen" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]       icon="lichtaus" visibility=[Light_NiklasDeckeScenes==0]
+				Selection 	item=Light_NiklasDeckeScenes label="Decke-Szenen" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]       icon="lichtan"  visibility=[Light_NiklasDeckeScenes!=0]
+				Text label="Decke manuell" icon="colorlight" {
 					Frame label="Licht manuell" {
 						Switch      item=Light_NiklasDeckeSwitch                 					    label="An/Aus"
 						Colorpicker item=Light_NiklasDeckeColor  visibility=[Light_NiklasSwitch==ON]  	label="Farbe"
@@ -641,14 +654,16 @@ sitemap loft label="Loft"
 				Switch item=Rollershutter_Niklas label="Niklas" icon="rollershutter"
 			}
 			Frame label="Emilie" icon="girl_2" {
-				Selection item=Light_EmilieScenes label="Licht-Szenen" mappings=[0=aus, 1=Tag, 2=Standard, 7=Nacht]
-				Text label="Licht manuell" icon="dimmablelight" {
+				Selection 	item=Light_EmilieScenes label="Emilie vorne" mappings=[0=aus, 1=Tag, 2=Standard, 7=Nacht]            icon="lichtaus" visibility=[Light_EmilieScenes==0]
+				Selection 	item=Light_EmilieScenes label="Emilie vorne" mappings=[0=aus, 1=Tag, 2=Standard, 7=Nacht]            icon="lichtan"  visibility=[Light_EmilieScenes!=0]
+				Text label="Licht manuell" icon="colorlight" {
 					Frame label="Licht manuell" {
 						Switch      item=Light_EmilieSwitch                 						label="An/Aus"
 						Colorpicker item=Light_EmilieColor  visibility=[Light_EmilieSwitch==ON]  	label="Farbe"
 						Slider      item=Light_EmilieTemp   visibility=[Light_EmilieSwitch==ON]  	label="Weiß"
 					}
 				}
+                Switch item=Light_EmilieBed label="Emilie Bett" icon="light"
 				Setpoint item=HeatingTarget_Emilie step=0.5 minValue=12 maxValue=30 label="Soll-Temperatur [%.1f °C]"
 				Text item=Temp_Emilie label="Ist-Temperatur [%.1f °C]"
 				Text item=Heating_EmilieRe label="Heizung rechts [%d %%]"
@@ -665,8 +680,9 @@ sitemap loft label="Loft"
 		}
 		Text label="Arbeits- / Bastelzimmer" icon="office" {
 			Frame label="Arbeitszimmer" icon="office" {
-				Selection item=Light_OfficeTopScenes label="Licht-Szenen" mappings=[0=aus, 1=Tag, 2=Standard, 4=Nacht]
-				Text label="Licht manuell" icon="dimmablelight" {
+				Selection 	item=Light_OfficeTopScenes label="Licht-Szenen Decke" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]        icon="lichtaus" visibility=[Light_OfficeTopScenes==0]
+				Selection 	item=Light_OfficeTopScenes label="Licht-Szenen Decke" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]        icon="lichtan"  visibility=[Light_OfficeTopScenes!=0]
+				Text label="Licht manuell" icon="colorlight" {
 					Frame label="Licht manuell" {
 						Switch      item=Light_OfficeYSwitch                 						label="An/Aus gelb"
 						Colorpicker item=Light_OfficeYColor  visibility=[Light_OfficeYSwitch==ON]  	label="Farbe"
@@ -679,8 +695,9 @@ sitemap loft label="Loft"
 						Slider      item=Light_OfficeGTemp   visibility=[Light_OfficeGSwitch==ON]  	label="Weiß"
 					}
 				}
-				Selection item=Light_OfficeEffScenes label="Licht-Szenen Effekt" mappings=[0=aus, 1=Tag, 2=Standard, 4=Nacht]
-				Text label="Licht manuell Effekt" icon="dimmablelight" {
+				Selection 	item=Light_OfficeEffScenes label="Licht-Szenen Effekt" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht] icon="lichtaus" visibility=[Light_OfficeEffScenes==0]
+				Selection 	item=Light_OfficeEffScenes label="Licht-Szenen Effekt" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht] icon="lichtan"  visibility=[Light_OfficeEffScenes!=0]
+				Text label="Licht manuell Effekt" icon="colorlight" {
 					Frame label="Licht manuell" {
 						Switch      item=Light_OfficeEffSwitch                 							label="An/Aus"
 						Colorpicker item=Light_OfficeEffColor  visibility=[Light_OfficeEffSwitch==ON]  	label="Farbe"
@@ -726,16 +743,17 @@ sitemap loft label="Loft"
 					}
 				}
 				Text item=Window_Terrace label="Terrassentür [MAP(contact.map):%s]"
-				Text item=Rainsensor {
+				Text item=RainingNow {
 					Frame label="Wetter-Daten" {
 						Switch item=Temp_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 2="Tag", 3="Woche"]
-						Chart item=RainsensorNum period=h refresh=10000 visibility=[Temp_Chart_Period==0, Temp_Chart_Period=="NULL"]
-						Chart item=RainsensorNum period=8h refresh=40000 visibility=[Temp_Chart_Period==1]
-						Chart item=RainsensorNum period=D refresh=60000 visibility=[Temp_Chart_Period==2]
-						Chart item=RainsensorNum period=W refresh=300000 visibility=[Temp_Chart_Period==3]
+						Chart item=gRainSensor period=h refresh=10000 visibility=[Temp_Chart_Period==0, Temp_Chart_Period=="NULL"]
+						Chart item=gRainSensor period=8h refresh=40000 visibility=[Temp_Chart_Period==1]
+						Chart item=gRainSensor period=D refresh=60000 visibility=[Temp_Chart_Period==2]
+						Chart item=gRainSensor period=W refresh=300000 visibility=[Temp_Chart_Period==3]
 					}
 				}
 				Text item=Humidity
+				Switch item=CameraRoof label="Kamera"
 				Switch item=SnowOnRoof visibility=[WateringPeriod==OFF, WateringPeriod=="NULL"]
 				Text item=Warn_no_rain visibility=[WateringPeriod==OFF, WateringPeriod=="NULL"]
 				Text item=Soil1_corr label="Feuchtigkeit Erde" visibility=[WateringPeriod==OFF, WateringPeriod=="NULL"] {
@@ -749,57 +767,101 @@ sitemap loft label="Loft"
 						Chart item=gSoil period=Y refresh=1000000 visibility=[Soil_Chart_Period==5]
 					}
 				}
-				Text item=SoilMoisture1 {
-					Frame label="Bodenfeuchtigkeit Palme" {
-						Switch item=Soil_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 2="Tag", 3="Woche", 4="Month"]
-						Chart item=SoilMoisture1 period=h refresh=10000 visibility=[Soil_Chart_Period==0, Soil_Chart_Period=="NULL"]
-						Chart item=SoilMoisture1 period=8h refresh=40000 visibility=[Soil_Chart_Period==1]
-						Chart item=SoilMoisture1 period=D refresh=60000 visibility=[Soil_Chart_Period==2]
-						Chart item=SoilMoisture1 period=W refresh=300000 visibility=[Soil_Chart_Period==3]
-						Chart item=SoilMoisture1 period=M refresh=1000000 visibility=[Soil_Chart_Period==4]
-					}
-				}
-				Text item=SoilBattery1 {
-					Frame label="Palme Batterie" {
-						Switch item=Soil_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 4="Month", 5="Jahr"]
-						Chart item=SoilBattery1 period=h refresh=10000 visibility=[Soil_Chart_Period==0, Soil_Chart_Period=="NULL"]
-						Chart item=SoilBattery1 period=8h refresh=40000 visibility=[Soil_Chart_Period==1]
-						Chart item=SoilBattery1 period=D refresh=60000 visibility=[Soil_Chart_Period==2]
-						Chart item=SoilBattery1 period=W refresh=300000 visibility=[Soil_Chart_Period==3]
-						Chart item=SoilBattery1 period=M refresh=1000000 visibility=[Soil_Chart_Period==4]
-						Chart item=SoilBattery1 period=Y refresh=10000000 visibility=[Soil_Chart_Period==5]
-					}
-				}
-				Text item=SoilSolar1 {
-					Frame label="Palme Solar" {
-						Switch item=Soil_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 2="Tag", 3="Woche", 4="Month"]
-						Chart item=SoilSolar1 period=h refresh=10000 visibility=[Soil_Chart_Period==0, Soil_Chart_Period=="NULL"]
-						Chart item=SoilSolar1 period=8h refresh=40000 visibility=[Soil_Chart_Period==1]
-						Chart item=SoilSolar1 period=D refresh=60000 visibility=[Soil_Chart_Period==2]
-						Chart item=SoilSolar1 period=W refresh=300000 visibility=[Soil_Chart_Period==3]
-						Chart item=SoilSolar1 period=M refresh=1000000 visibility=[Soil_Chart_Period==4]
-					}
-				}
-				Text item=SoilTemperature1 {
-					Frame label="Palme Temperatur" {
-						Switch item=Soil_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 2="Tag", 3="Woche", 4="Month"]
-						Chart item=SoilTemperature1 period=h refresh=10000 visibility=[Soil_Chart_Period==0, Soil_Chart_Period=="NULL"]
-						Chart item=SoilTemperature1 period=8h refresh=40000 visibility=[Soil_Chart_Period==1]
-						Chart item=SoilTemperature1 period=D refresh=60000 visibility=[Soil_Chart_Period==2]
-						Chart item=SoilTemperature1 period=W refresh=300000 visibility=[Soil_Chart_Period==3]
-						Chart item=SoilTemperature1 period=M refresh=1000000 visibility=[Soil_Chart_Period==4]
-					}
-				}
-				Text item=SoilRSSI1 {
-					Frame label="Palme Signal" {
-						Switch item=Soil_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 2="Tag", 3="Woche", 4="Month"]
-						Chart item=SoilRSSI1 period=h refresh=10000 visibility=[Soil_Chart_Period==0, Soil_Chart_Period=="NULL"]
-						Chart item=SoilRSSI1 period=8h refresh=40000 visibility=[Soil_Chart_Period==1]
-						Chart item=SoilRSSI1 period=D refresh=60000 visibility=[Soil_Chart_Period==2]
-						Chart item=SoilRSSI1 period=W refresh=300000 visibility=[Soil_Chart_Period==3]
-						Chart item=SoilRSSI1 period=M refresh=1000000 visibility=[Soil_Chart_Period==4]
-					}
-				}
+                Text label="Bodenfeuchtigkeit 2" icon="water" {
+                    Frame {
+                        Text item=PlantHumidity2 {
+                            Frame label="Bodenfeuchtigkeit" {
+                                Switch item=Soil_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 2="Tag", 3="Woche", 4="Month"]
+                                Chart item=PlantHumidity2 period=h refresh=10000 visibility=[Soil_Chart_Period==0, Soil_Chart_Period=="NULL"]
+                                Chart item=PlantHumidity2 period=8h refresh=40000 visibility=[Soil_Chart_Period==1]
+                                Chart item=PlantHumidity2 period=D refresh=60000 visibility=[Soil_Chart_Period==2]
+                                Chart item=PlantHumidity2 period=W refresh=300000 visibility=[Soil_Chart_Period==3]
+                                Chart item=PlantHumidity2 period=M refresh=1000000 visibility=[Soil_Chart_Period==4]
+                            }
+                        }
+                        Text item=PlantBattery2 {
+                            Frame label="Batterie" {
+                                Switch item=Soil_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 4="Month", 5="Jahr"]
+                                Chart item=PlantBattery2 period=h refresh=10000 visibility=[Soil_Chart_Period==0, Soil_Chart_Period=="NULL"]
+                                Chart item=PlantBattery2 period=8h refresh=40000 visibility=[Soil_Chart_Period==1]
+                                Chart item=PlantBattery2 period=D refresh=60000 visibility=[Soil_Chart_Period==2]
+                                Chart item=PlantBattery2 period=W refresh=300000 visibility=[Soil_Chart_Period==3]
+                                Chart item=PlantBattery2 period=M refresh=1000000 visibility=[Soil_Chart_Period==4]
+                                Chart item=PlantBattery2 period=Y refresh=10000000 visibility=[Soil_Chart_Period==5]
+                            }
+                        }
+                        Text item=PlantSolar2 {
+                            Frame label="Solar" {
+                                Switch item=Soil_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 2="Tag", 3="Woche", 4="Month"]
+                                Chart item=PlantSolar2 period=h refresh=10000 visibility=[Soil_Chart_Period==0, Soil_Chart_Period=="NULL"]
+                                Chart item=PlantSolar2 period=8h refresh=40000 visibility=[Soil_Chart_Period==1]
+                                Chart item=PlantSolar2 period=D refresh=60000 visibility=[Soil_Chart_Period==2]
+                                Chart item=PlantSolar2 period=W refresh=300000 visibility=[Soil_Chart_Period==3]
+                                Chart item=PlantSolar2 period=M refresh=1000000 visibility=[Soil_Chart_Period==4]
+                            }
+                        }
+                        Text item=PlantTemperature2 {
+                            Frame label="Temperatur" {
+                                Switch item=Soil_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 2="Tag", 3="Woche", 4="Month"]
+                                Chart item=PlantTemperature2 period=h refresh=10000 visibility=[Soil_Chart_Period==0, Soil_Chart_Period=="NULL"]
+                                Chart item=PlantTemperature2 period=8h refresh=40000 visibility=[Soil_Chart_Period==1]
+                                Chart item=PlantTemperature2 period=D refresh=60000 visibility=[Soil_Chart_Period==2]
+                                Chart item=PlantTemperature2 period=W refresh=300000 visibility=[Soil_Chart_Period==3]
+                                Chart item=PlantTemperature2 period=M refresh=1000000 visibility=[Soil_Chart_Period==4]
+                            }
+                        }
+                        Text item=PlantRssi2 {
+                            Frame label="Signal" {
+                                Switch item=Soil_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 2="Tag", 3="Woche", 4="Month"]
+                                Chart item=PlantRssi2 period=h refresh=10000 visibility=[Soil_Chart_Period==0, Soil_Chart_Period=="NULL"]
+                                Chart item=PlantRssi2 period=8h refresh=40000 visibility=[Soil_Chart_Period==1]
+                                Chart item=PlantRssi2 period=D refresh=60000 visibility=[Soil_Chart_Period==2]
+                                Chart item=PlantRssi2 period=W refresh=300000 visibility=[Soil_Chart_Period==3]
+                                Chart item=PlantRssi2 period=M refresh=1000000 visibility=[Soil_Chart_Period==4]
+                            }
+                        }
+                        Text item=PlantHeartbeat2
+                        Text item=PlantHeartbeatDate2
+                    }
+                }
+                Text label="Bodenfeuchtigkeit 3" icon="water" {
+                    Frame {
+                        Text item=PlantHumidity3 {
+                            Frame label="Bodenfeuchtigkeit" {
+                                Switch item=Soil_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 2="Tag", 3="Woche", 4="Month"]
+                                Chart item=PlantHumidity3 period=h refresh=10000 visibility=[Soil_Chart_Period==0, Soil_Chart_Period=="NULL"]
+                                Chart item=PlantHumidity3 period=8h refresh=40000 visibility=[Soil_Chart_Period==1]
+                                Chart item=PlantHumidity3 period=D refresh=60000 visibility=[Soil_Chart_Period==2]
+                                Chart item=PlantHumidity3 period=W refresh=300000 visibility=[Soil_Chart_Period==3]
+                                Chart item=PlantHumidity3 period=M refresh=1000000 visibility=[Soil_Chart_Period==4]
+                            }
+                        }
+                        Text item=PlantBattery3 {
+                            Frame label="Batterie" {
+                                Switch item=Soil_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 4="Month", 5="Jahr"]
+                                Chart item=PlantBattery3 period=h refresh=10000 visibility=[Soil_Chart_Period==0, Soil_Chart_Period=="NULL"]
+                                Chart item=PlantBattery3 period=8h refresh=40000 visibility=[Soil_Chart_Period==1]
+                                Chart item=PlantBattery3 period=D refresh=60000 visibility=[Soil_Chart_Period==2]
+                                Chart item=PlantBattery3 period=W refresh=300000 visibility=[Soil_Chart_Period==3]
+                                Chart item=PlantBattery3 period=M refresh=1000000 visibility=[Soil_Chart_Period==4]
+                                Chart item=PlantBattery3 period=Y refresh=10000000 visibility=[Soil_Chart_Period==5]
+                            }
+                        }
+                        Text item=PlantRssi3 {
+                            Frame label="Signal" {
+                                Switch item=Soil_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 2="Tag", 3="Woche", 4="Month"]
+                                Chart item=PlantRssi3 period=h refresh=10000 visibility=[Soil_Chart_Period==0, Soil_Chart_Period=="NULL"]
+                                Chart item=PlantRssi3 period=8h refresh=40000 visibility=[Soil_Chart_Period==1]
+                                Chart item=PlantRssi3 period=D refresh=60000 visibility=[Soil_Chart_Period==2]
+                                Chart item=PlantRssi3 period=W refresh=300000 visibility=[Soil_Chart_Period==3]
+                                Chart item=PlantRssi3 period=M refresh=1000000 visibility=[Soil_Chart_Period==4]
+                            }
+                        }
+                        Text item=PlantHeartbeat3
+                        Text item=PlantHeartbeatDate3
+                        Switch item=PlantWinterMode3
+                    }
+                }
 				Text item=WateringStatusDisplay label="Bewässerung [MAP(watering.map):%s]" icon="garden" visibility=[WateringPeriod==ON] {
 					Frame label="Hauptschalter" {
                         Switch item=WateringPlug
@@ -983,37 +1045,44 @@ sitemap loft label="Loft"
 				}
 			}
 		}
-		Text label="Flur" icon="corridor" {
-			Text item=HallMotion
-			Text item=Hall_Temperature
-			Text item=Hall_Luminance
+		Text label="Flur" icon="wardrobe" {
+			Frame label="Flur" icon="wardrobe" {
+                Text item=HallMotion
+                Text item=Hall_Temperature
+                Text item=Hall_Luminance
 
-            Selection item=Light_HallScenes label="Licht-Szenen" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]
-            Text label="Licht manuell" icon="dimmablelight" {
-                Frame label="Licht manuell" {
-                    Switch	item=Light_HallSwitch                    						label="Licht"
-                    Slider	item=Light_HallBright	visibility=[Light_HallSwitch==ON]  	    label="Helligkeit"
-                    Slider	item=Light_HallTemp 	visibility=[Light_HallSwitch==ON]  	    label="Temperatur"
+                Selection 	item=Light_HallScenes label="Licht-Szenen" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]        icon="lichtaus" visibility=[Light_HallScenes==0]
+                Selection 	item=Light_HallScenes label="Licht-Szenen" mappings=[0=aus, 1=Tag, 2=Standard, 3=Antik, 4=Nacht]        icon="lichtan"  visibility=[Light_HallScenes!=0]
+                Text label="Licht manuell" icon="colorlight" {
+                    Frame label="Licht manuell" {
+                        Switch	item=Light_HallSwitch                    						label="Licht"
+                        Slider	item=Light_HallBright	visibility=[Light_HallSwitch==ON]  	    label="Helligkeit"
+                        Slider	item=Light_HallTemp 	visibility=[Light_HallSwitch==ON]  	    label="Temperatur"
+                    }
                 }
             }
 		}
 		Text label="Treppenhaus" icon="corridor" {
-			Switch item=DoorBuzzer_Down
-			Switch item=DoorBuzzer_Up
-			Text item=Window_AppDoor
-			Text item=StairwayMotion
-			Text item=Stairway_Temperature
-			Text item=Stairway_Luminance
+			Frame label="Treppenhaus" icon="corridor" {
+                Switch item=DoorBuzzer_Down
+                Switch item=DoorBuzzer_Up
+                Text item=Window_AppDoor
+                Text item=StairwayMotion
+                Text item=Stairway_Temperature
+                Text item=Stairway_Luminance
 
-			Switch	item=Light_StairsSwitch                 						label="Licht"
-			Slider	item=Light_StairsBright	visibility=[Light_StairsSwitch==ON]  	label="Helligkeit"
-			Slider	item=Light_StairsTemp	visibility=[Light_StairsSwitch==ON]  	label="Temperatur"
+                Switch	item=Light_StairsSwitch                 						label="Licht"
+                Slider	item=Light_StairsBright	visibility=[Light_StairsSwitch==ON]  	label="Helligkeit"
+                Slider	item=Light_StairsTemp	visibility=[Light_StairsSwitch==ON]  	label="Temperatur"
 
-			Switch item=Light_StairwaysDown
+                Switch item=Light_StairwaysDown
+            }
 		}
 		Text label="Garage" icon="garagedoor" {
-			Switch item=Garagentor
-			Text item=Window_Garage
+			Frame label="Garage" icon="garagedoor" {
+    			Switch item=Garagentor
+	    		Text item=Window_Garage
+            }
 		}
 	}
 	Frame label="Status" {
@@ -1303,7 +1372,7 @@ sitemap loft label="Loft"
                     Text item=Solar2Signal
                     Text item=HAMasterSwitchSignal
                 }
-				Text label="Esp32" icon="network" {
+				Text label="ESP" icon="network" {
                     Frame label="Bewässerung" icon="water" {
                         Text item=WaterRoofHeartbeat
                         Text item=WaterRoofHeartbeatDate
@@ -1345,6 +1414,35 @@ sitemap loft label="Loft"
                         Chart item=CO2Rssi1 period=8h refresh=40000 visibility=[PiCpu_Chart_Period==1]
                         Chart item=CO2Rssi1 period=D refresh=60000 visibility=[PiCpu_Chart_Period==2]
                         Chart item=CO2Rssi1 period=W refresh=300000 visibility=[PiCpu_Chart_Period==3]
+                    }
+                    Frame label="CO2 - 2" icon="carbondioxide" {
+                        Text item=CO2level2
+                        Text item=CO2status2
+                        Text item=CO2temp2
+                        Text item=CO2humid2
+                        Setpoint item=CO2brightness2 step=1 minValue=0 maxValue=9
+                        Setpoint item=CO2tempOffset2 step=0.1 minValue=-5.0 maxValue=5.0
+                        Setpoint item=CO2humidityOffset2 step=1 minValue=-50 maxValue=50
+                        Text item=CO2Heartbeat2
+                        Text item=CO2HeartbeatDate2
+                        Text item=CO2Rssi2
+                        Switch item=PiCpu_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 2="Tag", 3="Woche"]
+                        Chart item=CO2Rssi2 period=h refresh=10000 visibility=[PiCpu_Chart_Period==0, PiCpu_Chart_Period=="NULL"]
+                        Chart item=CO2Rssi2 period=8h refresh=40000 visibility=[PiCpu_Chart_Period==1]
+                        Chart item=CO2Rssi2 period=D refresh=60000 visibility=[PiCpu_Chart_Period==2]
+                        Chart item=CO2Rssi2 period=W refresh=300000 visibility=[PiCpu_Chart_Period==3]
+                    }
+                    Frame label="Regensensor" icon="rain" {
+                        Text item=RainingNow
+                        Switch item=RainingHeating
+                        Text item=RainingHeartbeat
+                        Text item=RainingHeartbeatDate
+                        Text item=RainSensorRssi
+                        Switch item=PiCpu_Chart_Period icon="time" label="Zeitraum" mappings=[0="Std", 1="8 Std", 2="Tag", 3="Woche"]
+                        Chart item=RainSensorRssi period=h refresh=10000 visibility=[PiCpu_Chart_Period==0, PiCpu_Chart_Period=="NULL"]
+                        Chart item=RainSensorRssi period=8h refresh=40000 visibility=[PiCpu_Chart_Period==1]
+                        Chart item=RainSensorRssi period=D refresh=60000 visibility=[PiCpu_Chart_Period==2]
+                        Chart item=RainSensorRssi period=W refresh=300000 visibility=[PiCpu_Chart_Period==3]
                     }
 				}
 
@@ -1594,6 +1692,35 @@ sitemap loft label="Loft"
 					}
 				}
 			}
+            Frame label="Aufrufe" {
+				Text label="Fenster" icon="line" {
+					Frame label="Fenster" {
+						Switch item=NumCalls_Chart_Period icon="time" label="Zeitraum" mappings=[0="Tag", 1="Woche", 2="Monat", 3="Jahr"]
+						Chart item=gDeviceStatusNumWin period=D refresh=60000 visibility=[NumCalls_Chart_Period==0]
+						Chart item=gDeviceStatusNumWin period=W refresh=300000 visibility=[NumCalls_Chart_Period==1]
+						Chart item=gDeviceStatusNumWin period=M refresh=600000 visibility=[NumCalls_Chart_Period==2]
+						Chart item=gDeviceStatusNumWin period=Y refresh=600000 visibility=[NumCalls_Chart_Period==3]
+					}
+                }
+				Text label="Rauchmelder" icon="line" {
+					Frame label="Rauchmelder" {
+						Switch item=NumCalls_Chart_Period icon="time" label="Zeitraum" mappings=[0="Tag", 1="Woche", 2="Monat", 3="Jahr"]
+						Chart item=gDeviceStatusNumSmoke period=D refresh=60000 visibility=[NumCalls_Chart_Period==0]
+						Chart item=gDeviceStatusNumSmoke period=W refresh=300000 visibility=[NumCalls_Chart_Period==1]
+						Chart item=gDeviceStatusNumSmoke period=M refresh=600000 visibility=[NumCalls_Chart_Period==2]
+						Chart item=gDeviceStatusNumSmoke period=Y refresh=600000 visibility=[NumCalls_Chart_Period==3]
+					}
+                }
+				Text label="Bewegungsmelder" icon="line" {
+					Frame label="Bewegungsmelder" {
+						Switch item=NumCalls_Chart_Period icon="time" label="Zeitraum" mappings=[0="Tag", 1="Woche", 2="Monat", 3="Jahr"]
+						Chart item=gDeviceStatusNumMotion period=D refresh=60000 visibility=[NumCalls_Chart_Period==0]
+						Chart item=gDeviceStatusNumMotion period=W refresh=300000 visibility=[NumCalls_Chart_Period==1]
+						Chart item=gDeviceStatusNumMotion period=M refresh=600000 visibility=[NumCalls_Chart_Period==2]
+						Chart item=gDeviceStatusNumMotion period=Y refresh=600000 visibility=[NumCalls_Chart_Period==3]
+					}
+                }
+            }
 			Frame label="Restart" {
 				Switch item=RestartICloud
 				Switch item=RestartHomematic

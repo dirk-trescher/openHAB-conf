@@ -1,4 +1,4 @@
-DRY=trocken
-RAIN=Regen
+Dry=trocken
+Raining=Regen
 NULL=unbekannt
 -=unbekannt

@@ -54,6 +54,60 @@ val Functions$Function5<SwitchItem, Map<String, Boolean>, Integer,
     }
 ]
 
+// Lambda to process an update from a Device, create/reschedule the Timer and set the Switch to ON
+val Functions$Function6<SwitchItem, NumberItem, Map<String, Boolean>, Integer,
+                        Map<String, Timer>, Map<String, ReentrantLock>, Void> processONNum = [
+    SwitchItem sw,
+    NumberItem SensorCount,
+	Map<String, Boolean> notified,
+    Integer timeoutMinutes,
+	Map<String, Timer> timers,
+    Map<String, ReentrantLock> locks |
+
+    if(locks.get(sw.name) === null) {
+        locks.put(sw.name, new ReentrantLock)
+    }
+
+    val lock = locks.get(sw.name)
+    if(!lock.isLocked) {
+        try {
+            lock.lock
+
+            // logInfo("processOn", "Device " + sw.name + " ist aktiv")
+
+            if (sw.state != ON) {
+                sw.sendCommand(ON)          // update the switch
+            }
+
+            var int count = 0
+            if (SensorCount.state != NULL) {
+                count = (SensorCount.state as DecimalType).intValue
+            }
+            SensorCount.postUpdate(count + 1)
+
+            // Set or reschedule the Timer
+            if(timers.get(sw.name) === null) {
+                timers.put(sw.name, createTimer(now.plusMinutes(timeoutMinutes), [ |
+                    // logInfo("processOn", "Timer für Device " + sw.name)
+
+                    timers.put(sw.name, null)
+                    sw.sendCommand(OFF)
+                ]))
+            }
+            else {
+                timers.get(sw.name).reschedule(now.plusMinutes(timeoutMinutes))
+            }
+        }
+        catch(Throwable t){
+            logError("processOn", "Error in locked segment in processON")
+        }
+        finally {
+            lock.unlock
+        }
+        true
+    }
+]
+
 rule "System started, create initial timers"
 when
     System started
@@ -80,125 +134,134 @@ then
     }
 end
 
+rule "reset daily counter"
+when
+    Time cron "0 0 0 * * ?"         // midnight
+then
+    gDeviceStatusNum.members.forEach[NumberItem number |
+        number.postUpdate(0)
+    ]
+end
+
 // ----------------------------------------------------------
 
 rule "WindowContct Living Left received update"
 when
     Item Window_LivingLeft_Signal received update
 then
-    processON.apply(WinLLStatus, notified, 600, timers, locks)
+    processONNum.apply(WinLLStatus, WinLLStatusNum, notified, 600, timers, locks)
 end
 
 rule "WindowContct Living Middle received update"
 when
     Item Window_LivingMiddle_Signal received update
 then
-    processON.apply(WinLMStatus, notified, 600, timers, locks)
+    processONNum.apply(WinLMStatus, WinLMStatusNum, notified, 600, timers, locks)
 end
 
 rule "WindowContct Living Right received update"
 when
     Item Window_LivingRight_Signal received update
 then
-    processON.apply(WinLRStatus, notified, 600, timers, locks)
+    processONNum.apply(WinLRStatus, WinLRStatusNum, notified, 600, timers, locks)
 end
 
 rule "WindowContct Sleep received update"
 when
     Item Window_Sleep_Signal received update
 then
-    processON.apply(WinSlStatus, notified, 600, timers, locks)
+    processONNum.apply(WinSlStatus, WinSlStatusNum, notified, 600, timers, locks)
 end
 
 rule "WindowContct Emilie left received update"
 when
     Item Window_EmilieLeft_Signal received update
 then
-    processON.apply(WinELStatus, notified, 600, timers, locks)
+    processONNum.apply(WinELStatus, WinELStatusNum, notified, 600, timers, locks)
 end
 
 rule "WindowContct Emilie middle received update"
 when
     Item Window_EmilieMiddle_Signal received update
 then
-    processON.apply(WinEMStatus, notified, 600, timers, locks)
+    processONNum.apply(WinEMStatus, WinEMStatusNum, notified, 600, timers, locks)
 end
 
 rule "WindowContct Emilie right received update"
 when
     Item Window_EmilieRight_Signal received update
 then
-    processON.apply(WinERStatus, notified, 600, timers, locks)
+    processONNum.apply(WinERStatus, WinERStatusNum, notified, 600, timers, locks)
 end
 
 rule "WindowContct Niklas left received update"
 when
     Item Window_NiklasLeft_Signal received update
 then
-    processON.apply(WinNLStatus, notified, 600, timers, locks)
+    processONNum.apply(WinNLStatus, WinNLStatusNum, notified, 600, timers, locks)
 end
 
 rule "WindowContct Niklas right received update"
 when
     Item Window_NiklasRight_Signal received update
 then
-    processON.apply(WinNRStatus, notified, 600, timers, locks)
+    processONNum.apply(WinNRStatus, WinNRStatusNum, notified, 600, timers, locks)
 end
 
 rule "WindowContct Office Door received update"
 when
     Item Window_OfficeDoor_Signal received update
 then
-    processON.apply(WinODStatus, notified, 600, timers, locks)
+    processONNum.apply(WinODStatus, WinODStatusNum, notified, 600, timers, locks)
 end
 
 rule "WindowContct Office left received update"
 when
     Item Window_OfficeLeft_Signal received update
 then
-    processON.apply(WinOLStatus, notified, 600, timers, locks)
+    processONNum.apply(WinOLStatus, WinOLStatusNum, notified, 600, timers, locks)
 end
 
 rule "WindowContct Office right received update"
 when
     Item Window_OfficeRight_Signal received update
 then
-    processON.apply(WinORStatus, notified, 600, timers, locks)
+    processONNum.apply(WinORStatus, WinORStatusNum, notified, 600, timers, locks)
 end
 
 rule "WindowContct Hobby received update"
 when
     Item Window_Hobby_Signal received update
 then
-    processON.apply(WinHStatus, notified, 600, timers, locks)
+    processONNum.apply(WinHStatus, WinHStatusNum, notified, 600, timers, locks)
 end
 
 rule "WindowContct Terrace Door received update"
 when
     Item Window_Terrace_Signal received update
 then
-    processON.apply(WinTStatus, notified, 600, timers, locks)
+    processONNum.apply(WinTStatus, WinTStatusNum, notified, 600, timers, locks)
 end
 
 rule "WindowContct Guest received update"
 when
     Item Window_Guests_Signal received update
 then
-    processON.apply(WinGuStatus, notified, 600, timers, locks)
+    processONNum.apply(WinGuStatus, WinGuStatusNum, notified, 600, timers, locks)
 end
 
 rule "WindowContct Appartment Door received update"
 when
     Item Window_AppDoor_Signal received update
 then
-    processON.apply(WinADStatus, notified, 600, timers, locks)
+    processONNum.apply(WinADStatus, WinADStatusNum, notified, 600, timers, locks)
 end
 
 rule "WindowContct Garage received update"
 when
     Item Window_Garage_Signal received update
 then
-    processON.apply(WinGaStatus, notified, 600, timers, locks)
+    processONNum.apply(WinGaStatus, WinGaStatusNum, notified, 600, timers, locks)
 end
 
 // ----------------------------------------------------------
@@ -444,7 +507,7 @@ when
     Item CO_Level received update or
     Item Batt_CO_disp received update
 then
-    processON.apply(COStatus, notified, 1440, timers, locks)
+    processONNum.apply(COStatus, COStatusNum, notified, 1440, timers, locks)
 end
 
 rule "Smoke detector sleep received update"
@@ -454,7 +517,7 @@ when
     Item Smoke_Sleep received update or
     Item Batt_Smoke_Sleep_disp received update
 then
-    processON.apply(SmokeSleepStatus, notified, 1440, timers, locks)
+    processONNum.apply(SmokeSleepStatus, SmokeSleepStatusNum, notified, 1440, timers, locks)
 end
 
 rule "Smoke detector Niklas received update"
@@ -464,7 +527,7 @@ when
     Item Smoke_Niklas received update or
     Item Batt_Smoke_Niklas_disp received update
 then
-    processON.apply(SmokeNiklasStatus, notified, 1440, timers, locks)
+    processONNum.apply(SmokeNiklasStatus, SmokeNiklasStatusNum, notified, 1440, timers, locks)
 end
 
 rule "Smoke detector Emilie received update"
@@ -474,7 +537,7 @@ when
     Item Smoke_Emilie received update or
     Item Batt_Smoke_Emilie_disp received update
 then
-    processON.apply(SmokeEmilieStatus, notified, 1440, timers, locks)
+    processONNum.apply(SmokeEmilieStatus, SmokeEmilieStatusNum, notified, 1440, timers, locks)
 end
 
 rule "Smoke detector office received update"
@@ -484,7 +547,7 @@ when
     Item Smoke_Office received update or
     Item Batt_Smoke_Office_disp received update
 then
-    processON.apply(SmokeOfficeStatus, notified, 1440, timers, locks)
+    processONNum.apply(SmokeOfficeStatus, SmokeOfficeStatusNum, notified, 1440, timers, locks)
 end
 
 rule "Motion stairway received update"
@@ -494,7 +557,7 @@ when
     Item Stairway_Luminance received update or
     Item Batt_StairwayMotion_disp received update
 then
-    processON.apply(MotionStairwayStatus, notified, 1440, timers, locks)
+    processONNum.apply(MotionStairwayStatus, MotionStairwayStatusNum, notified, 1440, timers, locks)
 end
 
 rule "Motion hall received update"
@@ -504,7 +567,7 @@ when
     Item Hall_Luminance received update or
     Item Batt_HallMotion_disp received update
 then
-    processON.apply(MotionHallStatus, notified, 1440, timers, locks)
+    processONNum.apply(MotionHallStatus, MotionHallStatusNum, notified, 1440, timers, locks)
 end
 
 rule "Motion Guest Loo received update"
@@ -514,5 +577,5 @@ when
     Item GuestLoo_Luminance received update or
     Item Batt_GuestLooMotion_disp received update
 then
-    processON.apply(MotionGuestLooStatus, notified, 1440, timers, locks)
+    processONNum.apply(MotionGuestLooStatus, MotionGuestLooStatusNum, notified, 1440, timers, locks)
 end

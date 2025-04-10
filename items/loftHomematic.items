@@ -585,28 +585,28 @@ Switch Switch_BathInside_Unreach	"Schalter Bad innen [MAP(unreach.map):%s]"  	(g
 Switch BathAmbientTrigger													(grBath)
 
 Number Switch_EmilieDoor			"Schalter [MAP(switches.map):%s]"   	(grEmilie)
-Switch Switch_EmilieDoorShortUp    	"Schalter kurz hoch"  					(grEmilie)     			{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136640:1#PRESS_SHORT"}
-Switch Switch_EmilieDoorLongUp     	"Schalter lang hoch"  					(grEmilie)     			{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136640:1#PRESS_LONG"}
-Switch Switch_EmilieDoorLongUpEnd  	"Schalter lang hoch Ende" 				(grEmilie)     			{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136640:1#PRESS_LONG_RELEASE"}
-Switch Switch_EmilieDoorShortDown  	"Schalter kurz runter"  				(grEmilie)     			{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136640:2#PRESS_SHORT"}
-Switch Switch_EmilieDoorLongDown   	"Schalter lang runter"  				(grEmilie)     			{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136640:2#PRESS_LONG"}
-Switch Switch_EmilieDoorLongDownEnd "Schalter lang runter Ende"  			(grEmilie)     			{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136640:2#PRESS_LONG_RELEASE"}
-Switch Switch_EmilieDoor_Batt 												(grEmilie, gBatteries) 	{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136640:0#LOWBAT"}
+Switch Switch_EmilieDoorShortUp    	"Schalter kurz hoch"  					(grEmilie)     			{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136533:1#PRESS_SHORT"}
+Switch Switch_EmilieDoorLongUp     	"Schalter lang hoch"  					(grEmilie)     			{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136533:1#PRESS_LONG"}
+Switch Switch_EmilieDoorLongUpEnd  	"Schalter lang hoch Ende" 				(grEmilie)     			{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136533:1#PRESS_LONG_RELEASE"}
+Switch Switch_EmilieDoorShortDown  	"Schalter kurz runter"  				(grEmilie)     			{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136533:2#PRESS_SHORT"}
+Switch Switch_EmilieDoorLongDown   	"Schalter lang runter"  				(grEmilie)     			{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136533:2#PRESS_LONG"}
+Switch Switch_EmilieDoorLongDownEnd "Schalter lang runter Ende"  			(grEmilie)     			{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136533:2#PRESS_LONG_RELEASE"}
+Switch Switch_EmilieDoor_Batt 												(grEmilie, gBatteries) 	{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136533:0#LOWBAT"}
 Number Switch_EmilieDoor_Batt_disp	"Schalter Emilie Tür [MAP(batteries.map):%s]" <battery>	(grEmilie, gBatteries)
-Number Switch_EmilieDoor_Signal		"Schalter Emilie Tür [%.0f]"   <signal>    (gSignal)		    {channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136640:0#RSSI_DEVICE"}
-Switch Switch_EmilieDoor_Unreach	"Schalter Emilie Tür [MAP(unreach.map):%s]"  	(gUnreach) 		{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136640:0#UNREACH"}
+Number Switch_EmilieDoor_Signal		"Schalter Emilie Tür [%.0f]"   <signal>    (gSignal)		    {channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136533:0#RSSI_DEVICE"}
+Switch Switch_EmilieDoor_Unreach	"Schalter Emilie Tür [MAP(unreach.map):%s]"  	(gUnreach) 		{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136533:0#UNREACH"}
 
 Number Switch_EmilieSleep			"Schalter [MAP(switches.map):%s]"   	(grEmilie)
-Switch Switch_EmilieSleepShortUp    "Schalter kurz hoch"  					(grEmilie)     			{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136533:1#PRESS_SHORT"}
-Switch Switch_EmilieSleepLongUp     "Schalter lang hoch"  					(grEmilie)     			{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136533:1#PRESS_LONG"}
-Switch Switch_EmilieSleepLongUpEnd  "Schalter lang hoch Ende" 				(grEmilie)     			{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136533:1#PRESS_LONG_RELEASE"}
-Switch Switch_EmilieSleepShortDown  "Schalter kurz runter"  				(grEmilie)     			{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136533:2#PRESS_SHORT"}
-Switch Switch_EmilieSleepLongDown   "Schalter lang runter"  				(grEmilie)     			{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136533:2#PRESS_LONG"}
-Switch Switch_EmilieSleepLongDownEnd "Schalter lang runter Ende"  			(grEmilie)     			{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136533:2#PRESS_LONG_RELEASE"}
-Switch Switch_EmilieSleep_Batt 												(grEmilie, gBatteries) 	{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136533:0#LOWBAT"}
+Switch Switch_EmilieSleepShortUp    "Schalter kurz hoch"  					(grEmilie)     			{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136640:1#PRESS_SHORT"}
+Switch Switch_EmilieSleepLongUp     "Schalter lang hoch"  					(grEmilie)     			{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136640:1#PRESS_LONG"}
+Switch Switch_EmilieSleepLongUpEnd  "Schalter lang hoch Ende" 				(grEmilie)     			{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136640:1#PRESS_LONG_RELEASE"}
+Switch Switch_EmilieSleepShortDown  "Schalter kurz runter"  				(grEmilie)     			{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136640:2#PRESS_SHORT"}
+Switch Switch_EmilieSleepLongDown   "Schalter lang runter"  				(grEmilie)     			{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136640:2#PRESS_LONG"}
+Switch Switch_EmilieSleepLongDownEnd "Schalter lang runter Ende"  			(grEmilie)     			{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136640:2#PRESS_LONG_RELEASE"}
+Switch Switch_EmilieSleep_Batt 												(grEmilie, gBatteries) 	{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136640:0#LOWBAT"}
 Number Switch_EmilieSleep_Batt_disp	"Schalter Emilie Bett [MAP(batteries.map):%s]" <battery>	(grEmilie, gBatteries)
-Number Switch_EmilieSleep_Signal    "Schalter Emilie Bett [%.0f]"   <signal>    (gSignal)		    {channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136533:0#RSSI_DEVICE"}
-Switch Switch_EmilieSleep_Unreach	"Schalter Emilie Bett [MAP(unreach.map):%s]"  	(gUnreach) 		{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136533:0#UNREACH"}
+Number Switch_EmilieSleep_Signal    "Schalter Emilie Bett [%.0f]"   <signal>    (gSignal)		    {channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136640:0#RSSI_DEVICE"}
+Switch Switch_EmilieSleep_Unreach	"Schalter Emilie Bett [MAP(unreach.map):%s]"  	(gUnreach) 		{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:LTK0136640:0#UNREACH"}
 
 Number Switch_Niklas			    "Schalter [MAP(switches.map):%s]"   	(grNiklas)
 Switch Switch_NiklasShortUp    	    "Schalter kurz hoch"  					(grNiklas)     			{channel="homematic:HG-HM-PB-2-WM55-2:bc18ba0fac:OEQ0902169:1#PRESS_SHORT"}
@@ -737,12 +737,6 @@ Switch Soil1_Batt    		 													(gBatteries)				{channel="homematic:HG-HM-W
 Number Soil1_Signal			"Feuchtigkeit Erde [%.0f]"			<signal>		(gSignal)					{channel="homematic:HG-HM-WDS30-OT2-SM:bc18ba0fac:MEQ1597564:0#RSSI_DEVICE"}
 Number Soil1_Unreach		"Feuchtigkeit Erde"					<signal>		(gUnreach)					{channel="homematic:HG-HM-WDS30-OT2-SM:bc18ba0fac:MEQ1597564:0#UNREACH"}
 Number Soil1_Batt_disp 		"Feuchtigkeit Erde [MAP(batteries.map):%s]"	<battery>	(gBatteries)
-
-/* Weather Sensors */
-String Rainsensor			"Regensensor [MAP(rainSensor.map):%s]"					<rain>		(gWeather)	{channel="homematic:HG-HM-Sen-RD-O:bc18ba0fac:KEQ1070950:1#STATE"}
-Switch RainsensorHeating	"Regensensor Heizung [MAP(rainSensorHeating.map):%s]"	<rain>		(gWeather)	{channel="homematic:HG-HM-Sen-RD-O:bc18ba0fac:KEQ1070950:2#STATE"}
-Number RainsensorNum		"Regensensor [%d]"													(gRainSensor)
-Number RainsensorHeatingNum	"Regensensor Heizung [%d]"											(gRainSensor)
 
 
 /* Failover */

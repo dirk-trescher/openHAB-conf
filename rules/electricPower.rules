@@ -46,6 +46,9 @@ then
     if( energyDaily1 < 0.0 ) {
         energyDaily1 = SolarEnergy1.state as DecimalType
     }
+    if( energyDaily1 > 10.0 ) {
+        energyDaily1 = 0.0
+    }
     SolarEnergyDaily1.postUpdate(energyDaily1)
 
     var double energyDaily2 = (SolarEnergy2.state as DecimalType).doubleValue
@@ -54,6 +57,9 @@ then
     }
     if( energyDaily2 < 0.0 ) {
         energyDaily2 = SolarEnergy2.state as DecimalType
+    }
+    if( energyDaily2 > 10.0 ) {
+        energyDaily2 = 0.0
     }
     SolarEnergyDaily2.postUpdate(energyDaily2)
     SolarEnergyDaily.postUpdate(energyDaily1 + energyDaily2)
@@ -130,7 +136,7 @@ then
 	var int sum = (Power1_bigFlat.state as DecimalType).intValue
                 + (Power2_bigFlat.state as DecimalType).intValue
                 + (Power3_bigFlat.state as DecimalType).intValue
-	if (sum < 0) {
+	if (sum < 0 && sum > -1000) {
         postUpdate(SolarPowerEinspeisung1, - sum)
     } else {
         postUpdate(SolarPowerEinspeisung1, 0)
@@ -138,7 +144,7 @@ then
 	sum = (Power1_smallFlat.state as DecimalType).intValue
         + (Power2_smallFlat.state as DecimalType).intValue
         + (Power3_smallFlat.state as DecimalType).intValue
-	if (sum < 0) {
+	if (sum < 0 && sum > -1000) {
         postUpdate(SolarPowerEinspeisung2, - sum)
     } else {
         postUpdate(SolarPowerEinspeisung2, 0)

@@ -110,7 +110,7 @@ when
 	Time cron "0 * * * * ?"		// every min
 then
 	if (triggerBathOpenWindow) {
-		if (Rainsensor.state == NULL || Rainsensor.state == "DRY") {
+		if (RainingNow.state == NULL || RainingNow.state == "Dry") {
 			if (Light_BathLSwitch.state == OFF) {
 				logAndWriteReason.apply( "too humid in bathroom: open roof window" )
 

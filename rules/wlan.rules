@@ -87,6 +87,22 @@ then
 	}
 end
 
+rule "Switch on WLAN at 6 AM when present"
+when
+	Time cron "0 1 6 * * ?"	    // 6:01
+then
+	if(LoftMode.state == 0 &&
+            (WLAN_Loft.state == OFF || WLAN50_LoftRoof.state == OFF) ) {
+		logInfo( "wifi", "wifi on due to 6 AM and Present Mode" )
+
+		sendCommand(WLAN_Loft, ON)
+    	sendCommand(WLAN50_LoftRoof, ON)
+		if (Guests.state == OFF) {
+			sendCommand(WLAN_Office_DelayOff, ON)
+		}
+	}
+end
+
 rule "Switch on office WiFi at 9:00 when guests are there"
 when
     Time cron "0 0 7 ? * MON-FRI" or	// 7:00 weekdays
@@ -200,10 +216,10 @@ then
     WLAN_Loft_ON_Timer?.cancel
     WLAN_Loft_ON_Timer = null
 
-	if (WLAN24_Loft.state != OFF) {
-		logInfo( "wifi", "switch WLAN24_Loft off" )
-		sendCommand(WLAN24_Loft, OFF)
-	}
+	// if (WLAN24_Loft.state != OFF) {
+	// 	logInfo( "wifi", "switch WLAN24_Loft off" )
+	// 	sendCommand(WLAN24_Loft, OFF)
+	// }
 	if (WLAN50_Loft.state != OFF) {
 		logInfo( "wifi", "switch WLAN50_Loft off" )
 		sendCommand(WLAN50_Loft, OFF)
@@ -211,10 +227,10 @@ then
 
 	WLAN_Loft_OFF_Timer = createTimer(now.plusMinutes(20)) [|
 		if (LoftMode.state == 2 || LoftMode.state == 4) {
-			if (WLAN24_Loft.state != OFF) {
-				logInfo( "wifi", "timer: switch WLAN24_Loft off" )
-				sendCommand(WLAN24_Loft, OFF)
-			}
+			// if (WLAN24_Loft.state != OFF) {
+			// 	logInfo( "wifi", "timer: switch WLAN24_Loft off" )
+			// 	sendCommand(WLAN24_Loft, OFF)
+			// }
 			if (WLAN50_Loft.state != OFF) {
 				logInfo( "wifi", "timer: switch WLAN50_Loft off" )
 				sendCommand(WLAN50_Loft, OFF)

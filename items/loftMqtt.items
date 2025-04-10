@@ -1,8 +1,17 @@
-Number SoilMoisture1        "Bodenfeuchtigkeit Palme [%d %%]"   <water>   (gSoil)	{channel="mqtt:topic:1fd8bb3ef8:4a1c228310:soilMoisture"}
-Number SoilBattery1         "Batterie Palme [JS(divideByHundred.js):%s]"   <battery>   (gSoilBatt)	{channel="mqtt:topic:1fd8bb3ef8:4a1c228310:batteryVoltage"}
-Number SoilSolar1           "Solar Palme [JS(divideByHundred.js):%s]"   <solarplant>   (gSoilSolar)	{channel="mqtt:topic:1fd8bb3ef8:4a1c228310:solarVoltage"}
-Number SoilTemperature1     "Temperatur Palme [%d °C]"   <temperature>   (gOutsideTemp)	{channel="mqtt:topic:1fd8bb3ef8:4a1c228310:Temperature"}
-Number SoilRSSI1            "Signalstärke Palme [-%d]"   <network>   (gSignal)	{channel="mqtt:topic:1fd8bb3ef8:4a1c228310:moistureRssi"}
+Number PlantHumidity2        "Bodenfeuchtigkeit Palme [%d %%]"   <water>   (gSoil)	{channel="mqtt:topic:1fd8bb3ef8:4a1c228310:plantHumidity"}
+Number PlantBattery2         "Batterie Palme [JS(divideByHundred.js):%s]"   <battery>   (gSoilBatt)	{channel="mqtt:topic:1fd8bb3ef8:4a1c228310:batteryVoltage"}
+Number PlantSolar2           "Solar Palme [JS(divideByHundred.js):%s]"   <solarplant>   (gSoilSolar)	{channel="mqtt:topic:1fd8bb3ef8:4a1c228310:solarVoltage"}
+Number PlantTemperature2     "Temperatur Palme [JS(divideByTen.js):%s]"   <temperature>   (gOutsideTemp)	{channel="mqtt:topic:1fd8bb3ef8:4a1c228310:Temperature"}
+Number PlantRssi2            "Signalstärke Palme [%d]"   <network>   (gSignal)	{channel="mqtt:topic:1fd8bb3ef8:4a1c228310:moistureRssi"}
+Number PlantHeartbeat2       "Palme Uptime [JS(duration.js):%s]"   <network>   	{channel="mqtt:topic:1fd8bb3ef8:4a1c228310:heartbeat"}
+DateTime PlantHeartbeatDate2 "Heartbeat Palme [%1$td.%1$tm.%1$ty %1$tH:%1$tM]"   <network>
+
+Number PlantHumidity3        "Bodenfeuchtigkeit 3 [%s]"   <water>   (gSoil)	{channel="mqtt:topic:1fd8bb3ef8:e1c39457a8:plantHumidity"}
+Number PlantBattery3         "Batterie 3 [%s]"   <battery>   (gSoilBatt)	{channel="mqtt:topic:1fd8bb3ef8:e1c39457a8:batteryVoltage"}
+Switch PlantWinterMode3      "Winter-Modus 3"   <snow>  (gSoilWinterMode)
+Number PlantRssi3            "Signalstärke 3 [%d]"   <network>   (gSignal)	{channel="mqtt:topic:1fd8bb3ef8:e1c39457a8:moistureRssi"}
+Number PlantHeartbeat3       "Uptime 3 [JS(duration.js):%s]"   <network>   	{channel="mqtt:topic:1fd8bb3ef8:e1c39457a8:heartbeat"}
+DateTime PlantHeartbeatDate3 "Heartbeat 3 [%1$td.%1$tm.%1$ty %1$tH:%1$tM]"   <network>
 
 Number WaterFlowRoof1                                                      (gWaterUsage)    {channel="mqtt:topic:1fd8bb3ef8:cf183728:waterflow_1"}
 Number WaterFlowRoof2                                                      (gWaterUsage)    {channel="mqtt:topic:1fd8bb3ef8:cf183728:waterflow_2"}
@@ -53,10 +62,30 @@ Switch FingerGetNrOfFingers      "Anfrage Anzahl Fingerabdrücke"
 Number FingerNrOfFingers         "Registrierte Fingerabdrücke [%d]"                        (gFingerprint) {channel="mqtt:topic:aad8e2f9:nr_fingers"}
 String FingerTamperAlarm         "Manipulations-Alarm [%s]"             <alarm>            (gFingerprint) {channel="mqtt:topic:aad8e2f9:tamper_alarm"}
 
-Number CO2level1                 "CO2 Level [%d ppm]"                    <carbondioxide>    (gAirQuality) {channel="mqtt:topic:0dee8c13:co2level"}
-Number CO2temp1                  "CO2 Temperatur [%.2f °C]"              <temperature>                    {channel="mqtt:topic:0dee8c13:co2temp"}
-Number CO2Heartbeat1             "CO2 Uptime [JS(duration.js):%s]"       <network>                        {channel="mqtt:topic:0dee8c13:CO2Heartbeat"}
-DateTime CO2HeartbeatDate1       "CO2 Heartbeat [%1$td.%1$tm.%1$ty %1$tH:%1$tM]" <network>
-Number CO2Rssi1                  "CO2 Signalstärke [%d]"                 <network>          (gSignal)     {channel="mqtt:topic:0dee8c13:CO2Rssi"}
+Number CO2level1                 "CO2-1 Level [%d ppm]"                    <carbondioxide>    (gAirQuality) {channel="mqtt:topic:0dee8c13:co2level"}
+Number CO2temp1                  "CO2-1 Temperatur [%.2f °C]"              <temperature>                    {channel="mqtt:topic:0dee8c13:co2temp"}
+Number CO2Heartbeat1             "CO2-1 Uptime [JS(duration.js):%s]"       <network>                        {channel="mqtt:topic:0dee8c13:CO2Heartbeat"}
+DateTime CO2HeartbeatDate1       "CO2-1 Heartbeat [%1$td.%1$tm.%1$ty %1$tH:%1$tM]" <network>
+Number CO2Rssi1                  "CO2-1 Signalstärke [%d]"                 <network>          (gSignal)     {channel="mqtt:topic:0dee8c13:CO2Rssi"}
 Switch CO2Calibrate1             "Calibrieren"
 Switch CO2AutoCal1               "Auto-Calibrierung"
+
+Number CO2level2                 "CO2-2 Level [%d ppm]"                    <carbondioxide>    (gAirQuality) {channel="mqtt:topic:1fd8bb3ef8:90b6f95665:co2level"}
+Number CO2status2                "CO2-2 Status [%d]"                       <carbondioxide>                  {channel="mqtt:topic:1fd8bb3ef8:90b6f95665:co2status"}
+Number CO2temp2                  "CO2-2 Temperatur [%.2f °C]"              <temperature>                    {channel="mqtt:topic:1fd8bb3ef8:90b6f95665:co2temp"}
+Number CO2humid2                 "CO2-2 Luftfeuchtigkeit [%.2f %%]"         <humidity>                       {channel="mqtt:topic:1fd8bb3ef8:90b6f95665:co2humidity"}
+Number CO2Heartbeat2             "CO2-2 Uptime [JS(duration.js):%s]"       <network>                        {channel="mqtt:topic:1fd8bb3ef8:90b6f95665:CO2Heartbeat"}
+DateTime CO2HeartbeatDate2       "CO2-2 Heartbeat [%1$td.%1$tm.%1$ty %1$tH:%1$tM]" <network>
+Number CO2Rssi2                  "CO2-2 Signalstärke [%d]"                 <network>          (gSignal)     {channel="mqtt:topic:1fd8bb3ef8:90b6f95665:CO2Rssi"}
+Number CO2brightness2            "Helligkeit"
+Number CO2tempOffset2            "Temperatur-Offset"
+Number CO2humidityOffset2        "Luftfeuchtigkeit-Offset"
+
+String RainingNow                "Regen [MAP(rainSensor.map):%s]"     <rain>                (gWeather)    {channel="mqtt:topic:1fd8bb3ef8:b47eac90b8:rainStatus"}
+Number RainingNum                "Regensensor [%d]"										    (gRainSensor)
+Switch RainingHeatingTrigger     "Regensensor Heizung Start"	        <rain>	            (gWeather)
+Switch RainingHeating            "Regensensor Heizung [MAP(rainSensorHeating.map):%s]"	<rain>	(gWeather)
+Number RainingHeatingNum         "Regensensor Heizung [%d]"		     						(gRainSensor)
+Number RainingHeartbeat          "Regensensor Uptime [JS(duration.js):%s]" <network>                      {channel="mqtt:topic:1fd8bb3ef8:b47eac90b8:heartbeat"}
+DateTime RainingHeartbeatDate    "Regensensor Heartbeat [%1$td.%1$tm.%1$ty %1$tH:%1$tM]" <network>
+Number RainSensorRssi            "Regensensor Signalstärke [%d]"           <network>        (gSignal)     {channel="mqtt:topic:1fd8bb3ef8:b47eac90b8:RainSensorRSSI"}

@@ -10,6 +10,6 @@ Items {
 	gTemperature*, gOutsideTemp*, gClouds*, gWind*, gHumidity*, gSoil*, gSoilBatt*, gSoilSolar*, gAirQuality*, gWeather*, gWaterUsageChart*, gCoreAdmin*, gRainSensor*, gSignal*, gUnreach*: strategy = everyMinute
     gHeatLiv*, gHeatKitchen*,  gHeatBath*, gHeatSleep*, gHeatEmilie*, gHeatNiklas*, gHeatOffice*, gHeatHobby*, gHeatKidsBath* : strategy = everyMinute
 	gBatteries*, gLights*, gLightScenes*, gSmokeSensor*, gTempAdmin*, gRoofWindows*, gWindows*, gWateringInternal*, gWLAN*, gCharts*, gRollershutters*, gStatus*, gPowerTech*, gEnergyTech* : strategy = everyChange, restoreOnStartup
-	gHeating*, gRain*, gTempTarget*, gTempTargetValves*, gPowerUsage*, gPowerDaily*, gEnergyToday*, gEnergyDaily*, gSolarPower*, gSolarEnergy*, gSolarEnergyDaily*, gModes*, gPresence*, gHeartbeat* : strategy = everyMinute, restoreOnStartup
-	gWatering*, gHeatAll*, gHeatingAnalysis* : strategy = everyMinute, everyChange, restoreOnStartup
+	gHeating*, gRain*, gTempTarget*, gTempTargetValves*, gPowerUsage*, gPowerDaily*, gEnergyToday*, gEnergyDaily*, gSolarPower*, gSolarPowerDiag*, gSolarEnergy*, gSolarEnergyDaily*, gModes*, gPresence*, gHeartbeat* : strategy = everyMinute, restoreOnStartup
+	gWatering*, gHeatAll*, gHeatingAnalysis*, gDeviceStatusNumWin*, gDeviceStatusNumSmoke*, gDeviceStatusNumMotion* : strategy = everyMinute, everyChange, restoreOnStartup
 }

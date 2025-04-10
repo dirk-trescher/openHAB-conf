@@ -4,7 +4,7 @@ Number   Warn_no_rain   "Tage ohne Regen [%d]"  <rain>  (gRain)
 String   Station_Id     "Stations-Id [%s]"                          {channel="weathercompany:weather-observations:2ce9ffd49a:stationId"}
 
 // atmosphere
-Number   Humidity       "Feuchtigkeit [%d %%]"    	                {channel="weathercompany:weather-observations:ececb0ae89:1f960ac810:currentHumidity"}
+Number   Humidity       "Luft-Feuchtigkeit [%d %%]"    	                {channel="weathercompany:weather-observations:ececb0ae89:1f960ac810:currentHumidity"}
 
 Number   UV_Index       "UV Index [%d]"                 (gClouds)   {channel="weathercompany:weather-observations:2ce9ffd49a:currentUv"}
 Number   Solar_Radiation  "Sonneneinstrahlung [%.2f]"   (gClouds)   {channel="weathercompany:weather-observations:2ce9ffd49a:currentSolarRadiation"}
@@ -37,10 +37,8 @@ Number   PrecipProbabDay   "Niederschlagswahrscheinlichtkeit tags [%d %%]"      
 Number   PrecipProbabNight   "Niederschlagswahrscheinlichtkeit nachts [%d %%]"  {channel="weathercompany:weather-forecast:ececb0ae89:local:forecastDay0Night#precipitationChance"}
 
 // temperature
-Number:Temperature   Temp                                                       {channel="weathercompany:weather-observations:2ce9ffd49a:currentTemperature"}
-Number   Temperature    "aktuelle Temperatur [%.1f °C]" (gOutsideTemp)
-Number:Temperature   Temp_Dew                                     	            {channel="weathercompany:weather-observations:ececb0ae89:1f960ac810:currentTemperatureDewPoint"}
-Number   Temp_Dewpoint  "Taupunkt [%.1f °C]"            (gWeather)
+Number:Temperature   Temperature    "aktuelle Temperatur [%.1f °C]" (gOutsideTemp) {channel="weathercompany:weather-observations:2ce9ffd49a:currentTemperature"}
+Number:Temperature   Temp_Dewpoint  "Taupunkt [%.1f °C]"            (gWeather)  {channel="weathercompany:weather-observations:ececb0ae89:1f960ac810:currentTemperatureDewPoint"}
 
 Number:Temperature   TempDay        "Temperatur tags [%.2f °C]"   	(gOutsideTemp)   {channel="weathercompany:weather-forecast:ececb0ae89:local:forecastDay0Day#temperature"}
 Number:Temperature   TempNight      "Temperatur nachts [%.2f °C]"   (gOutsideTemp)   {channel="weathercompany:weather-forecast:ececb0ae89:local:forecastDay0Night#temperature"}

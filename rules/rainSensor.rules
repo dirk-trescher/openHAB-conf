@@ -1,11 +1,9 @@
 
 rule "rain sensor rains"
 when
-	Item Rainsensor changed to RAIN
+	Item RainingNow changed to Raining
 then
 	logInfo ("rainSensor", "rainSensor changed to raining")
-
-	postUpdate(RainsensorNum, 1)
 
 	if (RoofWindow_Kitchen.state < 100) {
 		sendCommand(RoofWindow_Kitchen, DOWN)
@@ -29,11 +27,8 @@ then
 	if (Window_Terrace.state == OPEN) {
 		sendNotification("dirk.trescher@web.de", "Es regnet und die Tür zur Dachterrasse ist auf!")
 	}
-	logInfo( "rainSensor", "switch on heating due to rain" )
 
-	if (RainsensorHeating.state == OFF) {
-		sendCommand(RainsensorHeating, ON)
-	}
+	postUpdate(RainingNum, 1)
 end
 
 
@@ -42,64 +37,58 @@ when
 	Time cron "0 0 7 ? * MON-FRI" or		// 7:00 each weekday
 	Time cron "0 0 9 ? * SAT,SUN"			// 9:00 each Saturday and Sunday
 then
-	if (Rainsensor.state == ON && RoofWindow_Sleep.state < 100) {
+	if (RainingNow.state == "Raining" && RoofWindow_Sleep.state < 100) {
 		logInfo( "rainSensor", "close sleeping room roof window due to rain" )
 		sendCommand(RoofWindow_Sleep, DOWN)
 	}
 end
 
 
-rule "rain sensor heating dewpoint"
+rule "rain sensor dry"
 when
-	Item Temp_Dewpoint changed or
-	Item Temperature changed
-then
-	if (Temp_Dewpoint.state != NULL && Temperature.state != NULL) {
-		if ((Temp_Dewpoint.state as QuantityType<Number>) + 2.0 > Temperature.state) {
-			if (RainsensorHeating.state == OFF) {
-				logInfo( "rainSensor", "switch on heating due to dewpoint" )
-
-				sendCommand(RainsensorHeating, ON)
-			}
-		} else if (Rainsensor.state == 0) {
-			if (RainsensorHeating.state == ON) {
-				logInfo( "rainSensor", "switch off heating due to dewpoint" )
-
-				sendCommand(RainsensorHeating, OFF)
-			}
-		}
-	}
-end
-
-
-rule "rain sensor heating dry"
-when
-	Item Rainsensor changed to DRY
+	Item RainingNow changed to Dry
 then
 	logInfo ("rainSensor", "rainSensor changed to dry")
 
-	postUpdate(RainsensorNum, 0)
-	if ((Temp_Dewpoint.state as QuantityType<Number>).doubleValue <= (Temperature.state as QuantityType<Number>).doubleValue) {
-		logInfo( "rainSensor", "switch off heating due to no rain" )
+	postUpdate(RainingNum, 0)
+end
 
-		sendCommand(RainsensorHeating, OFF)
-	}
+rule "rain sensor heating"
+when
+	Time cron "0 0/5 * * * ?"		// every 5 mins
+then
+    if (RainingNow.state == "Raining" ||
+            (Temperature.state as QuantityType<Number>).doubleValue <= (Temp_Dewpoint.state as QuantityType<Number>).doubleValue) {
+        sendCommand(RainingHeating, ON)
+
+        createTimer(now.plusSeconds(60)) [|
+            sendCommand(RainingHeating, OFF)
+        ]
+    }
 end
 
 
 rule "update sensor heating graph off"
 when
-	Item RainsensorHeating changed to OFF
+	Item RainingHeating changed to OFF
 then
 	logInfo ("rainSensor", "rainSensor heating changed to OFF")
-	postUpdate(RainsensorHeatingNum, 0)
+
+    val mqttActions = getActions("mqtt","mqtt:broker:1fd8bb3ef8")
+    mqttActions.publishMQTT("rainSensor/heating", "OFF")
+
+	postUpdate(RainingHeatingNum, 0.1)
 end
 
 
 rule "update sensor heating graph on"
 when
-	Item RainsensorHeating changed to ON
+	Item RainingHeating changed to ON
 then
 	logInfo ("rainSensor", "rainSensor heating changed to ON")
-	postUpdate(RainsensorHeatingNum, 1)
+
+    val mqttActions = getActions("mqtt","mqtt:broker:1fd8bb3ef8")
+    mqttActions.publishMQTT("rainSensor/heating", "ON")
+
+	postUpdate(RainingHeatingNum, 0.5)
 end

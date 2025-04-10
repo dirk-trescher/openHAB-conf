@@ -1,27 +1,12 @@
 var boolean windWarningSent = false
 
 
-rule "correct Fahrenheit to Celsius for Temperature"
-when
-	Item Temp changed
-then
-	postUpdate(Temperature, Temp.state)
-end
-
-rule "correct Fahrenheit to Celsius for Dewpoint"
-when
-	Item Temp_Dew changed
-then
-	postUpdate(Temp_Dewpoint, Temp_Dew.state)
-end
-
-
 rule "Warn if too windy"
 when
 	Item Wind_Speed changed
 then
-	if (windWarningSent == false && Wind_Speed.state > 20) {
-		sendNotification("dirk.trescher@web.de", "Sehr windig " + Wind_Speed.state + "km/h - Schirme auf Dachterrasse versorgen")
+	if (windWarningSent == false && ((Wind_Speed.state as QuantityType<Speed>).doubleValue > 20 || (Wind_Gusts.state as QuantityType<Temperature>).doubleValue > 30)) {
+		sendNotification("dirk.trescher@web.de", "Sehr windig " + Wind_Speed.state + ", in Böen " + Wind_Gusts.state + " - Schirme auf Dachterrasse versorgen und Windsurfen gehen :-)")
 		windWarningSent = true
 	}
 end
@@ -38,7 +23,8 @@ rule "Warn if too long no rain in winter - reset"
 when
 	Item Precip_Total changed
 then
-	if (Precip_Total.state as Number > 2) {
+	if (Precip_Total.state as Number > 2|mm) {
+        logInfo("Weather", "Warn_no_rain " + Warn_no_rain)
 		postUpdate(Warn_no_rain, 0)
 	}
 end
@@ -59,4 +45,11 @@ then
 		}
 		Warn_no_rain.postUpdate(days)
 	}
+end
+
+rule "update Raining Heartbeat Date"
+when
+    Item RainingHeartbeat changed
+then
+    postUpdate(RainingHeartbeatDate, now.toLocalDateTime().toString())
 end

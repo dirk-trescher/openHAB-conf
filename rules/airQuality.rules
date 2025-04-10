@@ -45,7 +45,7 @@ then
     postUpdate(CO2HeartbeatDate1, now.toLocalDateTime().toString())
 end
 
-rule "CO2 -1 calibrate"
+rule "CO2 - 1 calibrate"
 when
     Item CO2Calibrate1 received command ON
 then
@@ -58,7 +58,7 @@ then
     ]
 end
 
-rule "CO2 -1 set auto-calibration mode"
+rule "CO2 - 1 set auto-calibration mode"
 when
     Item CO2AutoCal1 received command
 then
@@ -69,6 +69,43 @@ then
     }
     val mqttActions = getActions("mqtt","mqtt:broker:1fd8bb3ef8")
     mqttActions.publishMQTT("CO2-1/auto-cal", switchState)
+end
+
+// -----------------------------------------------------------------
+
+rule "update CO2 - 2 Date"
+when
+    Item CO2Heartbeat2 changed
+then
+//    logInfo("CO2", "Heartbeat-2 Date converted")
+    postUpdate(CO2HeartbeatDate2, now.toLocalDateTime().toString())
+end
+
+rule "CO2 - 2 set brightness"
+when
+    Item CO2brightness2 changed
+then
+    logInfo("CO2", "set brightness " + CO2brightness2.state)
+    val mqttActions = getActions("mqtt","mqtt:broker:1fd8bb3ef8")
+    mqttActions.publishMQTT("CO2-2/brightness", (CO2brightness2.state as DecimalType).toString())
+end
+
+rule "CO2 - 2 set temperature offset"
+when
+    Item CO2tempOffset2 changed
+then
+    logInfo("CO2", "set temperature offset " + CO2tempOffset2.state)
+    val mqttActions = getActions("mqtt","mqtt:broker:1fd8bb3ef8")
+    mqttActions.publishMQTT("CO2-2/temp-offset", (CO2tempOffset2.state as DecimalType).toString())
+end
+
+rule "CO2 - 2 set humidity offset"
+when
+    Item CO2humidityOffset2 changed
+then
+    logInfo("CO2", "set humidity offset " + CO2humidityOffset2.state)
+    val mqttActions = getActions("mqtt","mqtt:broker:1fd8bb3ef8")
+    mqttActions.publishMQTT("CO2-2/humidity-offset", (CO2humidityOffset2.state as DecimalType).toString())
 end
 
 // -----------------------------------------------------------------

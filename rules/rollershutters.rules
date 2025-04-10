@@ -108,7 +108,7 @@ when
 	Item Rollershutter_Living changed
 then
 	if (!automatic) {
-		if (Sun_Elevation.state > 26 && Sun_Azimuth.state < 170) {
+		if (Sun_Elevation.state > 26|° && Sun_Azimuth.state < 180|°) {
 			logAndWriteReason.apply( "Living room shades: manual override by operation" )
 
 			manualOverride = true
@@ -121,18 +121,17 @@ when
 	Item Sun_Elevation changed
 then
 	if (rollershuttersDown == 0) {
-		if (Sun_Elevation.state > 26 && Sun_Azimuth.state < 170) {
+		if (Sun_Elevation.state > 26|° && Sun_Azimuth.state < 180|°) {
 			if (Rollershutter_Living.state > 0) {
 				manualOverride = true
-				logAndWriteReason.apply( "Living room shades: manual override due to state" )
 			}
 			if (!manualOverride) {
-				if (SolarEnergy1.state >= 300) {
+				if (Solar_Radiation.state as Number >= 100) {
 					logAndWriteReason.apply( "Living room shades down to protect sofa from sun" )
 
 					automatic = true
 
-					if (Sun_Azimuth.state > 170) {
+					if (Sun_Azimuth.state > 170|°) {
 						var halfDown = (RollershutterEndPos_Living.state as DecimalType).doubleValue
 						halfDown = halfDown / 2.0
 						sendCommand(Rollershutter_Living, halfDown.toString)
@@ -164,7 +163,7 @@ when
 	Item Sun_Azimuth changed
 then
 	if (rollershuttersDown == 1 && !manualOverride) {
-		if (Sun_Azimuth.state > 170) {
+		if (Sun_Azimuth.state > 170|°) {
 			logAndWriteReason.apply( "Living room shades up half" )
 
 			automatic = true
@@ -186,7 +185,7 @@ when
 	Item Sun_Azimuth changed
 then
 	if ((rollershuttersDown == 1 || rollershuttersDown == 2) && !manualOverride) {
-		if (Sun_Azimuth.state > 180) {
+		if (Sun_Azimuth.state > 180|°) {
 			logAndWriteReason.apply( "Living room shades up full" )
 
 			automatic = true

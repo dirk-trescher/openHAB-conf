@@ -11,8 +11,8 @@ Switch  WLAN50_LoftRoof        	"5,0GHz WLAN Dachterrasse"      						<network>	
 
 Number NrWLAN					"WLAN [%d]"												<network>
 
-Switch FritzBoxMacOnlineDirk	"Presence Dirk (WiFi) [MAP(presence.map):%s]"			<present>	{channel="tr064:subdeviceLan:b130bacd7e:uuid_3A75802409_2Dbccb_2D40e7_2D8e6b_2D3C3712B5887D:macOnline_12_3AF3_3A75_3A9D_3A81_3A71"}
-Switch FritzBoxMacOnlineHeike	"Presence Heike (WiFi) [MAP(presence.map):%s]"			<present>	{channel="tr064:subdeviceLan:b130bacd7e:uuid_3A75802409_2Dbccb_2D40e7_2D8e6b_2D3C3712B5887D:macOnline_F6_3A4F_3A6C_3AA7_3AC0_3A2E"}
+Switch FritzBoxMacOnlineDirk	"Presence Dirk (WiFi) [MAP(presence.map):%s]"			<present>	{channel="tr064:subdeviceLan:b130bacd7e:uuid_3A75802409_2Dbccb_2D40e7_2D8e6b_2D3C3712B5887D:macOnline_8A_3A00_3AB9_3AD8_3A10_3A89"}
+Switch FritzBoxMacOnlineHeike	"Presence Heike (WiFi) [MAP(presence.map):%s]"			<present>	{channel="tr064:subdeviceLan:b130bacd7e:uuid_3A75802409_2Dbccb_2D40e7_2D8e6b_2D3C3712B5887D:macOnline_52_3AB1_3A33_3AAF_3A14_3A9F"}
 Switch FritzBoxMacOnlineNiklas  "Presence Niklas (WiFi) [MAP(presence.map):%s]"			<present>	{channel="tr064:subdeviceLan:b130bacd7e:uuid_3A75802409_2Dbccb_2D40e7_2D8e6b_2D3C3712B5887D:macOnline_E6_3AF2_3A5D_3A6A_3ACB_3A92"}
 Switch FritzBoxMacOnlineEmilie	"Presence Emilie (WiFi) [MAP(presence.map):%s]"			<present>	{channel="tr064:subdeviceLan:b130bacd7e:uuid_3A75802409_2Dbccb_2D40e7_2D8e6b_2D3C3712B5887D:macOnline_64_3A9A_3ABE_3A04_3A95_3AA2"}
 

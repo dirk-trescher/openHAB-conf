@@ -39,9 +39,11 @@ Number Energy_offset_Tumbler                                                    
 Number Energy_Tumbler   	"Energieverbrauch Trockner [%.2f kWh]"	    <energy>	(gEnergy)
 Switch WLan_Office			"WLAN Arbeitszimmer"				<network>			(gWLAN)						{channel="zwave:device:3dcec7afdc:node12:switch_binary"}
 Switch Garagentor			"Garagentor"						<garagedoor>									{channel="zwave:device:3dcec7afdc:node6:switch_binary"}
-Switch CameraRoof			"Klavier"						    <energy>										{channel="zwave:device:3dcec7afdc:node15:switch_binary"}
+Switch CameraRoof			"Klavier"						    <camera>										{channel="zwave:device:3dcec7afdc:node15:switch_binary"}
 Number CameraRoof_Power		"Klavier Leistung [%.0f W]"			<energy>			(gPower)					{channel="zwave:device:3dcec7afdc:node15:sensor_power"}
 Number CameraRoof_EnergyRaw	                                    <energy>	        (gPowerTech)	            {channel="zwave:device:3dcec7afdc:node15:meter_kwh"}
+
+Switch Fridge_OnOff                     "Kühlschrank/CO2 An-Aus"    <error>  {channel="zwave:device:3dcec7afdc:node33:switch_binary"}
 Number Fridge   			"Kühlschrank [%.0f W]"				<energy>			(gPower)					{channel="zwave:device:3dcec7afdc:node33:sensor_power"}
 Number Energy_raw_Fridge   	                                        	    <energy>	(gPowerTech)	        {channel="zwave:device:3dcec7afdc:node33:meter_kwh"}
 Number Energy_offset_Fridge                                                             (gPowerTech)
@@ -62,6 +64,8 @@ Switch DoorBuzzer_Down				"Summer Haustür"				    <door>			(gSwitches)				{chan
 Switch DoorBuzzer_Both				"Summer unten und oben"				<door>			(gSwitches)
 
 Switch Light_StairwaysDown			"Taster Licht Treppenhaus unten"	<light>			(gSwitches)				{channel="zwave:device:3dcec7afdc:node31:switch_binary1"}
+
+Switch Light_EmilieBed              "Taster Licht Emilie Bett"          <light>         (gSwitches, gLightsCount)    {channel="zwave:device:3dcec7afdc:node53:switch_binary1"}
 
 /* Wall Controller */
 Switch BuzzerSwitch					"Taster [%s]"					<switch>									{channel="zwave:device:3dcec7afdc:node22:switch_dimmer"}
@@ -92,15 +96,15 @@ Switch Smoke_Sleep_Heat			"Rauchmelder Schlafzimmer Hitze [%s]"			<fire>			(gSmo
 Switch Smoke_Sleep				"Rauchmelder Schlafzimmer [%s]"					<fire>			(gSmokeSensor)				{channel="zwave:device:3dcec7afdc:node44:alarm_smoke"}
 Number Batt_Smoke_Sleep_disp	"Rauchmelder Schlafzimmer [%.2f %%]"			<battery>		(gSmokeSensor, gBatteries)	{channel="zwave:device:3dcec7afdc:node44:battery-level"}
 
-Number Smoke_Niklas_Temp		"Rauchmelder Niklas Temperatur [%.1f °C]"		<temperature>	(gSmokeSensor)				{channel="zwave:device:3dcec7afdc:node41:sensor_temperature"}
-Switch Smoke_Niklas_Heat		"Rauchmelder Niklas Hitze [%s]"					<fire>			(gSmokeSensor)				{channel="zwave:device:3dcec7afdc:node41:alarm_heat"}
-Switch Smoke_Niklas				"Rauchmelder Niklas [%s]"						<fire>			(gSmokeSensor)				{channel="zwave:device:3dcec7afdc:node41:alarm_smoke"}
-Number Batt_Smoke_Niklas_disp	"Rauchmelder Niklas [%.2f %%]"					<battery>		(gSmokeSensor, gBatteries)	{channel="zwave:device:3dcec7afdc:node41:battery-level"}
+Number Smoke_Niklas_Temp		"Rauchmelder Niklas Temperatur [%.1f °C]"		<temperature>	(gSmokeSensor)				{channel="zwave:device:3dcec7afdc:node55:sensor_temperature"}
+Switch Smoke_Niklas_Heat		"Rauchmelder Niklas Hitze [%s]"					<fire>			(gSmokeSensor)				{channel="zwave:device:3dcec7afdc:node55:alarm_heat"}
+Switch Smoke_Niklas				"Rauchmelder Niklas [%s]"						<fire>			(gSmokeSensor)				{channel="zwave:device:3dcec7afdc:node55:alarm_smoke"}
+Number Batt_Smoke_Niklas_disp	"Rauchmelder Niklas [%.2f %%]"					<battery>		(gSmokeSensor, gBatteries)	{channel="zwave:device:3dcec7afdc:node55:battery-level"}
 
-Number Smoke_Emilie_Temp		"Rauchmelder Emilie Temperatur [%.1f °C]"		<temperature>	(gSmokeSensor)				{channel="zwave:device:3dcec7afdc:node48:sensor_temperature"}
-Switch Smoke_Emilie_Heat		"Rauchmelder Emilie Hitze [%s]"					<fire>			(gSmokeSensor)				{channel="zwave:device:3dcec7afdc:node48:alarm_heat"}
-Switch Smoke_Emilie				"Rauchmelder Emilie [%s]"						<fire>			(gSmokeSensor)				{channel="zwave:device:3dcec7afdc:node48:alarm_smoke"}
-Number Batt_Smoke_Emilie_disp	"Rauchmelder Emilie [%.2f %%]"					<battery>		(gSmokeSensor, gBatteries)	{channel="zwave:device:3dcec7afdc:node48:battery-level"}
+Number Smoke_Emilie_Temp		"Rauchmelder Emilie Temperatur [%.1f °C]"		<temperature>	(gSmokeSensor)				{channel="zwave:device:3dcec7afdc:node52:sensor_temperature"}
+Switch Smoke_Emilie_Heat		"Rauchmelder Emilie Hitze [%s]"					<fire>			(gSmokeSensor)				{channel="zwave:device:3dcec7afdc:node52:alarm_heat"}
+Switch Smoke_Emilie				"Rauchmelder Emilie [%s]"						<fire>			(gSmokeSensor)				{channel="zwave:device:3dcec7afdc:node52:alarm_smoke"}
+Number Batt_Smoke_Emilie_disp	"Rauchmelder Emilie [%.2f %%]"					<battery>		(gSmokeSensor, gBatteries)	{channel="zwave:device:3dcec7afdc:node52:battery-level"}
 
 Number Smoke_Office_Temp		"Rauchmelder Arbeitszimmer Temperatur [%.1f °C]"<temperature>	(gSmokeSensor)				{channel="zwave:device:3dcec7afdc:node49:sensor_temperature"}
 Switch Smoke_Office_Heat		"Rauchmelder Arbeitszimmer Hitze [%s]"			<fire>			(gSmokeSensor)				{channel="zwave:device:3dcec7afdc:node49:alarm_heat"}

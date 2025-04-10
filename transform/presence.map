@@ -2,6 +2,7 @@ OPEN=anwesend
 CLOSED=abwesend
 NULL=unbekannt
 -=unbekannt
+UNDEF=unbekannt
 
 ON=anwesend
 OFF=abwesend

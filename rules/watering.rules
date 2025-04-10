@@ -16,6 +16,19 @@ var Timer timerValveOn5 = null
 var Timer timerValveOn6 = null
 var boolean notifyOn = true
 
+var Timer timerExcessWaterFlow1 = null
+var Timer timerExcessWaterFlow2 = null
+var Timer timerExcessWaterFlow3 = null
+var Timer timerExcessWaterFlow4 = null
+var Timer timerExcessWaterFlow5 = null
+var Timer timerExcessWaterFlow6 = null
+var Integer cntExcessWaterFlow1 = 0
+var Integer cntExcessWaterFlow2 = 0
+var Integer cntExcessWaterFlow3 = 0
+var Integer cntExcessWaterFlow4 = 0
+var Integer cntExcessWaterFlow5 = 0
+var Integer cntExcessWaterFlow6 = 0
+
 var Number waterAtBeginning1 = 0
 var Number waterAtBeginning2 = 0
 var Number waterAtBeginning3 = 0
@@ -61,7 +74,8 @@ val	Functions.Function2<NumberItem, Integer, Void> WateringCountdownLogic = [
 
 	if (locCurrWaterTime.state >= 10 &&
 		(WateringStatus.state == 1 || WateringStatus.state == 2) &&
-		IrrigationLane.state == number) {
+		(IrrigationLane.state == number ||
+        (number == 1 || number ==2) && (IrrigationLane.state == 1 || IrrigationLane.state == 2)) ) { // eine der beiden Wiesen
         var int timerSecs = 10 + (locCurrWaterTime.state as DecimalType).intValue % 10
 		createTimer(now.plusSeconds(timerSecs)) [|
 			var Number currTime = locCurrWaterTime.state as DecimalType
@@ -111,7 +125,7 @@ val	Functions.Function0<Void> WateringStartAutomaticLogic = [ |
 				logInfo( "watering", "no automatic watering (irrigation time <= 1 min.)" )
 			} else if ( Soil1_corr.state > (TargetSoilHumidity.state as Number) + 20 ) {
 				logInfo( "watering", "no automatic watering (soil humid enough)" )
-			} else if (Rainsensor.state == ON) {
+			} else if (RainingNow.state == "Raining") {
 				logInfo( "watering", "no automatic watering (currently raining)" )
 			} else {
 				logInfo( "watering", "start automatic watering" )
@@ -205,7 +219,7 @@ then
 		var Number rainToday = 0
 		if (Rain.state != NULL) {
 			rainToday = (Rain.state as QuantityType<Number>).doubleValue
-		} else if (Rainsensor.state == ON) {				// Fallback, if weather data not available
+		} else if (RainingNow.state == "Raining") {				// Fallback, if weather data not available
 			rainToday = 8
 		}
 
@@ -410,7 +424,12 @@ then
 	if (WateringPeriod.state == ON) {
         postUpdate(StartWatering, ON)
 
-        val currentWaterUsage = DailyWaterUsage.state as Number
+        var currentWaterUsage = 0.0
+        if (DailyWaterUsage.state != NULL) {
+            currentWaterUsage = DailyWaterUsage.state as Number
+        } else {
+            postUpdate(DailyWaterUsage, 0)
+        }
         createTimer(now.plusMinutes(10)) [|
             if ((DailyWaterUsage.state as Number) < currentWaterUsage + 2) {
                 sendNotification("dirk.trescher@web.de", "Die Bewässerung läuft nicht!")
@@ -1025,10 +1044,22 @@ rule "react on excessive waterflow 1"
 when
     Item WaterFlowRoofPerHAkt1 changed
 then
-    if (WaterFlowRoofPerHAkt1.state > 300) {
-        sendNotification("dirk.trescher@web.de", "Wasser-Leck!!! Wasserdurchfluss für Fensterbänke zu hoch: " + WaterFlowRoofPerHAkt1.state + " l/h statt "
-                                                 + WaterFlowRoofPerH1.state + " l/h")
-        sendCommand(WaterValveRoof1, OFF)
+    if (WaterFlowRoofPerHAkt1.state > 300 && timerExcessWaterFlow1 === null) {
+        cntExcessWaterFlow1 = 1
+        timerExcessWaterFlow1 = createTimer(now.plusSeconds(20))[|
+            if (cntExcessWaterFlow1 >= 3) {
+                sendNotification("dirk.trescher@web.de", "Wasser-Leck!!! Wasserdurchfluss für Fensterbänke zu hoch: " + WaterFlowRoofPerHAkt1.state + " l/h statt " + WaterFlowRoofPerH1.state + " l/h")
+                sendCommand(WaterValveRoof1, OFF)
+            }
+            timerExcessWaterFlow1 = null
+        ]
+    }
+    if (WaterFlowRoofPerHAkt1.state > 300 && timerExcessWaterFlow1 !== null) {
+        cntExcessWaterFlow1 = cntExcessWaterFlow1 + 1
+    }
+    if (WaterFlowRoofPerHAkt1.state < 300 && timerExcessWaterFlow1 !== null) {
+        timerExcessWaterFlow1.cancel
+        timerExcessWaterFlow1 = null
     }
 end
 
@@ -1036,10 +1067,22 @@ rule "react on excessive waterflow 2"
 when
     Item WaterFlowRoofPerHAkt2 changed
 then
-    if (WaterFlowRoofPerHAkt2.state > 300) {
-        sendNotification("dirk.trescher@web.de", "Wasser-Leck!!! Wasserdurchfluss für Wiese Süd zu hoch: " + WaterFlowRoofPerHAkt2.state + " l/h statt "
-                                                 + WaterFlowRoofPerH2.state + " l/h")
+    if (WaterFlowRoofPerHAkt2.state > 300 && timerExcessWaterFlow2 === null) {
+        cntExcessWaterFlow2 = 1
+        timerExcessWaterFlow2 = createTimer(now.plusSeconds(20))[|
+            if (cntExcessWaterFlow2 >= 3) {
+        sendNotification("dirk.trescher@web.de", "Wasser-Leck!!! Wasserdurchfluss für Wiese Süd zu hoch: " + WaterFlowRoofPerHAkt2.state + " l/h statt " + WaterFlowRoofPerH2.state + " l/h")
         sendCommand(WaterValveRoof2, OFF)
+            }
+            timerExcessWaterFlow2 = null
+        ]
+    }
+    if (WaterFlowRoofPerHAkt2.state > 300 && timerExcessWaterFlow2 !== null) {
+        cntExcessWaterFlow2 = cntExcessWaterFlow2 + 1
+    }
+    if (WaterFlowRoofPerHAkt2.state < 300 && timerExcessWaterFlow2 !== null) {
+        timerExcessWaterFlow2.cancel
+        timerExcessWaterFlow2 = null
     }
 end
 
@@ -1047,10 +1090,22 @@ rule "react on excessive waterflow 3"
 when
     Item WaterFlowRoofPerHAkt3 changed
 then
-    if (WaterFlowRoofPerHAkt3.state > 300) {
-        sendNotification("dirk.trescher@web.de", "Wasser-Leck!!! Wasserdurchfluss für Wiese Nord zu hoch: " + WaterFlowRoofPerHAkt3.state + " l/h statt "
-                                                 + WaterFlowRoofPerH3.state + " l/h")
+    if (WaterFlowRoofPerHAkt3.state > 300 && timerExcessWaterFlow3 === null) {
+        cntExcessWaterFlow3 = 1
+        timerExcessWaterFlow3 = createTimer(now.plusSeconds(20))[|
+            if (cntExcessWaterFlow3 >= 3) {
+        sendNotification("dirk.trescher@web.de", "Wasser-Leck!!! Wasserdurchfluss für Wiese Nord zu hoch: " + WaterFlowRoofPerHAkt3.state + " l/h statt " + WaterFlowRoofPerH3.state + " l/h")
         sendCommand(WaterValveRoof3, OFF)
+            }
+            timerExcessWaterFlow3 = null
+        ]
+    }
+    if (WaterFlowRoofPerHAkt3.state > 300 && timerExcessWaterFlow3 !== null) {
+        cntExcessWaterFlow3 = cntExcessWaterFlow3 + 1
+    }
+    if (WaterFlowRoofPerHAkt3.state < 300 && timerExcessWaterFlow3 !== null) {
+        timerExcessWaterFlow3.cancel
+        timerExcessWaterFlow3 = null
     }
 end
 
@@ -1058,10 +1113,22 @@ rule "react on excessive waterflow 4"
 when
     Item WaterFlowRoofPerHAkt4 changed
 then
-    if (WaterFlowRoofPerHAkt4.state > 600) {
-        sendNotification("dirk.trescher@web.de", "Wasser-Leck!!! Wasserdurchfluss für Tröge zu hoch: " + WaterFlowRoofPerHAkt4.state + " l/h statt "
-                                                 + WaterFlowRoofPerH4.state + " l/h")
+    if (WaterFlowRoofPerHAkt4.state > 800 && timerExcessWaterFlow4 === null) {
+        cntExcessWaterFlow4 = 1
+        timerExcessWaterFlow4 = createTimer(now.plusSeconds(20))[|
+            if (cntExcessWaterFlow4 >= 3) {
+        sendNotification("dirk.trescher@web.de", "Wasser-Leck!!! Wasserdurchfluss für Tröge zu hoch: " + WaterFlowRoofPerHAkt4.state + " l/h statt " + WaterFlowRoofPerH4.state + " l/h")
         sendCommand(WaterValveRoof4, OFF)
+            }
+            timerExcessWaterFlow4 = null
+        ]
+    }
+    if (WaterFlowRoofPerHAkt4.state > 800 && timerExcessWaterFlow4 !== null) {
+        cntExcessWaterFlow4 = cntExcessWaterFlow4 + 1
+    }
+    if (WaterFlowRoofPerHAkt4.state < 800 && timerExcessWaterFlow4 !== null) {
+        timerExcessWaterFlow4.cancel
+        timerExcessWaterFlow4 = null
     }
 end
 
@@ -1069,10 +1136,22 @@ rule "react on excessive waterflow 5"
 when
     Item WaterFlowRoofPerHAkt5 changed
 then
-    if (WaterFlowRoofPerHAkt5.state > 300) {
-        sendNotification("dirk.trescher@web.de", "Wasser-Leck!!! Wasserdurchfluss für Erdbeeren zu hoch: " + WaterFlowRoofPerHAkt5.state + " l/h statt "
-                                                 + WaterFlowRoofPerH5.state + " l/h")
+    if (WaterFlowRoofPerHAkt5.state > 300 && timerExcessWaterFlow5 === null) {
+        cntExcessWaterFlow5 = 1
+        timerExcessWaterFlow5 = createTimer(now.plusSeconds(20))[|
+            if (cntExcessWaterFlow5 >= 3) {
+        sendNotification("dirk.trescher@web.de", "Wasser-Leck!!! Wasserdurchfluss für Erdbeeren zu hoch: " + WaterFlowRoofPerHAkt5.state + " l/h statt " + WaterFlowRoofPerH5.state + " l/h")
         sendCommand(WaterValveRoof5, OFF)
+            }
+            timerExcessWaterFlow5 = null
+        ]
+    }
+    if (WaterFlowRoofPerHAkt5.state > 300 && timerExcessWaterFlow5 !== null) {
+        cntExcessWaterFlow5 = cntExcessWaterFlow5 + 1
+    }
+    if (WaterFlowRoofPerHAkt5.state < 300 && timerExcessWaterFlow5 !== null) {
+        timerExcessWaterFlow5.cancel
+        timerExcessWaterFlow5 = null
     }
 end
 
@@ -1080,10 +1159,22 @@ rule "react on excessive waterflow 6"
 when
     Item WaterFlowRoofPerHAkt6 changed
 then
-    if (WaterFlowRoofPerHAkt6.state > 300) {
-        sendNotification("dirk.trescher@web.de", "Wasser-Leck!!! Wasserdurchfluss für Obstbäume zu hoch: " + WaterFlowRoofPerHAkt6.state + " l/h statt "
-                                                 + WaterFlowRoofPerH6.state + " l/h")
+    if (WaterFlowRoofPerHAkt6.state > 300 && timerExcessWaterFlow6 === null) {
+        cntExcessWaterFlow6 = 1
+        timerExcessWaterFlow6 = createTimer(now.plusSeconds(20))[|
+            if (cntExcessWaterFlow6 >= 3) {
+        sendNotification("dirk.trescher@web.de", "Wasser-Leck!!! Wasserdurchfluss für Obstbäume zu hoch: " + WaterFlowRoofPerHAkt6.state + " l/h statt " + WaterFlowRoofPerH6.state + " l/h")
         sendCommand(WaterValveRoof6, OFF)
+            }
+            timerExcessWaterFlow6 = null
+        ]
+    }
+    if (WaterFlowRoofPerHAkt6.state > 300 && timerExcessWaterFlow6 !== null) {
+        cntExcessWaterFlow6 = cntExcessWaterFlow6 + 1
+    }
+    if (WaterFlowRoofPerHAkt6.state < 300 && timerExcessWaterFlow6 !== null) {
+        timerExcessWaterFlow6.cancel
+        timerExcessWaterFlow6 = null
     }
 end
 
@@ -1124,4 +1215,38 @@ when
     Item WaterRoofHeartbeat changed
 then
     postUpdate(WaterRoofHeartbeatDate, now.toLocalDateTime().toString())
+end
+
+rule "Last update plant humidity 2"
+when
+    Item PlantHeartbeat2 changed or
+    Item PlantHumidity2 changed
+then
+    postUpdate(PlantHeartbeatDate2, now.toLocalDateTime().toString())
+end
+
+rule "Winter Mode ON for plant humidity 3"
+when
+    Item PlantWinterMode3 changed to ON
+then
+	val mqttActions = getActions("mqtt","mqtt:broker:1fd8bb3ef8")
+    mqttActions.publishMQTT("plantHumid-3/activateWinter", "ON", true)
+    logInfo("watering", "WinterMode activated for Plant Humidity Sensor Nr. 3")
+end
+
+rule "Winter Mode OFF for plant humidity 3"
+when
+    Item PlantWinterMode3 changed to OFF
+then
+	val mqttActions = getActions("mqtt","mqtt:broker:1fd8bb3ef8")
+    mqttActions.publishMQTT("plantHumid-3/activateWinter", "OFF", true)
+    logInfo("watering", "WinterMode deactivated for Plant Humidity Sensor Nr. 3")
+end
+
+rule "Last update plant humidity 3"
+when
+    Item PlantHeartbeat3 changed or
+    Item PlantHumidity3 changed
+then
+    postUpdate(PlantHeartbeatDate3, now.toLocalDateTime().toString())
 end

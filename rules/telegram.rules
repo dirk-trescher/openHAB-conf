@@ -67,7 +67,9 @@ when
 	Item Temp_Min_1 changed or
 	Item Temp_Min_2 changed
 then
-	if (WaterOnOnRoof.state == ON && (Temp_Min_0.state <= 0 || Temp_Min_1.state <= 0 || Temp_Min_2.state <= 0) && !freezeWarnSent) {
+	if (WaterOnOnRoof.state == ON &&
+      ((Temp_Min_0.state as Number) <= 0|°C || (Temp_Min_1.state as Number) <= 0|°C || (Temp_Min_2.state as Number) <= 0|°C) &&
+      !freezeWarnSent) {
 		freezeWarnSent = true
 		sendNotification("dirk.trescher@web.de", "Frostgefahr!!!")
 	}
